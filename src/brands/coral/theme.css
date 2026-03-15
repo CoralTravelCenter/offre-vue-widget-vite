@@ -1,0 +1,28 @@
+.offre-theme--coral {
+  color-scheme: light;
+  --background: #edf4fb;
+  --foreground: #1f2227;
+  --card: #ffffff;
+  --card-foreground: #1f2227;
+  --popover: #ffffff;
+  --popover-foreground: #1f2227;
+  --primary: #0093d0;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf3fb;
+  --secondary-foreground: #1f2227;
+  --muted: #f4faff;
+  --muted-foreground: #777777;
+  --accent: #f4faff;
+  --accent-foreground: #0093d0;
+  --destructive: #ff4d4f;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.15);
+  --input: rgba(0, 0, 0, 0.15);
+  --ring: color-mix(in srgb, #0093d0 35%, transparent);
+  --widget-shadow: 0 18px 44px rgba(0, 53, 78, 0.12);
+  --popover-shadow: 0 18px 44px rgba(0, 53, 78, 0.12);
+  --widget-radius-shell: 28px;
+  --widget-radius-panel: 24px;
+  --widget-radius-control: 20px;
+  --widget-radius-chip: 16px;
+}

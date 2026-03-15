@@ -1,0 +1,28 @@
+.offre-theme--sunmar {
+  color-scheme: light;
+  --background: #fff7f1;
+  --foreground: #2a2421;
+  --card: #ffffff;
+  --card-foreground: #2a2421;
+  --popover: #ffffff;
+  --popover-foreground: #2a2421;
+  --primary: #ff6b00;
+  --primary-foreground: #ffffff;
+  --secondary: #fff1e6;
+  --secondary-foreground: #2a2421;
+  --muted: #fff7f1;
+  --muted-foreground: #8a7267;
+  --accent: #fff7f1;
+  --accent-foreground: #ff6b00;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(75, 34, 0, 0.14);
+  --input: rgba(75, 34, 0, 0.14);
+  --ring: color-mix(in srgb, #ff6b00 35%, transparent);
+  --widget-shadow: 0 18px 44px rgba(136, 71, 0, 0.12);
+  --popover-shadow: 0 18px 44px rgba(136, 71, 0, 0.12);
+  --widget-radius-shell: 28px;
+  --widget-radius-panel: 24px;
+  --widget-radius-control: 20px;
+  --widget-radius-chip: 16px;
+}

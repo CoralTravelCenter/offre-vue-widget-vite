@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "core/*": [
+        "src/core/*"
+      ],
+      "brands/*": [
+        "src/brands/*"
+      ],
+      "components/*": [
+        "src/shared/components/*"
+      ],
+      "composables/*": [
+        "src/core/composables/*"
+      ],
+      "dev/*": [
+        "src/dev/*"
+      ],
+      "features/*": [
+        "src/features/*"
+      ],
+      "lib/*": [
+        "src/shared/lib/*"
+      ],
+      "monkey/*": [
+        "src/monkey/*"
+      ],
+      "shared/*": [
+        "src/shared/*"
+      ],
+      "styles/*": [
+        "src/styles/*"
+      ],
+      "ui/*": [
+        "src/shared/components/ui/*"
+      ],
+      "utils": [
+        "src/shared/lib/utils.ts"
+      ],
+      "widget/*": [
+        "src/widget/*"
+      ]
+    }
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

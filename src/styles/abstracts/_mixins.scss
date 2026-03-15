@@ -1,0 +1,39 @@
+@use "sass:map";
+@use "./breakpoints" as *;
+
+@mixin media-up($point) {
+  $value: map.get($breakpoints, $point);
+
+  @if $value == null {
+    @error "Unknown breakpoint: #{$point}";
+  }
+
+  @media (min-width: $value) {
+    @content;
+  }
+}
+
+@mixin media-down($point) {
+  $value: map.get($breakpoints, $point);
+
+  @if $value == null {
+    @error "Unknown breakpoint: #{$point}";
+  }
+
+  @media (max-width: ($value - 1px)) {
+    @content;
+  }
+}
+
+@mixin media-between($from, $to) {
+  $min: map.get($breakpoints, $from);
+  $max: map.get($breakpoints, $to);
+
+  @if $min == null or $max == null {
+    @error "Unknown breakpoint: #{$from} or #{$to}";
+  }
+
+  @media (min-width: $min) and (max-width: ($max - 1px)) {
+    @content;
+  }
+}
