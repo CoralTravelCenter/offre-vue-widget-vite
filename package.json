@@ -37,6 +37,7 @@
     "sass-embedded": "^1.98.0",
     "shadcn-vue": "^2.4.3",
     "tailwindcss": "^4.2.1",
+    "terser": "^5.46.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-monkey": "^7.1.4",
