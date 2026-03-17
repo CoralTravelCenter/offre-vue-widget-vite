@@ -95,13 +95,20 @@ const termIconByKey: Record<OffreOfferCardTermIcon, typeof PlaneIcon> = {
   meal: UtensilsCrossedIcon
 };
 
+const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
+  flight: "h-3 w-5.5",
+  calendar: "h-3 w-3.5",
+  bed: "h-3 w-4.25",
+  meal: "h-3 w-4.75"
+};
+
 const starItems = computed(() => {
   return Array.from({ length: 5 }, (_, index) => index < hotelStarCount.value);
 });
 </script>
 
 <template>
-  <article class="rounded-2xl border border-border bg-white p-2 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_220px] xl:gap-4">
+  <article class="rounded-[20px] border border-border bg-white p-2 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_220px] xl:gap-4">
     <div class="relative mb-4 xl:mb-0">
       <a
         :href="offerHref"
@@ -113,64 +120,71 @@ const starItems = computed(() => {
           v-if="imageUrl"
           :src="imageUrl"
           :alt="hotelName"
-          class="aspect-[4/3] w-full rounded-xl object-cover xl:h-full xl:aspect-auto"
+          class="block h-50 w-full rounded-[12px] object-cover xl:h-full"
         >
         <div
           v-else
-          class="aspect-[4/3] rounded-xl bg-muted xl:h-full"
+          class="h-50 w-full rounded-[12px] bg-muted xl:h-full"
         />
       </a>
 
-      <div class="absolute left-3 top-3 flex flex-col gap-2">
+      <div class="absolute left-2.5 top-2.5 flex flex-col gap-2">
         <Badge
           v-if="isRecommended"
-          class="rounded-lg border-transparent bg-white px-2.5 py-1 text-xs font-medium text-black shadow-none"
+          class="rounded-[12px] border-transparent bg-white px-2 py-1 text-[12px] font-normal leading-none text-black shadow-none"
         >
           Рекомендуем
         </Badge>
         <Badge
           v-if="isExclusive"
-          class="rounded-lg border-transparent bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground shadow-none"
+          class="rounded-[12px] border-transparent bg-primary px-2 py-1 text-[12px] font-normal leading-none text-primary-foreground shadow-none"
         >
           Эксклюзив
         </Badge>
       </div>
     </div>
 
-    <div class="min-w-0 space-y-3 xl:space-y-4">
+    <div class="min-w-0 py-2">
       <div
         v-if="locationLabel"
-        class="inline-flex items-center gap-1 text-xs text-muted-foreground"
+        class="mb-1 inline-flex self-start text-[12px] font-light leading-[1.3] text-muted-foreground"
       >
-        <MapPinIcon class="size-3.5 shrink-0"/>
+        <MapPinIcon class="mb-0.5 mr-1 h-3.5 w-3 shrink-0"/>
         <span class="truncate">{{ locationLabel }}</span>
       </div>
 
       <a
         :href="offerHref"
-        class="block text-inherit no-underline hover:underline"
+        class="mb-1 inline-block text-inherit no-underline hover:underline"
         rel="noopener noreferrer"
         target="_blank"
       >
-        <h3 class="text-base font-semibold leading-tight text-foreground">
+        <h3
+          :class="[
+            'm-0 text-[20px] text-foreground',
+            isEliteHotel
+              ? 'font-normal leading-[1.2] tracking-[0.015em]'
+              : 'font-bold leading-[1.2]'
+          ]"
+        >
           {{ hotelName }}
         </h3>
       </a>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="mb-2 flex flex-wrap items-center gap-2">
         <div
           v-if="hotelStarCount > 0"
-          class="flex items-center gap-0.5"
+          class="inline-flex gap-1"
         >
           <StarIcon
             v-for="(isFilled, index) in starItems"
             :key="`hotel-star-${index}`"
-            :class="isFilled ? 'size-4 fill-current text-[#FADB14]' : 'size-4 text-border'"
+            :class="isFilled ? 'h-5 w-5 fill-current text-[#FADB14]' : 'h-5 w-5 text-border'"
           />
         </div>
         <span
           v-else-if="hotelCategoryName"
-          class="text-sm text-[#FADB14]"
+          class="text-[14px] text-[#FADB14]"
         >
           {{ hotelCategoryName }}
         </span>
@@ -181,14 +195,14 @@ const starItems = computed(() => {
         >
           <Badge
             v-if="isEliteHotel"
-            class="rounded-md border-transparent bg-black px-2 py-1 text-xs font-medium text-white"
+            class="inline-grid h-6 place-content-center rounded-[6px] border-transparent bg-black px-3 text-[12px] font-light leading-none text-white"
           >
             Elite Service
           </Badge>
 
           <Badge
             v-if="hasFamilyClub"
-            class="rounded-md border-transparent bg-accent px-2 py-1 text-xs font-medium text-accent-foreground"
+            class="inline-grid h-6 place-content-center rounded-[6px] border-transparent bg-accent px-3 text-[12px] font-light leading-none text-accent-foreground"
           >
             Family Club
           </Badge>
@@ -197,7 +211,7 @@ const starItems = computed(() => {
 
       <ul
         v-if="terms.length"
-        class="flex list-none flex-wrap gap-x-3 gap-y-2 p-0 text-sm text-muted-foreground"
+        class="m-0 flex list-none flex-wrap items-baseline gap-1 p-0 text-[12px] leading-[1.3] text-muted-foreground"
       >
         <li
           v-for="term in terms"
@@ -206,7 +220,7 @@ const starItems = computed(() => {
         >
           <component
             :is="termIconByKey[term.icon]"
-            class="size-4 shrink-0"
+            :class="`${termIconClassByKey[term.icon]} shrink-0 object-contain`"
           />
           <span>{{ term.value }}</span>
         </li>
@@ -214,20 +228,20 @@ const starItems = computed(() => {
 
       <ul
         v-if="hotelUsps.length"
-        class="grid list-none gap-1 border-t border-border pt-3 text-sm text-foreground/80"
+        class="mt-2 grid max-h-34.25 list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-border pt-2 text-[14px] text-foreground/80"
       >
         <li
           v-for="usp in hotelUsps"
           :key="usp"
-          class="flex items-start gap-2"
+          class="flex"
         >
-          <span class="text-primary">•</span>
+          <span class="mr-1.5 text-primary">•</span>
           <span>{{ usp }}</span>
         </li>
       </ul>
     </div>
 
-    <div class="mt-4 flex min-w-0 flex-col gap-4 border-t border-border pt-4 xl:mt-0 xl:border-l xl:border-t-0 xl:border-border xl:pl-4">
+    <div class="mt-4 flex min-w-0 flex-col gap-2 border-t border-border pt-2 xl:mt-0 xl:border-l xl:border-t-0 xl:border-border xl:pl-3 xl:pt-0">
       <OffreTourTypeTabs
         v-model="selectedTourType"
         :disabled="hotelOfferLoading"
@@ -235,24 +249,24 @@ const starItems = computed(() => {
       />
 
       <div class="relative">
-        <div class="text-xs text-muted-foreground">
+        <div class="text-[10px] leading-3.5 text-muted-foreground">
           цена от:
         </div>
 
         <div
           v-if="oldPriceLabel"
-          class="mt-1 text-sm text-muted-foreground line-through decoration-destructive"
+          class="text-[14px] leading-5.5 text-muted-foreground line-through decoration-destructive"
         >
           {{ oldPriceLabel }}
         </div>
 
-        <div class="mt-1 flex flex-wrap items-end gap-x-1 gap-y-1">
-          <div class="text-xl font-semibold leading-none text-primary">
+        <div class="flex flex-wrap items-baseline gap-1 leading-7">
+          <div class="text-[24px] font-semibold leading-7 text-primary">
             {{ currentPriceLabel || "Цена по запросу" }}
           </div>
           <span
             v-if="currentPriceLabel && priceSuffix"
-            class="text-sm leading-none text-primary"
+            class="text-[20px] font-light leading-7 text-primary"
           >
             {{ priceSuffix }}
           </span>
@@ -260,7 +274,7 @@ const starItems = computed(() => {
 
         <div
           v-if="discountPercent"
-          class="absolute right-0 top-0 rounded-lg bg-green-600 px-2 py-1 text-xs font-medium text-white"
+          class="absolute bottom-0 right-1 grid h-6 translate-x-5.5 place-content-center rounded-[6px_6px_0_6px] bg-green-600 px-3 text-[12px] leading-none text-white"
         >
           {{ discountPercent }}% Скидка
         </div>
@@ -271,7 +285,7 @@ const starItems = computed(() => {
         as="a"
         :href="offerHref"
         :class="hotelOfferLoading ? 'pointer-events-none opacity-60' : ''"
-        class="h-10 w-full rounded-lg"
+        class="h-12 w-full rounded-lg px-4 py-3 text-[16px] leading-[1.3]"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -280,7 +294,7 @@ const starItems = computed(() => {
 
       <Button
         v-else
-        class="h-10 w-full rounded-lg"
+        class="h-12 w-full rounded-lg px-4 py-3 text-[16px] leading-[1.3]"
         disabled
       >
         Недоступно

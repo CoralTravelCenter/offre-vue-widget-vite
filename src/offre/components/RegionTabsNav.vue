@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {useScroll} from "@vueuse/core";
+import {useResizeObserver} from "@vueuse/core";
 import {Tabs, TabsList, TabsTrigger} from "@/shared/components/ui/tabs";
 import RegionTabsNavSkeleton from "offre/components/RegionTabsNavSkeleton.vue";
 import type {RegionTabItem} from "offre/types";
-import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 interface Props {
   tabs: RegionTabItem[];
@@ -25,24 +25,57 @@ const availableTabIds = computed(() => visibleTabs.value.map((tab) => tab.id));
 const shellRef = ref<HTMLElement | null>(null);
 const scrollerRef = ref<HTMLElement | null>(null);
 const hasInitialScrollSync = ref(false);
-const {arrivedState, measure} = useScroll(scrollerRef);
+const scrollState = ref({
+  hasOverflow: false,
+  canScrollRight: false
+});
+let scrollStateFrame: number | null = null;
 
 const hasRightFade = computed(() => {
-  if (!scrollerRef.value) {
-    return false;
-  }
-
-  return !arrivedState.right;
+  return scrollState.value.hasOverflow && scrollState.value.canScrollRight;
 });
 
 function syncScrollerElement() {
   scrollerRef.value = shellRef.value?.querySelector<HTMLElement>("[data-slot='tabs-list']") ?? null;
+  scheduleUpdateScrollState();
+}
+
+function updateScrollState() {
+  const container = scrollerRef.value;
+
+  if (!container) {
+    scrollState.value = {
+      hasOverflow: false,
+      canScrollRight: false
+    };
+    return;
+  }
+
+  const hasOverflow = container.scrollWidth > container.clientWidth + 1;
+  const canScrollRight = container.scrollLeft + container.clientWidth < container.scrollWidth - 1;
+
+  scrollState.value = {
+    hasOverflow,
+    canScrollRight
+  };
+}
+
+function scheduleUpdateScrollState() {
+  if (scrollStateFrame !== null) {
+    cancelAnimationFrame(scrollStateFrame);
+  }
+
+  scrollStateFrame = requestAnimationFrame(() => {
+    scrollStateFrame = null;
+    updateScrollState();
+  });
 }
 
 function scrollToValue(value: string, behavior: ScrollBehavior = "smooth") {
   const container = scrollerRef.value;
 
   if (!value || !container) {
+    scheduleUpdateScrollState();
     return;
   }
 
@@ -51,11 +84,12 @@ function scrollToValue(value: string, behavior: ScrollBehavior = "smooth") {
   });
 
   if (!(activeItem instanceof HTMLElement)) {
-    measure();
+    scheduleUpdateScrollState();
     return;
   }
 
   activeItem.scrollIntoView({behavior, inline: "start", block: "nearest"});
+  scheduleUpdateScrollState();
 }
 
 watch(
@@ -64,13 +98,14 @@ watch(
     syncScrollerElement();
 
     if (!value || !tabIds.includes(value)) {
-      measure();
+      scheduleUpdateScrollState();
       return;
     }
 
     await nextTick();
     scrollToValue(value, hasInitialScrollSync.value ? "smooth" : "auto");
     hasInitialScrollSync.value = true;
+    scheduleUpdateScrollState();
   },
   {immediate: true}
 );
@@ -78,7 +113,17 @@ watch(
 onMounted(async () => {
   await nextTick();
   syncScrollerElement();
-  measure();
+  scheduleUpdateScrollState();
+});
+
+useResizeObserver(scrollerRef, () => {
+  scheduleUpdateScrollState();
+});
+
+onBeforeUnmount(() => {
+  if (scrollStateFrame !== null) {
+    cancelAnimationFrame(scrollStateFrame);
+  }
 });
 </script>
 
@@ -92,7 +137,8 @@ onMounted(async () => {
     >
       <TabsList
         :aria-label="ariaLabel"
-        class="region-tabs-nav__list w-full offre-scroll-snap-x offre-scroll-no-bar h-auto bg-white flex items-center justify-start"
+        @scroll="updateScrollState"
+        class="region-tabs-nav__list w-full overflow-x-auto offre-scroll-snap-x offre-scroll-no-bar h-auto bg-white flex items-center justify-start"
       >
         <TabsTrigger
           v-for="tab in visibleTabs"

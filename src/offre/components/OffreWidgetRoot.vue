@@ -159,9 +159,9 @@ watch(totalPages, (nextTotalPages) => {
   <div class="offre-widget-container">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation-shell"
+        class="offre-widget-navigation-shell rounded-2xl overflow-clip"
     >
-      <div class="offre-widget-navigation gap-4 bg-white py-2 rounded-2xl overflow-clip">
+      <div class="offre-widget-navigation gap-4 bg-white py-2">
         <RegionTabsNav
             :model-value="activeRegionId"
             :isLoading="regionsLoading"
@@ -208,13 +208,13 @@ watch(totalPages, (nextTotalPages) => {
 
       <template v-else-if="productsList.length > 0">
         <OffreOffersList
-          :products="paginatedProducts"
-          :product-reference="productReference"
-          :selected-departure-name="selectedDeparture?.name ?? ''"
-          :pricing-mode="options.pricing"
-          :hotel-runtime-by-id="hotelRuntimeById"
-          :tour-type-by-hotel-id="tourTypeByHotelId"
-          @update-tour-type="setHotelTourType"
+            :products="paginatedProducts"
+            :product-reference="productReference"
+            :selected-departure-name="selectedDeparture?.name ?? ''"
+            :pricing-mode="options.pricing"
+            :hotel-runtime-by-id="hotelRuntimeById"
+            :tour-type-by-hotel-id="tourTypeByHotelId"
+            @update-tour-type="setHotelTourType"
         />
 
         <Pagination
