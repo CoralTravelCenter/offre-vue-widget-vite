@@ -27,20 +27,11 @@
       "brands/*": [
         "src/brands/*"
       ],
-      "components/*": [
-        "src/shared/components/*"
-      ],
-      "composables/*": [
-        "src/app/composables/*"
-      ],
       "dev/*": [
         "src/dev/*"
       ],
       "directives/*": [
         "src/directives/*"
-      ],
-      "lib/*": [
-        "src/shared/lib/*"
       ],
       "monkey/*": [
         "src/monkey/*"
@@ -56,9 +47,6 @@
       ],
       "ui/*": [
         "src/shared/components/ui/*"
-      ],
-      "utils": [
-        "src/shared/lib/utils.ts"
       ],
       "widget/*": [
         "src/widget/*"

@@ -19,7 +19,7 @@ defineProps<Props>()
         class="text-sm border rounded-lg flex-1">
       <SelectValue :placeholder="placeholder"/>
     </SelectTrigger>
-    <SelectContent class="rounded-lg">
+    <SelectContent :body-lock="false" class="rounded-lg">
       <SelectItem
           v-for="option in options"
           :key="option.id"

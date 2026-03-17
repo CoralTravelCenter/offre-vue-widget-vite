@@ -159,24 +159,26 @@ watch(totalPages, (nextTotalPages) => {
   <div class="offre-widget-container">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation gap-4 bg-white py-2 rounded-2xl overflow-clip"
+        class="offre-widget-navigation-shell"
     >
-      <RegionTabsNav
-          :model-value="activeRegionId"
-          :isLoading="regionsLoading"
-          :tabs="regionTabs"
-          class="offre-widget-navigation__tabs nav"
-          @update:model-value="setActiveRegion"
-      />
-      <OffreControls
-          v-model:selected-departure-id="selectedDepartureId"
-          v-model:selected-timeframe="selectedTimeframe"
-          :departures="departures"
-          :departures-loading="departuresLoading"
-          :timeframe-options="timeframeOptions"
-          :timeframes-loading="regionsLoading"
-      />
-      <ViewModeSwitch v-model="viewMode"/>
+      <div class="offre-widget-navigation gap-4 bg-white py-2 rounded-2xl overflow-clip">
+        <RegionTabsNav
+            :model-value="activeRegionId"
+            :isLoading="regionsLoading"
+            :tabs="regionTabs"
+            class="offre-widget-navigation__tabs nav"
+            @update:model-value="setActiveRegion"
+        />
+        <OffreControls
+            v-model:selected-departure-id="selectedDepartureId"
+            v-model:selected-timeframe="selectedTimeframe"
+            :departures="departures"
+            :departures-loading="departuresLoading"
+            :timeframe-options="timeframeOptions"
+            :timeframes-loading="regionsLoading"
+        />
+        <ViewModeSwitch v-model="viewMode"/>
+      </div>
     </div>
 
     <div
@@ -278,18 +280,21 @@ watch(totalPages, (nextTotalPages) => {
 </template>
 
 <style scoped lang="scss">
+.offre-widget-navigation-shell {
+  transition: box-shadow 0.2s ease;
+}
+
 .offre-widget-navigation {
   display: grid;
   grid-template-columns: 1fr min-content;
   gap: 8px 8px;
   grid-auto-flow: row;
-  transition: box-shadow 0.2s ease;
   grid-template-areas:
     "nav nav"
     "inputs switcher";
 }
 
-.offre-widget-navigation.sticked {
+.offre-widget-navigation-shell.sticked {
   box-shadow: 0 0 14px rgba(0, 0, 0, 0.14);
 }
 

@@ -14,17 +14,13 @@ const aliasMap = {
     "@": fileURLToPath(new URL("./src", import.meta.url)),
     app: fileURLToPath(new URL("./src/app", import.meta.url)),
     brands: fileURLToPath(new URL("./src/brands", import.meta.url)),
-    components: fileURLToPath(new URL("./src/shared/components", import.meta.url)),
-    composables: fileURLToPath(new URL("./src/app/composables", import.meta.url)),
     dev: fileURLToPath(new URL("./src/dev", import.meta.url)),
     directives: fileURLToPath(new URL("./src/directives", import.meta.url)),
-    lib: fileURLToPath(new URL("./src/shared/lib", import.meta.url)),
     monkey: fileURLToPath(new URL("./src/monkey", import.meta.url)),
     offre: fileURLToPath(new URL("./src/offre", import.meta.url)),
     shared: fileURLToPath(new URL("./src/shared", import.meta.url)),
     styles: fileURLToPath(new URL("./src/styles", import.meta.url)),
     ui: fileURLToPath(new URL("./src/shared/components/ui", import.meta.url)),
-    utils: fileURLToPath(new URL("./src/shared/lib/utils.ts", import.meta.url)),
     widget: fileURLToPath(new URL("./src/widget", import.meta.url)),
 };
 
@@ -35,7 +31,7 @@ function resolveMonkeyMatches(rawValue: string | undefined) {
         .filter(Boolean);
 }
 
-export default defineConfig(({command, mode}) => {
+export default defineConfig(({mode}) => {
     const env = loadEnv(mode, process.cwd(), "");
     const isMonkeyMode = mode === "monkey";
     const plugins = [
@@ -51,7 +47,7 @@ export default defineConfig(({command, mode}) => {
                     "Локальный dev-userscript для визуальной проверки виджета на живом сайте.",
                 match: resolveMonkeyMatches(env.VITE_MONKEY_MATCH),
                 version: "0.1.0",
-            }
+            },
         }),
     ].filter(Boolean);
 
@@ -61,7 +57,7 @@ export default defineConfig(({command, mode}) => {
             alias: aliasMap,
         },
         build: {
-            target: "es2020",
+            target: "esnext",
             minify: "terser",
             sourcemap: false,
             cssCodeSplit: false,
@@ -81,9 +77,6 @@ export default defineConfig(({command, mode}) => {
                     assetFileNames: "assets/[name]-[hash][extname]",
                 },
             },
-        },
-        optimizeDeps: {
-            exclude: isMonkeyMode ? ["vite-plugin-monkey"] : [],
         },
     };
 });

@@ -25,7 +25,7 @@ const forwardedProps = useForwardProps(delegatedProps)
     class="select-item"
     :class="
       cn(
-        'focus:bg-secondary focus:text-primary data-[state=checked]:text-primary [&_svg:not([class*=\'text-\'])]:text-muted-foreground relative flex w-full cursor-pointer items-center gap-2 rounded-chip py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2',
+        'data-[state=checked]:text-primary [&_svg:not([class*=\'text-\'])]:text-muted-foreground relative flex w-full cursor-pointer items-center gap-2 rounded-chip py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2',
         props.class,
       )
     "

@@ -51,7 +51,6 @@
 
 Production build собирает библиотеку виджета в `dist/`:
 
-- `dist/offre-widget.es.js`
 - `dist/offre-widget.iife.js`
 - `dist/assets/*.css`
 
