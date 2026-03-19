@@ -5,29 +5,23 @@
       "@/*": [
         "src/*"
       ],
-      "core/*": [
-        "src/core/*"
+      "app/*": [
+        "src/app/*"
       ],
       "brands/*": [
         "src/brands/*"
       ],
-      "components/*": [
-        "src/shared/components/*"
-      ],
-      "composables/*": [
-        "src/core/composables/*"
-      ],
       "dev/*": [
         "src/dev/*"
       ],
-      "features/*": [
-        "src/features/*"
-      ],
-      "lib/*": [
-        "src/shared/lib/*"
+      "directives/*": [
+        "src/directives/*"
       ],
       "monkey/*": [
         "src/monkey/*"
+      ],
+      "offre/*": [
+        "src/offre/*"
       ],
       "shared/*": [
         "src/shared/*"
@@ -37,9 +31,6 @@
       ],
       "ui/*": [
         "src/shared/components/ui/*"
-      ],
-      "utils": [
-        "src/shared/lib/utils.ts"
       ],
       "widget/*": [
         "src/widget/*"
