@@ -14,20 +14,31 @@ defineProps<Props>()
 </script>
 
 <template>
-  <Select v-model="modelValue" :disabled="disabled">
-    <SelectTrigger
-        class="text-left text-sm shadow-none border rounded-lg flex-1">
-      <SelectValue :placeholder="placeholder" class="capitalize"/>
-    </SelectTrigger>
-    <SelectContent :body-lock="false" class="rounded-lg">
-      <SelectItem
-          v-for="option in options"
-          :key="option.value"
-          :value="option.value"
-          class="capitalize"
-      >
-        {{ option.label }}
-      </SelectItem>
-    </SelectContent>
-  </Select>
+  <div class="offre-month-select flex-1 lg:w-[150px] lg:flex-none">
+    <Select v-model="modelValue" :disabled="disabled">
+      <SelectTrigger
+          class="offre-month-select__trigger w-full rounded-lg border text-left text-sm">
+        <SelectValue :placeholder="placeholder" class="offre-month-select__value capitalize"/>
+      </SelectTrigger>
+      <SelectContent :body-lock="false" class="offre-month-select__content rounded-lg">
+        <SelectItem
+            v-for="option in options"
+            :key="option.value"
+            :value="option.value"
+            class="offre-month-select__item capitalize"
+        >
+          {{ option.label }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
 </template>
+
+<style scoped>
+@media (min-width: 1280px) {
+  .offre-month-select {
+    width: 180px;
+    flex: none;
+  }
+}
+</style>

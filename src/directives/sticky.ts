@@ -4,7 +4,7 @@ type MaybeRef<T> = T | Ref<T>;
 export type StickySide = "top" | "bottom" | "both";
 export type StickyOffsetValue = string | number | null | undefined;
 type StickyScrollTarget = Window | HTMLElement;
-type StickyStyleProperty = "position" | "top" | "bottom" | "zIndex";
+type StickyStyleProperty = "position" | "top" | "bottom" | "zIndex" | "left" | "width";
 
 export interface StickyStateSnapshot {
   top: boolean;
@@ -38,6 +38,7 @@ interface StickyElementState {
   scrollTargets: StickyScrollTarget[];
   updateListener: (() => void) | null;
   frameId: number;
+  placeholder: HTMLDivElement | null;
 }
 
 export type StickyBindingValue = boolean | number | string | StickyConfig | null | undefined;
@@ -54,7 +55,9 @@ const inlineStyleProperties: Record<StickyStyleProperty, string> = {
   position: "position",
   top: "top",
   bottom: "bottom",
-  zIndex: "z-index"
+  zIndex: "z-index",
+  left: "left",
+  width: "width"
 };
 
 function getRawValue<T>(value: MaybeRef<T> | T) {
@@ -151,13 +154,16 @@ function getOrCreateState(el: StickyElement) {
         position: el.style.position,
         top: el.style.top,
         bottom: el.style.bottom,
-        zIndex: el.style.zIndex
+        zIndex: el.style.zIndex,
+        left: el.style.left,
+        width: el.style.width
       },
       config: normalizeConfig(undefined),
       lastStickyState: { top: false, bottom: false, sticked: false },
       scrollTargets: [],
       updateListener: null,
-      frameId: 0
+      frameId: 0,
+      placeholder: null
     };
   }
 
@@ -180,12 +186,53 @@ function applyStickyStateClasses(el: HTMLElement, stickyState: StickyStateSnapsh
   el.setAttribute("data-sticky-bottom", stickyState.bottom ? "true" : "false");
 }
 
+function createPlaceholder(el: HTMLElement) {
+  const placeholder = document.createElement("div");
+  const computedStyle = window.getComputedStyle(el);
+
+  placeholder.setAttribute("aria-hidden", "true");
+  placeholder.style.display = computedStyle.display === "inline" ? "inline-block" : computedStyle.display;
+  placeholder.style.width = `${el.offsetWidth}px`;
+  placeholder.style.height = `${el.offsetHeight}px`;
+  placeholder.style.margin = computedStyle.margin;
+  placeholder.style.padding = "0";
+  placeholder.style.border = "0";
+  placeholder.style.visibility = "hidden";
+  placeholder.style.pointerEvents = "none";
+  placeholder.style.flex = computedStyle.flex;
+  placeholder.style.alignSelf = computedStyle.alignSelf;
+  placeholder.style.gridArea = computedStyle.gridArea;
+
+  return placeholder;
+}
+
+function ensurePlaceholder(el: HTMLElement, state: StickyElementState) {
+  if (state.placeholder?.isConnected) {
+    state.placeholder.style.width = `${el.offsetWidth}px`;
+    state.placeholder.style.height = `${el.offsetHeight}px`;
+    return state.placeholder;
+  }
+
+  const placeholder = createPlaceholder(el);
+  el.insertAdjacentElement("afterend", placeholder);
+  state.placeholder = placeholder;
+  return placeholder;
+}
+
+function removePlaceholder(state: StickyElementState) {
+  state.placeholder?.remove();
+  state.placeholder = null;
+}
+
 function restoreInitialStyles(el: HTMLElement, state: StickyElementState) {
   setInlineStyle(el, "position", state.initial.position);
   setInlineStyle(el, "top", state.initial.top);
   setInlineStyle(el, "bottom", state.initial.bottom);
   setInlineStyle(el, "zIndex", state.initial.zIndex);
+  setInlineStyle(el, "left", state.initial.left);
+  setInlineStyle(el, "width", state.initial.width);
   clearStickyStateClasses(el);
+  removePlaceholder(state);
 }
 
 function areStickyStatesEqual(prevState: StickyStateSnapshot, nextState: StickyStateSnapshot) {
@@ -218,7 +265,6 @@ function unbindStickyListeners(state: StickyElementState) {
     state.scrollTargets.forEach((target) => {
       target.removeEventListener("scroll", state.updateListener as EventListener);
     });
-    window.removeEventListener("resize", state.updateListener as EventListener);
   }
 
   if (state.frameId) {
@@ -230,12 +276,18 @@ function unbindStickyListeners(state: StickyElementState) {
   state.updateListener = null;
 }
 
-function computeStickyState(el: HTMLElement, config: NormalizedStickyConfig): StickyStateSnapshot {
+function getAnchorRect(el: HTMLElement, state: StickyElementState) {
+  return (state.placeholder ?? el).getBoundingClientRect();
+}
+
+function computeStickyState(el: HTMLElement, state: StickyElementState): StickyStateSnapshot {
+  const config = state.config;
+
   if (!config.enabled) {
     return { top: false, bottom: false, sticked: false };
   }
 
-  const rect = el.getBoundingClientRect();
+  const rect = getAnchorRect(el, state);
   const topOffset = normalizeOffsetNumber(config.top, 0);
   const bottomOffset = normalizeOffsetNumber(config.bottom, 0);
   const isTopSticky = (config.side === "top" || config.side === "both")
@@ -261,8 +313,33 @@ function dispatchStickState(el: HTMLElement, config: NormalizedStickyConfig, sti
   }));
 }
 
+function applyFixedStyles(el: HTMLElement, state: StickyElementState, stickyState: StickyStateSnapshot) {
+  if (!stickyState.sticked) {
+    restoreInitialStyles(el, state);
+    return;
+  }
+
+  const placeholder = ensurePlaceholder(el, state);
+  const rect = placeholder.getBoundingClientRect();
+  const useBottom = stickyState.bottom && !stickyState.top;
+
+  setInlineStyle(el, "position", "fixed");
+  setInlineStyle(el, "top", useBottom ? null : normalizeLength(state.config.top, 0));
+  setInlineStyle(el, "bottom", useBottom ? normalizeLength(state.config.bottom, 0) : null);
+  setInlineStyle(el, "left", `${rect.left}px`);
+  setInlineStyle(el, "width", `${rect.width}px`);
+
+  if (state.config.zIndex === null || state.config.zIndex === undefined || state.config.zIndex === "") {
+    setInlineStyle(el, "zIndex", null);
+  } else {
+    setInlineStyle(el, "zIndex", String(state.config.zIndex));
+  }
+}
+
 function updateStickyState(el: HTMLElement, state: StickyElementState) {
-  const nextStickyState = computeStickyState(el, state.config);
+  const nextStickyState = computeStickyState(el, state);
+
+  applyFixedStyles(el, state, nextStickyState);
   applyStickyStateClasses(el, nextStickyState);
 
   if (areStickyStatesEqual(state.lastStickyState, nextStickyState)) {
@@ -293,7 +370,6 @@ function bindStickyListeners(el: HTMLElement, state: StickyElementState) {
   state.scrollTargets.forEach((target) => {
     target.addEventListener("scroll", state.updateListener as EventListener, { passive: true });
   });
-  window.addEventListener("resize", state.updateListener as EventListener, { passive: true });
 }
 
 function applyStickyStyles(el: StickyElement, rawConfig: StickyBindingValue) {
@@ -310,26 +386,6 @@ function applyStickyStyles(el: StickyElement, rawConfig: StickyBindingValue) {
   }
 
   bindStickyListeners(el, state);
-  setInlineStyle(el, "position", "sticky");
-
-  if (config.side === "top" || config.side === "both") {
-    setInlineStyle(el, "top", normalizeLength(config.top, 0));
-  } else {
-    setInlineStyle(el, "top", null);
-  }
-
-  if (config.side === "bottom" || config.side === "both") {
-    setInlineStyle(el, "bottom", normalizeLength(config.bottom, 0));
-  } else {
-    setInlineStyle(el, "bottom", null);
-  }
-
-  if (config.zIndex === null || config.zIndex === undefined || config.zIndex === "") {
-    setInlineStyle(el, "zIndex", null);
-  } else {
-    setInlineStyle(el, "zIndex", String(config.zIndex));
-  }
-
   updateStickyState(el, state);
 }
 

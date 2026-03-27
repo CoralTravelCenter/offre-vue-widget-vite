@@ -12,13 +12,13 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div
-    class="flex items-center gap-2 overflow-hidden"
+    class="region-tabs-nav-skeleton flex items-center gap-2 overflow-hidden"
     aria-hidden="true"
   >
     <Skeleton
       v-for="index in items"
       :key="index"
-      class="h-18 min-w-32 rounded-full"
+      class="region-tabs-nav-skeleton__item min-w-32 rounded-full h-18"
     />
   </div>
 </template>

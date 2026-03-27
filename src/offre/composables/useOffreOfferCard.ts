@@ -30,6 +30,24 @@ interface OffreOfferCardHotelCategory {
   starCount?: number;
 }
 
+function stripEnglishBracketFragments(value: string | undefined) {
+  const source = String(value ?? "").trim();
+
+  if (!source) {
+    return "";
+  }
+
+  const normalized = source
+    .replace(/\s*\(([A-Za-z0-9\s.'&,/+-]+)\)\s*/g, " ")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/,\s*,+/g, ", ")
+    .replace(/^,\s*|\s*,\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return normalized || source;
+}
+
 function getReferenceRecord<TValue extends object>(
   reference: B2CPriceSearchReference,
   field: string
@@ -166,8 +184,10 @@ export function useOffreOfferCard(params: {
     return resolvePriceSuffix(toValue(params.pricingMode));
   });
 
-  const hotelName = computed(() => hotel.value.name ?? "Без названия");
-  const locationLabel = computed(() => hotel.value.locationSummary ?? "");
+  const hotelName = computed(() => {
+    return stripEnglishBracketFragments(hotel.value.name) || "Без названия";
+  });
+  const locationLabel = computed(() => stripEnglishBracketFragments(hotel.value.locationSummary));
   const hotelCategoryName = computed(() => hotelCategory.value?.name ?? "");
   const hotelStarCount = computed(() => Number(hotelCategory.value?.starCount) || 0);
   const isRecommended = computed(() => Boolean(hotel.value.recommended));

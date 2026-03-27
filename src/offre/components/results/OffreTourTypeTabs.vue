@@ -30,13 +30,13 @@ const selectedValue = computed({
 <template>
   <Tabs
     v-model="selectedValue"
-    class="w-full"
+    class="offre-tour-type-tabs w-full"
   >
-    <TabsList class="grid w-full grid-cols-2 gap-2 rounded-lg bg-transparent">
+    <TabsList class="offre-tour-type-tabs__list grid w-full grid-cols-2 bg-white p-0">
       <TabsTrigger
         v-if="!isHotelOnly"
         value="package"
-        class="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-3 text-[12px] font-normal leading-[1.3] text-foreground shadow-none transition-colors hover:border-primary/45 hover:bg-primary/5 hover:text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary"
+        class="offre-tour-type-tabs__trigger inline-flex items-center justify-center rounded-l-[6px] rounded-r-none border border-[#D9D9D9] bg-white px-[18px] py-[5px] text-[14px] font-normal leading-[22px] text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary"
       >
         Пакетный тур
       </TabsTrigger>
@@ -44,8 +44,8 @@ const selectedValue = computed({
       <TabsTrigger
         value="hotel"
         :class="[
-          'inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-3 text-[12px] font-normal leading-[1.3] text-foreground shadow-none transition-colors hover:border-primary/45 hover:bg-primary/5 hover:text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary',
-          props.isHotelOnly ? 'col-span-2' : ''
+          'offre-tour-type-tabs__trigger inline-flex items-center justify-center rounded-r-[6px] rounded-l-none border border-[#D9D9D9] bg-white px-[18px] py-[5px] text-[14px] font-normal leading-[22px] text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary',
+          props.isHotelOnly ? 'col-span-2 rounded-[6px]' : '-ml-px'
         ]"
       >
         Только отель

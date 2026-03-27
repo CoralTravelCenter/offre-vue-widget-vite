@@ -13,6 +13,10 @@ interface B2CApiEndpoint {
   path: string;
 }
 
+interface B2CApiRequestOptions {
+  signal?: AbortSignal;
+}
+
 const B2C_ENDPOINT_PREFIX = "/endpoints";
 const B2C_ENDPOINTS = {
   listDepartureLocations: {
@@ -62,17 +66,21 @@ async function fetchJson<TResponse>(url: string, init?: RequestInit) {
 
 async function consultB2CApi<TResult>(
   endpoint: B2CApiEndpoint,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
+  options: B2CApiRequestOptions = {}
 ) {
   const url = resolveEndpointUrl(endpoint);
 
   if (endpoint.method === "GET") {
     const queryString = params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : "";
-    return fetchJson<B2CApiResponse<TResult>>(`${url}${queryString}`);
+    return fetchJson<B2CApiResponse<TResult>>(`${url}${queryString}`, {
+      signal: options.signal
+    });
   }
 
   return fetchJson<B2CApiResponse<TResult>>(url, {
     method: endpoint.method,
+    signal: options.signal,
     headers: {
       "Content-Type": "application/json"
     },
@@ -80,36 +88,44 @@ async function consultB2CApi<TResult>(
   });
 }
 
-export async function listDepartureLocations() {
+export async function listDepartureLocations(options: B2CApiRequestOptions = {}) {
   return consultB2CApi<B2CListDepartureLocationsResult>(
-    B2C_ENDPOINTS.listDepartureLocations
+    B2C_ENDPOINTS.listDepartureLocations,
+    undefined,
+    options
   );
 }
 
 export async function listHotelsInfo(
   hotelIds: Array<number | string>,
-  imageSizes = [4, 7]
+  imageSizes = [4, 7],
+  options: B2CApiRequestOptions = {}
 ) {
   return consultB2CApi<B2CHotelsInfoResult>(
     B2C_ENDPOINTS.listHotelsInfo,
-    { hotelIds, imageSizes }
+    { hotelIds, imageSizes },
+    options
   );
 }
 
 export async function packagePriceSearchList(
-  searchCriterias: B2CPriceSearchCriterias
+  searchCriterias: B2CPriceSearchCriterias,
+  options: B2CApiRequestOptions = {}
 ) {
   return consultB2CApi<B2CPriceSearchResult>(
     B2C_ENDPOINTS.packagePriceSearchList,
-    { searchCriterias }
+    { searchCriterias },
+    options
   );
 }
 
 export async function hotelPriceSearchList(
-  searchCriterias: B2CPriceSearchCriterias
+  searchCriterias: B2CPriceSearchCriterias,
+  options: B2CApiRequestOptions = {}
 ) {
   return consultB2CApi<B2CPriceSearchResult>(
     B2C_ENDPOINTS.hotelPriceSearchList,
-    { searchCriterias }
+    { searchCriterias },
+    options
   );
 }

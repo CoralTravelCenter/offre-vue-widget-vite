@@ -66,6 +66,10 @@ function sortProductsBySourceOrder(
   });
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 export function useOffreProductsQuery(params: {
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>;
   hotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
@@ -95,19 +99,23 @@ export function useOffreProductsQuery(params: {
     staleTime: offreQueryConfig.productsBatch.staleTime,
     gcTime: offreQueryConfig.productsBatch.gcTime,
     persister: offreQueryPersisters.productsBatch.persisterFn,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const products: NonNullable<B2CPriceSearchResult["products"]> = [];
       const reference: B2CPriceSearchReference = {};
       let failedQueries = 0;
 
       const responses = await Promise.allSettled(productQueryDescriptors.value.map((descriptor) => {
         return descriptor.onlyhotel
-          ? hotelPriceSearchList(descriptor.searchCriterias)
-          : packagePriceSearchList(descriptor.searchCriterias);
+          ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
+          : packagePriceSearchList(descriptor.searchCriterias, { signal });
       }));
 
       for (const response of responses) {
         if (response.status === "rejected") {
+          if (isAbortError(response.reason)) {
+            throw response.reason;
+          }
+
           failedQueries += 1;
           continue;
         }

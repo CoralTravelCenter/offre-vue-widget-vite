@@ -135,8 +135,8 @@ export function useOffreFiltersQueryState(
     staleTime: offreQueryConfig.hotelsInfo.staleTime,
     gcTime: offreQueryConfig.hotelsInfo.gcTime,
     persister: offreQueryPersisters.hotelsInfo.persisterFn,
-    queryFn: async () => {
-      const response = await listHotelsInfo(hotelIds.value);
+    queryFn: async ({ signal }) => {
+      const response = await listHotelsInfo(hotelIds.value, [4, 7], { signal });
       return response.result;
     }
   });
@@ -146,8 +146,8 @@ export function useOffreFiltersQueryState(
     staleTime: offreQueryConfig.departures.staleTime,
     gcTime: offreQueryConfig.departures.gcTime,
     persister: offreQueryPersisters.departures.persisterFn,
-    queryFn: async () => {
-      const response = await listDepartureLocations();
+    queryFn: async ({ signal }) => {
+      const response = await listDepartureLocations({ signal });
       return response.result;
     }
   });

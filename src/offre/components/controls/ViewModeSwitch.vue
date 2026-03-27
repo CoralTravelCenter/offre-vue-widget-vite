@@ -19,11 +19,11 @@ function toggleViewMode() {
       variant="outline"
       size="icon"
       :aria-label="isListMode ? 'Переключить на карту' : 'Переключить на список'"
-      class="switcher shrink-0 w-10 h-10 flex items-center justify-center border mr-2 rounded-lg"
+      class="offre-view-mode-switch switcher mr-2 size-10 shrink-0 rounded-lg border"
       @click="toggleViewMode"
   >
-    <MapPinned v-if="isListMode" class="size-4"/>
-    <List v-else class="size-4"/>
+    <MapPinned v-if="isListMode" class="offre-view-mode-switch__icon size-4"/>
+    <List v-else class="offre-view-mode-switch__icon size-4"/>
   </Button>
 </template>
 

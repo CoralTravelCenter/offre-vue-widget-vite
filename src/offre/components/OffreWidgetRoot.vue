@@ -20,11 +20,13 @@ import {
   PaginationPrevious
 } from "ui/pagination";
 
-const DESKTOP_LAYOUT_BREAKPOINT = "(min-width: 993px)";
+const DESKTOP_LAYOUT_BREAKPOINT = "(min-width: 1024px)";
+const TABLET_LAYOUT_BREAKPOINT = "(min-width: 768px)";
 const STICKY_BOTTOM_OFFSET = 16;
 const CONTROLS_STICKY_Z_INDEX = 30;
 const MV_MODE_TOP_OFFSET = 76;
 const DESKTOP_TOP_OFFSET = 16;
+const TABLET_TOP_OFFSET = 57;
 const MOBILE_TOP_OFFSET = 74;
 const PAGINATION_DESKTOP_BREAKPOINT = "(min-width: 768px)";
 const PRODUCTS_PAGE_SIZE = 5;
@@ -89,14 +91,27 @@ const isMvMode = computed(() => {
 });
 
 const isLargeScreen = useMediaQuery(DESKTOP_LAYOUT_BREAKPOINT);
+const isTabletScreen = useMediaQuery(TABLET_LAYOUT_BREAKPOINT);
 const isPaginationDesktop = useMediaQuery(PAGINATION_DESKTOP_BREAKPOINT);
 
+function resolveNavigationTopOffset() {
+  if (isMvMode.value) {
+    return MV_MODE_TOP_OFFSET;
+  }
+
+  if (isLargeScreen.value) {
+    return DESKTOP_TOP_OFFSET;
+  }
+
+  if (isTabletScreen.value) {
+    return TABLET_TOP_OFFSET;
+  }
+
+  return MOBILE_TOP_OFFSET;
+}
+
 const navigationStickyOptions = computed(() => ({
-  top: isMvMode.value
-      ? MV_MODE_TOP_OFFSET
-      : isLargeScreen.value
-          ? DESKTOP_TOP_OFFSET
-          : MOBILE_TOP_OFFSET,
+  top: resolveNavigationTopOffset(),
   bottom: STICKY_BOTTOM_OFFSET,
   side: "both",
   zIndex: CONTROLS_STICKY_Z_INDEX
@@ -159,9 +174,9 @@ watch(totalPages, (nextTotalPages) => {
   <div class="offre-widget-container">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation-shell rounded-2xl overflow-clip"
+        class="offre-widget-navigation-shell overflow-clip rounded-2xl"
     >
-      <div class="offre-widget-navigation gap-4 bg-white py-2">
+      <div class="offre-widget-navigation bg-white py-2">
         <RegionTabsNav
             :model-value="activeRegionId"
             :isLoading="regionsLoading"
@@ -183,25 +198,25 @@ watch(totalPages, (nextTotalPages) => {
 
     <div
         v-if="viewMode === 'list'"
-        class="mt-4"
+        class="offre-widget-results mt-4"
     >
       <div
           v-if="requestState === 'loading'"
-          class="rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+          class="offre-widget-state offre-widget-state--loading rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
       >
         Загрузка туров...
       </div>
 
       <div
           v-else-if="productsError"
-          class="rounded-2xl border bg-white px-4 py-6 text-sm text-destructive"
+          class="offre-widget-state offre-widget-state--error rounded-2xl border bg-white px-4 py-6 text-sm text-destructive"
       >
         Ошибка загрузки туров
       </div>
 
       <div
           v-else-if="noMatchedProducts"
-          class="rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+          class="offre-widget-state offre-widget-state--empty rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
       >
         По выбранным параметрам ничего не найдено
       </div>
@@ -212,6 +227,7 @@ watch(totalPages, (nextTotalPages) => {
             :product-reference="productReference"
             :selected-departure-name="selectedDeparture?.name ?? ''"
             :pricing-mode="options.pricing"
+            :brand-key="brandKey"
             :hotel-runtime-by-id="hotelRuntimeById"
             :tour-type-by-hotel-id="tourTypeByHotelId"
             @update-tour-type="setHotelTourType"
@@ -219,7 +235,7 @@ watch(totalPages, (nextTotalPages) => {
 
         <Pagination
             v-if="hasPagination"
-            class="mt-6"
+            class="offre-widget-pagination mt-6"
             v-model:page="currentPage"
             :items-per-page="PRODUCTS_PAGE_SIZE"
             :sibling-count="paginationSiblingCount"
@@ -228,13 +244,13 @@ watch(totalPages, (nextTotalPages) => {
         >
           <PaginationContent
               v-slot="{ items }"
-              class="gap-2"
+              class="offre-widget-pagination__content gap-2"
           >
             <PaginationPrevious
                 size="icon-lg"
-                class="size-10 rounded-lg border border-border bg-card p-0 text-foreground shadow-none hover:bg-secondary hover:text-primary gap-0 px-0 sm:pr-0"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card px-0 text-foreground hover:bg-secondary hover:text-primary"
             >
-              <ChevronLeftIcon class="size-4"/>
+              <ChevronLeftIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationPrevious>
 
             <template
@@ -247,23 +263,23 @@ watch(totalPages, (nextTotalPages) => {
                   size="icon-lg"
                   :value="item.value"
                   :class="item.value === currentPage
-                  ? 'size-10 rounded-lg border border-primary bg-primary p-0 text-primary-foreground shadow-none hover:bg-primary hover:text-primary-foreground'
-                  : 'size-10 rounded-lg border border-border bg-card p-0 text-foreground shadow-none hover:bg-secondary hover:text-primary'"
+                  ? 'offre-widget-pagination__item size-10 rounded-lg border border-primary bg-primary p-0 text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                  : 'offre-widget-pagination__item size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary'"
               >
                 {{ item.value }}
               </PaginationItem>
 
               <PaginationEllipsis
                   v-else
-                  class="size-10 text-foreground"
+                  class="offre-widget-pagination__ellipsis size-10 text-foreground"
               />
             </template>
 
             <PaginationNext
                 size="icon-lg"
-                class="size-10 rounded-lg border border-border bg-card p-0 text-foreground shadow-none hover:bg-secondary hover:text-primary gap-0 px-0 sm:pr-0"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card px-0 text-foreground hover:bg-secondary hover:text-primary"
             >
-              <ChevronRightIcon class="size-4"/>
+              <ChevronRightIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationNext>
           </PaginationContent>
         </Pagination>
@@ -272,7 +288,7 @@ watch(totalPages, (nextTotalPages) => {
 
     <div
         v-else
-        class="mt-4 rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+        class="offre-widget-state offre-widget-state--map mt-4 rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
     >
       Режим карты пока не подключен
     </div>
@@ -287,11 +303,19 @@ watch(totalPages, (nextTotalPages) => {
 .offre-widget-navigation {
   display: grid;
   grid-template-columns: 1fr min-content;
-  gap: 8px 8px;
+  gap: 8px;
   grid-auto-flow: row;
   grid-template-areas:
     "nav nav"
     "inputs switcher";
+}
+
+@media (min-width: 1024px) {
+  .offre-widget-navigation {
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "nav inputs switcher";
+  }
 }
 
 .offre-widget-navigation-shell.sticked {

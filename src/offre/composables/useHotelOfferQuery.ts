@@ -70,12 +70,12 @@ export function useHotelOfferQuery(params: {
     staleTime: offreQueryConfig.hotelOffer.staleTime,
     gcTime: offreQueryConfig.hotelOffer.gcTime,
     persister: offreQueryPersisters.hotelOffer.persisterFn,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!searchCriterias.value) {
         return null;
       }
 
-      const response = await hotelPriceSearchList(searchCriterias.value);
+      const response = await hotelPriceSearchList(searchCriterias.value, { signal });
       return response.result.products?.[0]?.offers?.[0] ?? null;
     }
   });
