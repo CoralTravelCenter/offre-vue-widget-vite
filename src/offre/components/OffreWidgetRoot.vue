@@ -8,8 +8,8 @@ import RegionTabsNav from "offre/components/RegionTabsNav.vue";
 import OffreOffersList from "offre/components/results/OffreOffersList.vue";
 import {useOffreFiltersQueryState} from "offre/composables/useOffreFiltersQueryState";
 import {useOffreProductsQuery} from "offre/composables/useOffreProductsQuery";
+import {useOffreWidgetListState} from "offre/composables/useOffreWidgetListState";
 import {getWidgetHotelId} from "offre/lib/payload";
-import type {OffreTourType, OffreViewMode} from "offre/types";
 import type {OffreWidgetRootProps} from "shared/types/widget";
 import {
   Pagination,
@@ -118,22 +118,10 @@ const navigationStickyOptions = computed(() => ({
 }));
 
 const departuresLoading = computed(() => departuresQuery.isPending.value);
-const viewMode = ref<OffreViewMode>("list");
-const tourTypeByHotelId = ref<Record<string, OffreTourType>>({});
-const currentPage = ref(1);
 const paginationSiblingCount = computed(() => {
   return isPaginationDesktop.value ? 1 : 0;
 });
 const paginationShowEdges = computed(() => true);
-const totalProducts = computed(() => productsList.value.length);
-const totalPages = computed(() => {
-  return Math.max(1, Math.ceil(totalProducts.value / PRODUCTS_PAGE_SIZE));
-});
-const hasPagination = computed(() => totalProducts.value > PRODUCTS_PAGE_SIZE);
-const paginatedProducts = computed(() => {
-  const startIndex = (currentPage.value - 1) * PRODUCTS_PAGE_SIZE;
-  return productsList.value.slice(startIndex, startIndex + PRODUCTS_PAGE_SIZE);
-});
 const hotelRuntimeById = computed(() => {
   return matchedHotelsDirectory.value.reduce<Map<string, typeof matchedHotelsDirectory.value[number]>>((accumulator, hotel) => {
     accumulator.set(String(hotel.id), hotel);
@@ -141,33 +129,21 @@ const hotelRuntimeById = computed(() => {
   }, new Map<string, typeof matchedHotelsDirectory.value[number]>());
 });
 
-watch(productsList, (nextProducts) => {
-  const knownHotelIds = new Set(nextProducts.map((product) => String(product.hotel?.id ?? "")));
-
-  for (const hotelId of Object.keys(tourTypeByHotelId.value)) {
-    if (!knownHotelIds.has(hotelId)) {
-      delete tourTypeByHotelId.value[hotelId];
-    }
-  }
-}, {immediate: true});
-
-function setHotelTourType(hotelId: string, value: OffreTourType) {
-  if (!hotelId) {
-    return;
-  }
-
-  tourTypeByHotelId.value[hotelId] = value;
-}
-
-watch([activeRegionId, selectedDepartureId, selectedTimeframe], () => {
-  currentPage.value = 1;
+const {
+  viewMode,
+  currentPage,
+  totalProducts,
+  hasPagination,
+  paginatedProducts,
+  tourTypeByHotelId,
+  setHotelTourType
+} = useOffreWidgetListState({
+  productsSource: productsList,
+  activeRegionIdSource: activeRegionId,
+  selectedDepartureIdSource: selectedDepartureId,
+  selectedTimeframeSource: selectedTimeframe,
+  pageSize: PRODUCTS_PAGE_SIZE
 });
-
-watch(totalPages, (nextTotalPages) => {
-  if (currentPage.value > nextTotalPages) {
-    currentPage.value = nextTotalPages;
-  }
-}, {immediate: true});
 </script>
 
 <template>
@@ -248,7 +224,7 @@ watch(totalPages, (nextTotalPages) => {
           >
             <PaginationPrevious
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card px-0 text-foreground hover:bg-secondary hover:text-primary"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary"
             >
               <ChevronLeftIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationPrevious>
@@ -277,7 +253,7 @@ watch(totalPages, (nextTotalPages) => {
 
             <PaginationNext
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card px-0 text-foreground hover:bg-secondary hover:text-primary"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary"
             >
               <ChevronRightIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationNext>

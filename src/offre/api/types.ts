@@ -177,6 +177,7 @@ export interface B2CProductHotel {
   name?: string;
   locationSummary?: string;
   categoryKey?: string | number;
+  countryKey?: string | number;
   recommended?: boolean;
   exclusive?: boolean;
   eliteHotel?: boolean;

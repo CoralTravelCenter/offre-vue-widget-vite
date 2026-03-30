@@ -1,29 +1,12 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { getCityGenitiveCase } from "app/plugins/city-spelling";
 import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "offre/api/types";
 import {
-  formatCurrencySafe,
-  formatOfferDate,
-  normalizePricingOption,
-  pluralizeNights,
   resolveHotelImageUrl,
-  resolveOfferHref,
-  resolveOfferPriceValue,
-  resolvePriceSuffix
+  resolveOfferHref
 } from "offre/lib/product-offer";
+import { useOffreOfferPricing } from "offre/composables/useOffreOfferPricing";
+import { useOffreOfferTerms } from "offre/composables/useOffreOfferTerms";
 import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
-
-export type OffreOfferCardTermIcon = "flight" | "calendar" | "bed" | "meal";
-
-export interface OffreOfferCardTerm {
-  key: string;
-  icon: OffreOfferCardTermIcon;
-  value: string;
-}
-
-interface OffreOfferCardReferenceValue {
-  name?: string;
-}
 
 interface OffreOfferCardHotelCategory {
   name?: string;
@@ -96,30 +79,12 @@ export function useOffreOfferCard(params: {
   const hotel = computed(() => product.value.hotel ?? {});
   const offer = computed(() => toValue(params.offer));
 
-  const passengersCount = computed(() => {
-    return offer.value?.rooms?.[0]?.passengers?.length || 1;
-  });
-
-  const stayNights = computed(() => {
-    return Number(offer.value?.stayNights) || 1;
-  });
-
   const hotelCategory = computed(() => {
     return getReferenceValue<OffreOfferCardHotelCategory>(
       productReference.value,
       "hotelCategories",
       hotel.value.categoryKey
     );
-  });
-
-  const mealType = computed(() => {
-    const meal = getReferenceValue<OffreOfferCardReferenceValue>(
-      productReference.value,
-      "meals",
-      offer.value?.rooms?.[0]?.mealKey
-    );
-
-    return meal?.name ?? "";
   });
 
   const isHotelOnly = computed(() => Boolean(hotelRuntimeEntry.value?.onlyhotel));
@@ -136,52 +101,26 @@ export function useOffreOfferCard(params: {
   });
   const hasOfferHref = computed(() => offerHref.value !== "#");
 
-  const beginDate = computed(() => {
-    return formatOfferDate(offer.value?.flight?.flightDate || offer.value?.checkInDate);
+  const {
+    mealType,
+    beginDate,
+    terms
+  } = useOffreOfferTerms({
+    offer,
+    productReference,
+    selectedDepartureName
   });
 
-  const departureTerm = computed(() => {
-    if (!offer.value?.flight || !selectedDepartureName.value) {
-      return "";
-    }
-
-    return `из ${getCityGenitiveCase(selectedDepartureName.value)}`;
-  });
-
-  const stayNightsTerm = computed(() => {
-    if (!offer.value?.stayNights) {
-      return "";
-    }
-
-    return `${offer.value.stayNights} ${pluralizeNights(offer.value.stayNights)}`;
-  });
-
-  const currentPriceValue = computed(() => {
-    return resolveOfferPriceValue(
-      offer.value?.price?.amount,
-      toValue(params.pricingMode),
-      passengersCount.value,
-      stayNights.value
-    );
-  });
-
-  const oldPriceValue = computed(() => {
-    return resolveOfferPriceValue(
-      offer.value?.price?.oldAmount,
-      toValue(params.pricingMode),
-      passengersCount.value,
-      stayNights.value
-    );
-  });
-
-  const currentPriceLabel = computed(() => formatCurrencySafe(currentPriceValue.value));
-  const oldPriceLabel = computed(() => formatCurrencySafe(oldPriceValue.value));
-  const priceSuffix = computed(() => {
-    if (!currentPriceLabel.value) {
-      return "";
-    }
-
-    return resolvePriceSuffix(toValue(params.pricingMode));
+  const {
+    currentPriceValue,
+    currentPriceLabel,
+    oldPriceLabel,
+    priceSuffix,
+    discountPercent,
+    normalizedPricingOption
+  } = useOffreOfferPricing({
+    offer,
+    pricingMode: () => toValue(params.pricingMode)
   });
 
   const hotelName = computed(() => {
@@ -194,48 +133,6 @@ export function useOffreOfferCard(params: {
   const isExclusive = computed(() => Boolean(hotel.value.exclusive));
   const isEliteHotel = computed(() => Boolean(hotel.value.eliteHotel));
   const hasFamilyClub = computed(() => Boolean(hotel.value.sunFamilyClub || hotel.value.coralFamilyClub));
-  const discountPercent = computed(() => {
-    const value = Number(offer.value?.price?.discountPercent);
-    return Number.isFinite(value) && value > 0 ? value : 0;
-  });
-
-  const terms = computed<OffreOfferCardTerm[]>(() => {
-    const nextTerms: OffreOfferCardTerm[] = [];
-
-    if (departureTerm.value) {
-      nextTerms.push({
-        key: "departure",
-        icon: "flight",
-        value: departureTerm.value
-      });
-    }
-
-    if (beginDate.value) {
-      nextTerms.push({
-        key: "begin-date",
-        icon: "calendar",
-        value: beginDate.value
-      });
-    }
-
-    if (stayNightsTerm.value) {
-      nextTerms.push({
-        key: "stay-nights",
-        icon: "bed",
-        value: stayNightsTerm.value
-      });
-    }
-
-    if (mealType.value) {
-      nextTerms.push({
-        key: "meal",
-        icon: "meal",
-        value: mealType.value
-      });
-    }
-
-    return nextTerms;
-  });
 
   return {
     hotel,
@@ -251,6 +148,7 @@ export function useOffreOfferCard(params: {
     mealType,
     beginDate,
     terms,
+    currentPriceValue,
     currentPriceLabel,
     oldPriceLabel,
     priceSuffix,
@@ -260,6 +158,6 @@ export function useOffreOfferCard(params: {
     isEliteHotel,
     hasFamilyClub,
     isHotelOnly,
-    normalizedPricingOption: computed(() => normalizePricingOption(toValue(params.pricingMode)))
+    normalizedPricingOption
   };
 }
