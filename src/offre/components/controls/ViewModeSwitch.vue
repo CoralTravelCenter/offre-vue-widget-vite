@@ -29,6 +29,14 @@ function toggleViewMode() {
 
 <style scoped lang="scss">
 .switcher {
+  background-color: transparent;
   grid-area: switcher;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    background-color: transparent;
+    border-color: rgb(74 158 212);
+    color: rgb(74 158 212);
+  }
 }
 </style>

@@ -7,6 +7,7 @@ import type {
   WidgetSortBy,
   WidgetTimeframeConfig
 } from "shared/types/widget";
+import type { B2CRoomCriteria } from "offre/api/types";
 
 const DEFAULT_GROUP_BY: WidgetGroupBy = "countries";
 const DEFAULT_PRICING: WidgetPricingMode = "default";
@@ -25,6 +26,7 @@ export interface NormalizedOffreWidgetOptions extends Omit<WidgetOptions, "group
   nights: number[];
   regionsOrder: string[];
   sortBy: WidgetSortBy;
+  roomCriterias?: B2CRoomCriteria[];
   wildcardOption?: string;
   preferRegion?: string;
   departureCity?: string;
@@ -37,6 +39,35 @@ export interface NormalizedWidgetHotelDescriptor extends Omit<WidgetHotelDescrip
   timeframe?: WidgetTimeframeConfig;
   nights?: number[];
   usps: string[];
+  roomCriterias?: B2CRoomCriteria[];
+}
+
+function isPassenger(value: unknown): value is { passengerType: number; age: number } {
+  return isPlainObject(value)
+    && typeof value.passengerType === "number"
+    && Number.isFinite(value.passengerType)
+    && typeof value.age === "number"
+    && Number.isFinite(value.age);
+}
+
+function normalizeRoomCriterias(value: unknown) {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const normalized = value
+    .filter((entry): entry is { passengers: unknown[] } => {
+      return isPlainObject(entry) && Array.isArray(entry.passengers);
+    })
+    .map((entry) => ({
+      passengers: entry.passengers.filter(isPassenger).map((passenger) => ({
+        passengerType: passenger.passengerType,
+        age: passenger.age
+      }))
+    }))
+    .filter((entry) => entry.passengers.length > 0);
+
+  return normalized.length ? normalized : undefined;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -142,7 +173,7 @@ export function getWidgetHotelId(hotelEntry: WidgetHotelEntry) {
 }
 
 export function normalizeWidgetOptions(options: WidgetOptions | undefined): NormalizedOffreWidgetOptions {
-  const source = isPlainObject(options) ? options : {};
+  const source: Partial<WidgetOptions> = isPlainObject(options) ? options : {};
 
   return {
     ...source,
@@ -151,6 +182,7 @@ export function normalizeWidgetOptions(options: WidgetOptions | undefined): Norm
     pricing: normalizePricing(source.pricing),
     timeframe: normalizeTimeframe(source.timeframe),
     nights: normalizeNights(source.nights),
+    roomCriterias: normalizeRoomCriterias(source.roomCriterias),
     regionsOrder: Array.isArray(source.regionsOrder)
       ? source.regionsOrder.filter((entry): entry is string => typeof entry === "string")
       : [],
@@ -182,6 +214,7 @@ export function normalizeWidgetHotelDescriptor(
     onlyhotel: Boolean(hotelEntry.onlyhotel),
     timeframe: hotelEntry.timeframe ? normalizeTimeframe(hotelEntry.timeframe) : undefined,
     nights: hotelEntry.nights ? normalizeNights(hotelEntry.nights, options.nights) : undefined,
+    roomCriterias: normalizeRoomCriterias(hotelEntry.roomCriterias),
     usps: Array.isArray(hotelEntry.usps)
       ? hotelEntry.usps.filter((entry): entry is string => typeof entry === "string")
       : []

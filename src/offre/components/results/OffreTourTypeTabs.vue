@@ -36,7 +36,7 @@ const selectedValue = computed({
       <TabsTrigger
         v-if="!isHotelOnly"
         value="package"
-        class="offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--package inline-flex items-center justify-center border bg-white font-normal text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary"
+        class="offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--package inline-flex items-center justify-center border bg-white font-normal text-foreground data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary"
       >
         Пакетный тур
       </TabsTrigger>
@@ -44,7 +44,7 @@ const selectedValue = computed({
       <TabsTrigger
         value="hotel"
         :class="[
-          'offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--hotel inline-flex items-center justify-center border bg-white font-normal text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary',
+          'offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--hotel inline-flex items-center justify-center border bg-white font-normal text-foreground data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary',
           props.isHotelOnly ? 'offre-tour-type-tabs__trigger--single col-span-2' : '-ml-px'
         ]"
       >
@@ -56,10 +56,25 @@ const selectedValue = computed({
 
 <style scoped lang="scss">
 .offre-tour-type-tabs__trigger {
+  background-color: transparent;
   border-color: var(--offre-color-control-border);
+  cursor: pointer;
   padding: var(--offre-control-padding-y) var(--offre-control-padding-x);
   font-size: var(--offre-text-control);
   line-height: var(--offre-leading-control);
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+
+  &:not([data-state="active"]):hover {
+    background-color: transparent;
+    border-color: rgb(74 158 212);
+    color: rgb(74 158 212);
+  }
+
+  &[data-state="active"] {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+  }
 }
 
 .offre-tour-type-tabs__trigger--package {

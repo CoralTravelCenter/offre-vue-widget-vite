@@ -31,6 +31,15 @@ const HOTEL_COMMON_SEARCH_CRITERIAS = {
   }]
 };
 
+function resolveRoomCriterias(
+  options: NormalizedOffreWidgetOptions,
+  defaultRoomCriterias: B2CPriceSearchCriterias["roomCriterias"]
+) {
+  return Array.isArray(options.roomCriterias) && options.roomCriterias.length > 0
+    ? options.roomCriterias
+    : defaultRoomCriterias;
+}
+
 export interface OffreProductQueryDescriptor {
   onlyhotel: boolean;
   searchCriterias: B2CPriceSearchCriterias;
@@ -114,6 +123,7 @@ export function buildOffreProductQueries(params: {
         onlyhotel: true,
         searchCriterias: {
           ...HOTEL_COMMON_SEARCH_CRITERIAS,
+          roomCriterias: resolveRoomCriterias(params.options, HOTEL_COMMON_SEARCH_CRITERIAS.roomCriterias),
           beginDates: matchedTimeframe.searchFields.beginDates,
           nights,
           arrivalLocations: [arrivalLocation],
@@ -136,6 +146,7 @@ export function buildOffreProductQueries(params: {
       onlyhotel: false,
       searchCriterias: {
         ...PACKAGE_COMMON_SEARCH_CRITERIAS,
+        roomCriterias: resolveRoomCriterias(params.options, PACKAGE_COMMON_SEARCH_CRITERIAS.roomCriterias),
         beginDates: matchedTimeframe.searchFields.beginDates,
         nights,
         departureLocations: [params.selectedDeparture],

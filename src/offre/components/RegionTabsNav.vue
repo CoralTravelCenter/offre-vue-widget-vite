@@ -85,7 +85,7 @@ onMounted(async () => {
 						:key="tab.id"
 						:value="tab.id"
 						:data-region-id="tab.id"
-						class="region-tabs-nav__item shrink-0 rounded-3xl border px-5 text-sm text-black data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-white"
+						class="region-tabs-nav__item shrink-0 cursor-pointer rounded-3xl border px-5 text-sm data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-white"
 				>
 					{{ tab.label }}
 				</TabsTrigger>
@@ -97,7 +97,19 @@ onMounted(async () => {
 <style scoped lang="scss">
 .region-tabs-nav__item {
   border-color: var(--offre-color-chip-border);
+  color: inherit;
   padding-top: var(--offre-region-tab-padding-y);
   padding-bottom: var(--offre-region-tab-padding-y);
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:not([data-state="active"]):hover {
+    border-color: rgb(74 158 212);
+    color: rgb(74 158 212);
+  }
+
+  &[data-state="active"] {
+    border-color: var(--primary);
+    color: #fff;
+  }
 }
 </style>

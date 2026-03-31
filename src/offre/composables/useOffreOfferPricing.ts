@@ -2,9 +2,8 @@ import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import type { B2COffer } from "offre/api/types";
 import {
   formatCurrencySafe,
-  normalizePricingOption,
   resolveOfferPriceValue,
-  resolvePriceSuffix
+  resolveOfferPartySuffix
 } from "offre/lib/product-offer";
 
 export function useOffreOfferPricing(params: {
@@ -16,7 +15,9 @@ export function useOffreOfferPricing(params: {
   const passengersCount = computed(() => {
     return offer.value?.rooms?.[0]?.passengers?.length || 1;
   });
-
+  const roomPassengers = computed(() => {
+    return offer.value?.rooms?.[0]?.passengers ?? [];
+  });
   const stayNights = computed(() => {
     return Number(offer.value?.stayNights) || 1;
   });
@@ -46,7 +47,10 @@ export function useOffreOfferPricing(params: {
       return "";
     }
 
-    return resolvePriceSuffix(toValue(params.pricingMode));
+    return resolveOfferPartySuffix(
+      toValue(params.pricingMode),
+      roomPassengers.value
+    );
   });
 
   const discountPercent = computed(() => {
@@ -60,7 +64,6 @@ export function useOffreOfferPricing(params: {
     currentPriceLabel,
     oldPriceLabel,
     priceSuffix,
-    discountPercent,
-    normalizedPricingOption: computed(() => normalizePricingOption(toValue(params.pricingMode)))
+    discountPercent
   };
 }

@@ -7,6 +7,7 @@ export function useOffreWidgetListState(params: {
   activeRegionIdSource: MaybeRefOrGetter<string>;
   selectedDepartureIdSource: MaybeRefOrGetter<string>;
   selectedTimeframeSource: MaybeRefOrGetter<string>;
+  guestsFilterKeySource?: MaybeRefOrGetter<string>;
   pageSize?: number;
 }) {
   const pageSize = params.pageSize ?? 5;
@@ -46,7 +47,8 @@ export function useOffreWidgetListState(params: {
   watch([
     () => toValue(params.activeRegionIdSource),
     () => toValue(params.selectedDepartureIdSource),
-    () => toValue(params.selectedTimeframeSource)
+    () => toValue(params.selectedTimeframeSource),
+    () => toValue(params.guestsFilterKeySource)
   ], () => {
     currentPage.value = 1;
   });

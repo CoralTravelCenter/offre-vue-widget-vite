@@ -39,7 +39,7 @@ const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
     >
       <component
         :is="termIconByKey[term.icon]"
-        :class="`offre-offer-terms__icon ${termIconClassByKey[term.icon]} shrink-0 object-contain`"
+        class="offre-offer-terms__icon h-4 w-4 shrink-0 object-contain"
       />
       <span class="offre-offer-terms__value">{{ term.value }}</span>
     </li>

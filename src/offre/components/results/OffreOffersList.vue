@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import type { B2CPriceSearchReference, B2CProduct } from "offre/api/types";
 import OffreOfferCard from "offre/components/results/OffreOfferCard.vue";
+import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
 import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
 import type { BrandKey } from "shared/types/brand";
 
@@ -10,6 +11,7 @@ const props = defineProps<{
   productReference: B2CPriceSearchReference;
   selectedDepartureName?: string;
   pricingMode?: unknown;
+  searchOptions: NormalizedOffreWidgetOptions;
   hotelRuntimeById: Map<string, OffreHotelRuntimeEntry>;
   tourTypeByHotelId: Record<string, OffreTourType>;
   brandKey: BrandKey;
@@ -37,6 +39,7 @@ const normalizedProducts = computed(() => {
       :product-reference="productReference"
       :selected-departure-name="selectedDepartureName"
       :pricing-mode="pricingMode"
+      :search-options="searchOptions"
       :hotel-runtime-entry="entry.hotelRuntimeEntry"
       :brand-key="brandKey"
       :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
@@ -47,6 +50,9 @@ const normalizedProducts = computed(() => {
 
 <style scoped lang="scss">
 .offre-offers-list {
+  margin-right: -16px;
+  padding-right: 16px;
+
   @media (min-width: 768px) and (max-width: 1023px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

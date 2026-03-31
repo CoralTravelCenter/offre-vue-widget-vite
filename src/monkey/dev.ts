@@ -1,6 +1,6 @@
 import type { BrandKey } from "shared/types/brand";
 import type { WidgetPayload } from "shared/types/widget";
-import { devOffrePayloads } from "dev/fixtures/offre-payloads";
+import { getDevOffrePayload } from "dev/fixtures/offre-payloads";
 import { hostReactAppReady } from "monkey/utils/host-react-app-ready";
 import { bootstrapOffreWidgets } from "widget/entry";
 
@@ -53,7 +53,7 @@ async function bootstrapMonkeyWidget() {
     timeoutMs: MONKEY_READY_TIMEOUT_MS
   });
   const root = ensureMonkeyRoot(hostElement);
-  ensureWidgetPayload(root, devOffrePayloads[activeBrand]);
+  ensureWidgetPayload(root, getDevOffrePayload(activeBrand));
   bootstrapOffreWidgets(root);
 }
 

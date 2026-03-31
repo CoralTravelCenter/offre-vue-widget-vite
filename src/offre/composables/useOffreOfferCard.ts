@@ -102,8 +102,6 @@ export function useOffreOfferCard(params: {
   const hasOfferHref = computed(() => offerHref.value !== "#");
 
   const {
-    mealType,
-    beginDate,
     terms
   } = useOffreOfferTerms({
     offer,
@@ -116,8 +114,7 @@ export function useOffreOfferCard(params: {
     currentPriceLabel,
     oldPriceLabel,
     priceSuffix,
-    discountPercent,
-    normalizedPricingOption
+    discountPercent
   } = useOffreOfferPricing({
     offer,
     pricingMode: () => toValue(params.pricingMode)
@@ -135,8 +132,6 @@ export function useOffreOfferCard(params: {
   const hasFamilyClub = computed(() => Boolean(hotel.value.sunFamilyClub || hotel.value.coralFamilyClub));
 
   return {
-    hotel,
-    offer,
     hotelName,
     hotelCategoryName,
     hotelStarCount,
@@ -145,8 +140,6 @@ export function useOffreOfferCard(params: {
     offerHref,
     hasOfferHref,
     hotelUsps,
-    mealType,
-    beginDate,
     terms,
     currentPriceValue,
     currentPriceLabel,
@@ -157,7 +150,6 @@ export function useOffreOfferCard(params: {
     isExclusive,
     isEliteHotel,
     hasFamilyClub,
-    isHotelOnly,
-    normalizedPricingOption
+    isHotelOnly
   };
 }

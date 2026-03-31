@@ -6,6 +6,8 @@ import OffreControls from "offre/components/controls/OffreControls.vue";
 import ViewModeSwitch from "offre/components/controls/ViewModeSwitch.vue";
 import RegionTabsNav from "offre/components/RegionTabsNav.vue";
 import OffreOffersList from "offre/components/results/OffreOffersList.vue";
+import OffreOffersListSkeleton from "offre/components/results/OffreOffersListSkeleton.vue";
+import type { B2CRoomCriteria } from "offre/api/types";
 import {useOffreFiltersQueryState} from "offre/composables/useOffreFiltersQueryState";
 import {useOffreProductsQuery} from "offre/composables/useOffreProductsQuery";
 import {useOffreWidgetListState} from "offre/composables/useOffreWidgetListState";
@@ -31,6 +33,21 @@ const MOBILE_TOP_OFFSET = 74;
 const PAGINATION_DESKTOP_BREAKPOINT = "(min-width: 768px)";
 const PRODUCTS_PAGE_SIZE = 5;
 
+function resolveInitialGuestsState(roomCriterias: B2CRoomCriteria[] | undefined) {
+  const passengers = roomCriterias?.[0]?.passengers ?? [
+    { age: 20, passengerType: 0 },
+    { age: 20, passengerType: 0 }
+  ];
+
+  return {
+    adultsCount: passengers.filter((passenger) => Number(passenger.passengerType) === 0).length || 2,
+    childrenAges: passengers
+      .filter((passenger) => Number(passenger.passengerType) !== 0)
+      .map((passenger) => Number(passenger.age))
+      .filter((age) => Number.isFinite(age))
+  };
+}
+
 const props = withDefaults(defineProps<OffreWidgetRootProps>(), {
   options: () => ({}),
   hotelsList: () => []
@@ -54,6 +71,34 @@ const {
     () => props.options,
     () => props.hotelsList
 );
+const selectedGuests = ref(resolveInitialGuestsState(options.value.roomCriterias));
+const selectedRoomCriterias = computed<B2CRoomCriteria[]>(() => {
+  return [{
+    passengers: [
+      ...Array.from({ length: selectedGuests.value.adultsCount }, () => ({
+        age: 20,
+        passengerType: 0
+      })),
+      ...selectedGuests.value.childrenAges.map((age) => ({
+        age,
+        passengerType: 1
+      }))
+    ]
+  }];
+});
+const effectiveSearchOptions = computed(() => ({
+  ...options.value,
+  roomCriterias: selectedRoomCriterias.value
+}));
+const guestsFilterKey = computed(() => JSON.stringify(selectedGuests.value));
+
+watch(
+  () => options.value.roomCriterias,
+  (nextRoomCriterias) => {
+    selectedGuests.value = resolveInitialGuestsState(nextRoomCriterias);
+  },
+  { immediate: true }
+);
 
 const hotelOrderById = computed(() => {
   return props.hotelsList.reduce<Map<string, number>>((accumulator, hotelEntry, index) => {
@@ -74,7 +119,7 @@ const {
   productReference,
   requestState
 } = useOffreProductsQuery({
-  optionsSource: options,
+  optionsSource: effectiveSearchOptions,
   hotelsSource: matchedHotelsDirectory,
   hotelInfoByIdSource: hotelInfoById,
   selectedTimeframeSource: selectedTimeframe,
@@ -142,8 +187,20 @@ const {
   activeRegionIdSource: activeRegionId,
   selectedDepartureIdSource: selectedDepartureId,
   selectedTimeframeSource: selectedTimeframe,
+  guestsFilterKeySource: guestsFilterKey,
   pageSize: PRODUCTS_PAGE_SIZE
 });
+
+function handleGuestsApply(value: { adultsCount: number; childrenAges: number[] }) {
+  selectedGuests.value = {
+    adultsCount: value.adultsCount,
+    childrenAges: [...value.childrenAges].sort((left, right) => left - right)
+  };
+}
+
+function handleGuestsReset() {
+  selectedGuests.value = resolveInitialGuestsState(options.value.roomCriterias);
+}
 </script>
 
 <template>
@@ -163,10 +220,14 @@ const {
         <OffreControls
             v-model:selected-departure-id="selectedDepartureId"
             v-model:selected-timeframe="selectedTimeframe"
+            :adults-count="selectedGuests.adultsCount"
+            :children-ages="selectedGuests.childrenAges"
             :departures="departures"
             :departures-loading="departuresLoading"
             :timeframe-options="timeframeOptions"
             :timeframes-loading="regionsLoading"
+            @apply-guests="handleGuestsApply"
+            @reset-guests="handleGuestsReset"
         />
         <ViewModeSwitch v-model="viewMode"/>
       </div>
@@ -178,9 +239,9 @@ const {
     >
       <div
           v-if="requestState === 'loading'"
-          class="offre-widget-state offre-widget-state--loading rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+          class="offre-widget-state offre-widget-state--loading"
       >
-        Загрузка туров...
+        <OffreOffersListSkeleton />
       </div>
 
       <div
@@ -202,7 +263,8 @@ const {
             :products="paginatedProducts"
             :product-reference="productReference"
             :selected-departure-name="selectedDeparture?.name ?? ''"
-            :pricing-mode="options.pricing"
+            :pricing-mode="effectiveSearchOptions.pricing"
+            :search-options="effectiveSearchOptions"
             :brand-key="brandKey"
             :hotel-runtime-by-id="hotelRuntimeById"
             :tour-type-by-hotel-id="tourTypeByHotelId"
@@ -224,7 +286,7 @@ const {
           >
             <PaginationPrevious
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground"
             >
               <ChevronLeftIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationPrevious>
@@ -240,7 +302,7 @@ const {
                   :value="item.value"
                   :class="item.value === currentPage
                   ? 'offre-widget-pagination__item size-10 rounded-lg border border-primary bg-primary p-0 text-primary-foreground hover:bg-primary hover:text-primary-foreground'
-                  : 'offre-widget-pagination__item size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary'"
+                  : 'offre-widget-pagination__item size-10 rounded-lg border border-border bg-card p-0 text-foreground'"
               >
                 {{ item.value }}
               </PaginationItem>
@@ -253,7 +315,7 @@ const {
 
             <PaginationNext
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground hover:bg-secondary hover:text-primary"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground"
             >
               <ChevronRightIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationNext>
@@ -272,6 +334,16 @@ const {
 </template>
 
 <style scoped lang="scss">
+.offre-widget-container,
+.offre-widget-results {
+  overflow: visible;
+}
+
+.offre-widget-results {
+  margin-right: -16px;
+  padding-right: 16px;
+}
+
 .offre-widget-navigation-shell {
   transition: box-shadow 0.2s ease;
 }
@@ -301,4 +373,12 @@ const {
 .nav {
   grid-area: nav;
 }
+
+.offre-widget-pagination__control:hover,
+.offre-widget-pagination__item:not([data-selected]):hover {
+  background-color: #fff;
+  border-color: rgb(74 158 212);
+  color: rgb(74 158 212);
+}
+
 </style>

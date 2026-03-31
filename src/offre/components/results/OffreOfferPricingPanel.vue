@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { useEventListener } from "@vueuse/core";
-import { useViewportBreakpoints } from "app/composables/useViewportBreakpoints";
-import OffreCashbackBanner from "offre/components/results/OffreCashbackBanner.vue";
+import OffreCashbackPopover from "offre/components/results/OffreCashbackPopover.vue";
 import OffreTourTypeTabs from "offre/components/results/OffreTourTypeTabs.vue";
 import type { CoralBonusInfo } from "offre/lib/coral-bonus";
 import type { OffreTourType } from "offre/types";
-import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
 import { Button } from "ui/button";
+import { Skeleton } from "ui/skeleton";
 
 interface Props {
 	disabled?: boolean;
+	loading?: boolean;
 	isHotelOnly?: boolean;
 	oldPriceLabel?: string;
 	currentPriceLabel?: string;
@@ -23,6 +21,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
 	disabled: false,
+	loading: false,
 	isHotelOnly: false,
 	oldPriceLabel: "",
 	currentPriceLabel: "",
@@ -34,92 +33,6 @@ withDefaults(defineProps<Props>(), {
 });
 
 const modelValue = defineModel<OffreTourType>({ required: true });
-const { isLg, isXl, isXXL } = useViewportBreakpoints();
-const isDesktopPopoverHoverMode = computed(() => {
-  return isLg.value || isXl.value || isXXL.value;
-});
-const isCashbackPopoverOpen = ref(false);
-let cashbackPopoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
-function clearCashbackPopoverCloseTimer() {
-  if (!cashbackPopoverCloseTimer) {
-    return;
-  }
-
-  clearTimeout(cashbackPopoverCloseTimer);
-  cashbackPopoverCloseTimer = null;
-}
-
-function openCashbackPopover() {
-  clearCashbackPopoverCloseTimer();
-  isCashbackPopoverOpen.value = true;
-}
-
-function scheduleCashbackPopoverClose() {
-  clearCashbackPopoverCloseTimer();
-  cashbackPopoverCloseTimer = setTimeout(() => {
-    isCashbackPopoverOpen.value = false;
-    cashbackPopoverCloseTimer = null;
-  }, 100);
-}
-
-function handleCashbackPopoverOpenChange(nextOpen: boolean) {
-  isCashbackPopoverOpen.value = nextOpen;
-}
-
-function handleCashbackTriggerEnter() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  openCashbackPopover();
-}
-
-function handleCashbackTriggerLeave() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  scheduleCashbackPopoverClose();
-}
-
-function handleCashbackContentEnter() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  openCashbackPopover();
-}
-
-function handleCashbackContentLeave() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  scheduleCashbackPopoverClose();
-}
-
-watch(isDesktopPopoverHoverMode, (isDesktop) => {
-  if (isDesktop) {
-    return;
-  }
-
-  clearCashbackPopoverCloseTimer();
-  isCashbackPopoverOpen.value = false;
-});
-
-useEventListener("scroll", () => {
-  if (!isCashbackPopoverOpen.value) {
-    return;
-  }
-
-  clearCashbackPopoverCloseTimer();
-  isCashbackPopoverOpen.value = false;
-}, { passive: true, capture: true });
-
-onBeforeUnmount(() => {
-  clearCashbackPopoverCloseTimer();
-});
 </script>
 
 <template>
@@ -132,154 +45,126 @@ onBeforeUnmount(() => {
       :is-hotel-only="isHotelOnly"
     />
 
-    <div class="offre-offer-pricing-panel__pricing relative overflow-visible">
-      <div class="offre-offer-pricing-panel__caption text-muted-foreground">
-        цена от:
-      </div>
-
-      <div
-        v-if="oldPriceLabel"
-        class="offre-offer-pricing-panel__old-price text-muted-foreground decoration-destructive line-through"
-      >
-        {{ oldPriceLabel }}
-      </div>
-
-      <div class="offre-offer-pricing-panel__price-row flex flex-wrap items-baseline gap-1">
-        <div class="offre-offer-pricing-panel__current-price font-semibold text-primary">
-          {{ currentPriceLabel || "Цена по запросу" }}
+    <template v-if="loading">
+      <div class="offre-offer-pricing-panel__tour-info offre-offer-pricing-panel__tour-info--loading">
+        <div class="offre-offer-pricing-panel__pricing offre-offer-pricing-panel__pricing--loading relative overflow-visible">
+          <Skeleton class="offre-offer-pricing-panel__loading-caption"/>
+          <Skeleton class="offre-offer-pricing-panel__loading-old-price"/>
+          <Skeleton class="offre-offer-pricing-panel__loading-current-price"/>
+          <Skeleton class="offre-offer-pricing-panel__loading-price-suffix"/>
+          <Skeleton class="offre-offer-pricing-panel__loading-discount"/>
         </div>
-        <span
-          v-if="currentPriceLabel && priceSuffix"
-          class="offre-offer-pricing-panel__price-suffix font-light text-primary"
+
+        <Skeleton class="offre-offer-pricing-panel__loading-cashback"/>
+
+        <Button
+          class="offre-offer-pricing-panel__action h-12 w-full px-4 py-3"
+          disabled
         >
-          {{ priceSuffix }}
-        </span>
+          Загрузка...
+        </Button>
       </div>
+    </template>
 
-      <div
-        v-if="discountPercent"
-        class="offre-offer-pricing-panel__discount-badge absolute bottom-0 right-0 grid h-6 place-content-center px-3 leading-none text-white"
-      >
-        {{ discountPercent }}% Скидка
-      </div>
-    </div>
+    <template v-else>
+      <div class="offre-offer-pricing-panel__tour-info">
+        <div class="offre-offer-pricing-panel__pricing relative overflow-visible">
+          <div class="offre-offer-pricing-panel__caption text-muted-foreground">
+            цена от:
+          </div>
 
-    <Popover
-      v-if="cashbackInfo"
-      :open="isCashbackPopoverOpen"
-      @update:open="handleCashbackPopoverOpenChange"
-    >
-      <PopoverTrigger as-child>
-        <button
-          type="button"
-          class="offre-offer-pricing-panel__cashback-trigger m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-inherit outline-none transition-[filter] duration-150 hover:brightness-[0.98] active:brightness-[0.95]"
-          aria-label="Показать условия кешбэка CoralBonus"
-          @mouseenter="handleCashbackTriggerEnter"
-          @mouseleave="handleCashbackTriggerLeave"
-        >
-          <OffreCashbackBanner
-            :amount-label="cashbackInfo.finalBonusLabel"
-            class="offre-offer-pricing-panel__cashback"
-          />
-        </button>
-      </PopoverTrigger>
+          <div
+            v-if="oldPriceLabel"
+            class="offre-offer-pricing-panel__old-price text-muted-foreground decoration-destructive line-through"
+          >
+            {{ oldPriceLabel }}
+          </div>
 
-      <PopoverContent
-        side="top"
-        align="center"
-        class="offre-offer-pricing-panel__cashback-popover w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-white px-3 py-0"
-        @mouseenter="handleCashbackContentEnter"
-        @mouseleave="handleCashbackContentLeave"
-      >
-        <div class="offre-offer-pricing-panel__cashback-popover-body text-foreground">
-          <div class="offre-offer-pricing-panel__cashback-content flex flex-col font-semibold">
-            <div
-              v-for="promo in cashbackInfo.listOfPromos"
-              :key="`${promo.content_txt ?? 'promo'}-${promo.content_num ?? ''}`"
-              class="offre-offer-pricing-panel__cashback-row inline-flex items-center justify-between gap-4 border-b py-3 text-balance"
-            >
-              <span class="offre-offer-pricing-panel__cashback-value text-left">
-                {{ promo.content_num ?? "" }}
-              </span>
-              <a
-                v-if="promo.content_link"
-                :href="promo.content_link"
-                class="offre-offer-pricing-panel__cashback-description cursor-pointer text-right underline decoration-1 underline-offset-2 transition-colors duration-150 hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {{ promo.content_txt }}
-              </a>
-              <span
-                v-else
-                class="offre-offer-pricing-panel__cashback-description text-left"
-              >
-                {{ promo.content_txt }}
-              </span>
-            </div>
-
-            <div class="offre-offer-pricing-panel__cashback-actions inline-flex items-center justify-between gap-4 py-3 text-balance">
-              <div class="offre-offer-pricing-panel__cashback-info text-left font-semibold">
-                Для начисления бонусов, укажите номер карты в поле "Примечание к заказу"
-              </div>
-              <a
-                href="https://coralbonus.ru/registration?promo=R3R5VO93GKG8N1PGQC1UP0G6EICQLRWEN3Z64WZGC4YBYIKHFJV55IND5O20WUJ"
-                class="offre-offer-pricing-panel__cashback-activate inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 py-1.5 text-primary-foreground transition-colors duration-150 hover:bg-primary/90 active:bg-primary/80"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Активировать
-              </a>
+          <div class="offre-offer-pricing-panel__price-row flex flex-wrap items-baseline gap-1">
+            <div class="offre-offer-pricing-panel__current-price font-semibold text-primary">
+              {{ currentPriceLabel || "Цена по запросу" }}
             </div>
           </div>
+
+          <div
+            v-if="currentPriceLabel && priceSuffix"
+            class="offre-offer-pricing-panel__price-suffix text-primary"
+          >
+            {{ priceSuffix }}
+          </div>
+
+          <div
+            v-if="discountPercent"
+            class="offre-offer-pricing-panel__discount-badge absolute bottom-0 right-0 grid h-6 place-content-center leading-none text-white"
+          >
+            <span class="offre-offer-pricing-panel__discount-badge-text">{{ discountPercent }}% Скидка</span>
+          </div>
         </div>
-      </PopoverContent>
-    </Popover>
 
-    <Button
-      v-if="hasOfferHref"
-      as="a"
-      :href="offerHref"
-      :class="[
-        'offre-offer-pricing-panel__action h-12 w-full px-4 py-3',
-        disabled ? 'pointer-events-none opacity-60' : ''
-      ]"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      {{ disabled ? "Загрузка..." : "Выбрать" }}
-    </Button>
+        <OffreCashbackPopover
+          v-if="cashbackInfo"
+          :cashback-info="cashbackInfo"
+        />
 
-    <Button
-      v-else
-      class="offre-offer-pricing-panel__action h-12 w-full px-4 py-3"
-      disabled
-    >
-      Недоступно
-    </Button>
+        <Button
+          v-if="hasOfferHref"
+          as="a"
+          :href="offerHref"
+          :class="[
+            'offre-offer-pricing-panel__action h-12 w-full px-4 py-3',
+            disabled ? 'pointer-events-none opacity-60' : ''
+          ]"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {{ disabled ? "Загрузка..." : "Выбрать" }}
+        </Button>
+
+        <Button
+          v-else
+          class="offre-offer-pricing-panel__action h-12 w-full px-4 py-3"
+          disabled
+        >
+          Недоступно
+        </Button>
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped lang="scss">
 .offre-offer-pricing-panel__discount-badge {
-  overflow: visible;
+  overflow: hidden;
   position: absolute;
-  bottom: 6px;
-  right: -16px;
+  top: 50%;
+  right: 0;
   background: var(--offre-color-discount);
-  border-radius: var(--offre-radius-badge) var(--offre-radius-badge) 0 var(--offre-radius-badge);
+  border-radius: var(--offre-radius-badge);
   font-size: var(--offre-text-meta);
+  transform: translateY(-50%);
+  z-index: 1;
+  padding-left: 12px;
+  padding-right: 16px;
 
   &::after {
     content: "";
     position: absolute;
-    top: 100%;
+    top: calc(100% - 6px);
     right: 0;
     width: 8px;
     height: 6px;
     background: inherit;
     clip-path: polygon(100% 0, 0 0, 0 100%);
   }
+}
+
+.offre-offer-pricing-panel__pricing {
+  padding-right: 108px;
+}
+
+.offre-offer-pricing-panel__discount-badge-text {
+  display: block;
+  white-space: nowrap;
 }
 
 .offre-offer-pricing-panel__caption {
@@ -303,19 +188,58 @@ onBeforeUnmount(() => {
 }
 
 .offre-offer-pricing-panel__price-suffix {
-  font-size: var(--offre-text-title);
+  font-size: var(--offre-text-price-suffix);
+  line-height: 1rem;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
-.offre-offer-pricing-panel__cashback-popover {
-  box-shadow: var(--offre-shadow-popover);
+.offre-offer-pricing-panel__loading-caption,
+.offre-offer-pricing-panel__loading-old-price,
+.offre-offer-pricing-panel__loading-current-price,
+.offre-offer-pricing-panel__loading-price-suffix,
+.offre-offer-pricing-panel__loading-discount,
+.offre-offer-pricing-panel__loading-cashback {
+  background-color: #e5e7eb;
 }
 
-.offre-offer-pricing-panel__cashback-content {
-  font-size: var(--offre-text-meta);
+.offre-offer-pricing-panel__loading-caption {
+  height: 12px;
+  width: 52px;
 }
 
-.offre-offer-pricing-panel__cashback-row {
-  border-color: var(--offre-border-popover-row);
+.offre-offer-pricing-panel__loading-old-price {
+  height: 18px;
+  margin-top: 8px;
+  width: 72px;
+}
+
+.offre-offer-pricing-panel__loading-current-price {
+  height: 38px;
+  margin-top: 8px;
+  width: 68%;
+}
+
+.offre-offer-pricing-panel__loading-price-suffix {
+  height: 12px;
+  margin-top: 2px;
+  width: 44%;
+}
+
+.offre-offer-pricing-panel__loading-discount {
+  border-radius: var(--offre-radius-badge);
+  height: 28px;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 88px;
+}
+
+.offre-offer-pricing-panel__loading-cashback {
+  border-radius: var(--offre-radius-badge);
+  height: 50px;
+  width: 100%;
 }
 
 .offre-offer-pricing-panel__action {
@@ -324,40 +248,39 @@ onBeforeUnmount(() => {
   line-height: var(--offre-leading-button);
 }
 
+.offre-offer-pricing-panel__tour-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .offre-offer-pricing-panel {
   @media (min-width: 1024px) {
     margin-top: 0;
     height: 100%;
-    justify-content: flex-end;
+    position: relative;
+    justify-content: space-between;
     border-top: 0;
-    border-left: 1px solid hsl(var(--border));
     padding-top: 0;
     padding-left: 12px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #e5e7eb;
+    }
   }
 }
 
-.offre-offer-pricing-panel__cashback-row {
-  @media (min-width: 768px) and (max-width: 1279px) {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-content: start;
-    gap: 12px;
+.offre-offer-pricing-panel__tour-info {
+  @media (min-width: 1024px) {
+    justify-content: flex-end;
   }
 }
 
-.offre-offer-pricing-panel__cashback-actions {
-  @media (min-width: 768px) and (max-width: 1279px) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-}
-
-.offre-offer-pricing-panel__cashback-description,
-.offre-offer-pricing-panel__cashback-info {
-  @media (min-width: 768px) and (max-width: 1279px) {
-    min-width: 0;
-    text-wrap: balance;
-  }
-}
 </style>

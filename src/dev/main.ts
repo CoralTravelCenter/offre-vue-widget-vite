@@ -1,4 +1,4 @@
-import { devOffrePayloads } from "dev/fixtures/offre-payloads";
+import { getDevOffrePayload } from "dev/fixtures/offre-payloads";
 import { bootstrapOffreWidgets } from "widget/entry";
 
 function ensureDevPayloadSlots() {
@@ -14,7 +14,7 @@ function ensureDevPayloadSlots() {
 
     script.type = "application/json";
     script.dataset.offreVueTest = "";
-    script.textContent = JSON.stringify(devOffrePayloads[brandKey]);
+    script.textContent = JSON.stringify(getDevOffrePayload(brandKey));
 
     slot.append(script);
   }

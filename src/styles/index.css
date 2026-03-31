@@ -71,6 +71,7 @@
     --offre-text-body: 14px;
     --offre-text-button: 16px;
     --offre-text-title: 20px;
+    --offre-text-price-suffix: 12px;
     --offre-text-price: 24px;
     --offre-text-control: 14px;
     --offre-leading-meta: 1.3;
@@ -153,6 +154,7 @@
     --offre-text-body: 14px;
     --offre-text-button: 16px;
     --offre-text-title: 20px;
+    --offre-text-price-suffix: 12px;
     --offre-text-price: 24px;
     --offre-text-control: 14px;
     --offre-leading-meta: 1.3;

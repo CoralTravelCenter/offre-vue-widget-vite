@@ -22,7 +22,7 @@ const forwarded = useForwardProps(delegatedProps)
 <template>
   <PaginationPrev
     data-slot="pagination-previous"
-    :class="cn('pagination-previous gap-1 px-2.5', buttonVariants({ variant: 'ghost', size }), props.class)"
+    :class="cn('pagination-previous gap-1', buttonVariants({ variant: 'ghost', size }), props.class)"
     v-bind="forwarded"
   >
     <slot>
@@ -33,12 +33,6 @@ const forwarded = useForwardProps(delegatedProps)
 </template>
 
 <style scoped lang="scss">
-.pagination-previous {
-  @media (min-width: 640px) {
-    padding-right: 0.625rem;
-  }
-}
-
 .pagination-previous__label {
   @media (min-width: 640px) {
     display: block;

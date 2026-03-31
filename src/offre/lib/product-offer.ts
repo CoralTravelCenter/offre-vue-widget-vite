@@ -1,9 +1,9 @@
-import type { B2CHotelImage } from "offre/api/types";
+import type { B2CHotelImage, B2COfferRoomPassenger } from "offre/api/types";
 
 const PRICE_SUFFIX_MAP = {
-  "per-person": " / за одного",
-  "per-night": " / за ночь",
-  default: " / за двоих"
+  "per-person": "за 1 взрослого",
+  "per-night": "за ночь",
+  default: "за 2 взрослых"
 } as const;
 
 const PRICING_ALIASES = Object.freeze({
@@ -75,7 +75,93 @@ export function formatCurrencySafe(value: number | string | undefined) {
 
 export function resolvePriceSuffix(pricingOption: unknown) {
   const normalizedPricingOption = normalizePricingOption(pricingOption);
-  return PRICE_SUFFIX_MAP[normalizedPricingOption] ?? PRICE_SUFFIX_MAP.default;
+
+  switch (normalizedPricingOption) {
+    case "per-person":
+      return PRICE_SUFFIX_MAP["per-person"];
+    case "per-night":
+      return PRICE_SUFFIX_MAP["per-night"];
+    default:
+      return PRICE_SUFFIX_MAP.default;
+  }
+}
+
+function resolvePassengerPartyLabel(passengers: B2COfferRoomPassenger[] | undefined) {
+  const normalizedPassengers = Array.isArray(passengers) ? passengers : [];
+
+  if (!normalizedPassengers.length) {
+    return "за 2 взрослых";
+  }
+
+  const adultsCount = normalizedPassengers.filter((passenger) => Number(passenger?.passengerType) === 0).length;
+  const childrenCount = normalizedPassengers.length - adultsCount;
+  return formatPassengerPartyText({
+    adultsCount,
+    childrenCount,
+    prefix: "за ",
+    separator: " и "
+  });
+}
+
+function pluralizeByCount(value: number, forms: [string, string, string]) {
+  const normalizedValue = Math.abs(Number(value)) % 100;
+  const lastDigit = normalizedValue % 10;
+
+  if (normalizedValue > 10 && normalizedValue < 20) {
+    return forms[2];
+  }
+
+  if (lastDigit === 1) {
+    return forms[0];
+  }
+
+  if (lastDigit > 1 && lastDigit < 5) {
+    return forms[1];
+  }
+
+  return forms[2];
+}
+
+export function resolveOfferPartySuffix(
+  pricingOption: unknown,
+  passengers: B2COfferRoomPassenger[] | undefined
+) {
+  const normalizedPricingOption = normalizePricingOption(pricingOption);
+
+  if (normalizedPricingOption === "per-night") {
+    return PRICE_SUFFIX_MAP["per-night"];
+  }
+
+  return resolvePassengerPartyLabel(passengers);
+}
+
+export function formatPassengerPartyText(params: {
+  adultsCount?: number;
+  childrenCount?: number;
+  prefix?: string;
+  separator?: string;
+}) {
+  const {
+    adultsCount = 0,
+    childrenCount = 0,
+    prefix = "",
+    separator = ", "
+  } = params;
+  const parts: string[] = [];
+
+  if (adultsCount > 0) {
+    parts.push(`${adultsCount} ${pluralizeByCount(adultsCount, ["взрослый", "взрослых", "взрослых"])}`);
+  }
+
+  if (childrenCount > 0) {
+    parts.push(`${childrenCount} ${childrenCount === 1 ? "ребенка" : "детей"}`);
+  }
+
+  if (parts.length === 0) {
+    return `${prefix}2 взрослых`;
+  }
+
+  return `${prefix}${parts.join(separator)}`;
 }
 
 export function resolveOfferPriceValue(

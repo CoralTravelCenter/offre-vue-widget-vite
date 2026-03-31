@@ -117,8 +117,6 @@ export function useOffreOfferTerms(params: {
   });
 
   return {
-    mealType,
-    beginDate,
     terms
   };
 }
