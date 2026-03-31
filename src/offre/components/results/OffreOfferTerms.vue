@@ -30,7 +30,7 @@ const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
 <template>
   <ul
     v-if="terms.length"
-    class="offre-offer-terms m-0 flex list-none flex-wrap items-baseline gap-1 p-0 text-[12px] leading-[1.3] text-muted-foreground"
+    class="offre-offer-terms m-0 flex list-none flex-wrap items-baseline gap-1 p-0 text-muted-foreground"
   >
     <li
       v-for="term in terms"
@@ -45,3 +45,10 @@ const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
     </li>
   </ul>
 </template>
+
+<style scoped lang="scss">
+.offre-offer-terms {
+  font-size: var(--offre-text-meta);
+  line-height: var(--offre-leading-meta);
+}
+</style>

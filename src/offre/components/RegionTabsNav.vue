@@ -85,7 +85,7 @@ onMounted(async () => {
 						:key="tab.id"
 						:value="tab.id"
 						:data-region-id="tab.id"
-						class="region-tabs-nav__item shrink-0 rounded-3xl border border-[#F0F0F0] px-5 py-[9px] text-sm text-black data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-white"
+						class="region-tabs-nav__item shrink-0 rounded-3xl border px-5 text-sm text-black data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-white"
 				>
 					{{ tab.label }}
 				</TabsTrigger>
@@ -93,3 +93,11 @@ onMounted(async () => {
 		</div>
 	</Tabs>
 </template>
+
+<style scoped lang="scss">
+.region-tabs-nav__item {
+  border-color: var(--offre-color-chip-border);
+  padding-top: var(--offre-region-tab-padding-y);
+  padding-bottom: var(--offre-region-tab-padding-y);
+}
+</style>

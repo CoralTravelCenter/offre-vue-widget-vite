@@ -104,7 +104,7 @@ const starItems = computed(() => {
 </script>
 
 <template>
-  <article class="offre-offer-card flex h-full flex-col overflow-visible rounded-[20px] border border-border bg-white p-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_220px] lg:gap-4">
+  <article class="offre-offer-card flex h-full flex-col overflow-visible border border-border bg-white p-2">
     <div class="offre-offer-card__media relative">
       <a
         :href="offerHref"
@@ -116,24 +116,24 @@ const starItems = computed(() => {
           v-if="imageUrl"
           :src="imageUrl"
           :alt="hotelName"
-          class="offre-offer-card__image block h-50 w-full rounded-[12px] object-cover lg:h-full"
+          class="offre-offer-card__image block h-50 w-full object-cover"
         >
         <div
           v-else
-          class="offre-offer-card__image-placeholder h-50 w-full rounded-[12px] bg-muted lg:h-full"
+          class="offre-offer-card__image-placeholder h-50 w-full bg-muted"
         />
       </a>
 
       <div class="offre-offer-card__badges absolute left-2.5 top-2.5 flex flex-col gap-2">
         <Badge
           v-if="isRecommended"
-          class="offre-offer-card__badge offre-offer-card__badge--recommended rounded-[12px] border-transparent bg-white px-2 py-1 text-[12px] font-normal leading-none text-black"
+          class="offre-offer-card__badge offre-offer-card__badge--recommended border-transparent bg-white px-2 py-1 font-normal leading-none text-black"
         >
           Рекомендуем
         </Badge>
         <Badge
           v-if="isExclusive"
-          class="offre-offer-card__badge offre-offer-card__badge--exclusive rounded-[12px] border-transparent bg-[#E84F0E] px-2 py-1 text-[12px] font-normal leading-none text-primary-foreground"
+          class="offre-offer-card__badge offre-offer-card__badge--exclusive border-transparent px-2 py-1 font-normal leading-none text-primary-foreground"
         >
           Эксклюзив
         </Badge>
@@ -143,7 +143,7 @@ const starItems = computed(() => {
     <div class="offre-offer-card__body min-w-0 py-2">
       <div
         v-if="locationLabel"
-        class="offre-offer-card__location mb-1 inline-flex self-start text-[12px] font-light leading-[1.3] text-muted-foreground"
+        class="offre-offer-card__location mb-1 inline-flex self-start font-light text-muted-foreground"
       >
         <MapPinIcon class="offre-offer-card__location-icon mb-0.5 mr-1 h-3.5 w-3 shrink-0"/>
         <span class="offre-offer-card__location-text truncate">{{ locationLabel }}</span>
@@ -157,10 +157,10 @@ const starItems = computed(() => {
       >
         <h3
           :class="[
-            'offre-offer-card__title m-0 break-words text-[20px] text-foreground',
+            'offre-offer-card__title m-0 break-words text-foreground',
             isEliteHotel
-              ? 'font-normal leading-[1.2] tracking-[0.015em]'
-              : 'font-bold leading-[1.2]'
+              ? 'font-normal tracking-[0.015em]'
+              : 'font-bold'
           ]"
         >
           {{ hotelName }}
@@ -175,12 +175,12 @@ const starItems = computed(() => {
           <StarIcon
             v-for="(isFilled, index) in starItems"
             :key="`hotel-star-${index}`"
-            :class="isFilled ? 'offre-offer-card__star h-5 w-5 fill-current text-[#FADB14]' : 'offre-offer-card__star h-5 w-5 text-border'"
+            :class="isFilled ? 'offre-offer-card__star offre-offer-card__star--filled h-5 w-5 fill-current' : 'offre-offer-card__star h-5 w-5 text-border'"
           />
         </div>
         <span
           v-else-if="hotelCategoryName"
-          class="offre-offer-card__category text-[14px] text-[#FADB14]"
+          class="offre-offer-card__category"
         >
           {{ hotelCategoryName }}
         </span>
@@ -191,14 +191,14 @@ const starItems = computed(() => {
         >
           <Badge
             v-if="isEliteHotel"
-            class="offre-offer-card__label offre-offer-card__label--elite inline-grid h-6 place-content-center rounded-[6px] border-transparent bg-black px-3 text-[12px] font-light leading-none text-white"
+            class="offre-offer-card__label offre-offer-card__label--elite inline-grid h-6 place-content-center border-transparent bg-black px-3 font-light leading-none text-white"
           >
             Elite Service
           </Badge>
 
           <Badge
             v-if="hasFamilyClub"
-            class="offre-offer-card__label offre-offer-card__label--family inline-grid h-6 place-content-center rounded-[6px] border-transparent bg-accent px-3 text-[12px] font-light leading-none text-accent-foreground"
+            class="offre-offer-card__label offre-offer-card__label--family inline-grid h-6 place-content-center border-transparent bg-accent px-3 font-light leading-none text-accent-foreground"
           >
             Family Club
           </Badge>
@@ -212,7 +212,7 @@ const starItems = computed(() => {
 
       <ul
         v-if="hotelUsps.length"
-        class="offre-offer-card__usp-list mt-2 grid max-h-34.25 list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-border pt-2 text-[14px] text-foreground/80"
+        class="offre-offer-card__usp-list mt-2 grid max-h-34.25 list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-border pt-2 text-foreground/80"
       >
         <li
           v-for="usp in hotelUsps"
@@ -240,3 +240,58 @@ const starItems = computed(() => {
     />
   </article>
 </template>
+
+<style scoped lang="scss">
+.offre-offer-card {
+  border-radius: var(--offre-radius-card);
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 220px;
+    gap: 16px;
+  }
+}
+
+.offre-offer-card__image,
+.offre-offer-card__image-placeholder {
+  border-radius: var(--offre-radius-media);
+
+  @media (min-width: 1024px) {
+    height: 100%;
+  }
+}
+
+.offre-offer-card__badge {
+  border-radius: var(--offre-radius-media);
+  font-size: var(--offre-text-meta);
+}
+
+.offre-offer-card__badge--exclusive {
+  background: var(--offre-color-exclusive);
+}
+
+.offre-offer-card__location {
+  font-size: var(--offre-text-meta);
+  line-height: var(--offre-leading-meta);
+}
+
+.offre-offer-card__title {
+  font-size: var(--offre-text-title);
+  line-height: var(--offre-leading-title);
+}
+
+.offre-offer-card__star--filled,
+.offre-offer-card__category {
+  color: var(--offre-color-star);
+}
+
+.offre-offer-card__category,
+.offre-offer-card__usp-list {
+  font-size: var(--offre-text-body);
+}
+
+.offre-offer-card__label {
+  border-radius: var(--offre-radius-segment);
+  font-size: var(--offre-text-meta);
+}
+</style>

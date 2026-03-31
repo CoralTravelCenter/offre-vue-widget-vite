@@ -14,19 +14,20 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="offre-city-select flex-1 lg:w-[150px] lg:flex-none">
+  <div class="offre-city-select flex-1">
     <Select v-model="modelValue" :disabled="disabled">
       <SelectTrigger
-          class="offre-city-select__trigger w-full rounded-lg border text-sm">
+        class="offre-city-select__trigger w-full rounded-lg border text-sm"
+      >
         <SelectValue :placeholder="placeholder"/>
       </SelectTrigger>
       <SelectContent :body-lock="false" class="offre-city-select__content rounded-lg">
         <SelectItem
-            v-for="option in options"
-            :key="option.id"
-            :value="option.id"
-            :text-value="option.label"
-            class="offre-city-select__item"
+          v-for="option in options"
+          :key="option.id"
+          :value="option.id"
+          :text-value="option.label"
+          class="offre-city-select__item"
         >
           {{ option.label }}
         </SelectItem>
@@ -35,9 +36,14 @@ defineProps<Props>()
   </div>
 </template>
 
-<style scoped>
-@media (min-width: 1280px) {
-  .offre-city-select {
+<style scoped lang="scss">
+.offre-city-select {
+  @media (min-width: 1024px) {
+    width: 150px;
+    flex: none;
+  }
+
+  @media (min-width: 1280px) {
     width: 180px;
     flex: none;
   }

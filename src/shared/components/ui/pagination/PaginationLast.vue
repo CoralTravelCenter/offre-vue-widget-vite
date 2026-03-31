@@ -22,12 +22,26 @@ const forwarded = useForwardProps(delegatedProps)
 <template>
   <PaginationLast
     data-slot="pagination-last"
-    :class="cn(buttonVariants({ variant: 'ghost', size }), 'gap-1 px-2.5 sm:pr-2.5', props.class)"
+    :class="cn('pagination-last gap-1 px-2.5', buttonVariants({ variant: 'ghost', size }), props.class)"
     v-bind="forwarded"
   >
     <slot>
-      <span class="hidden sm:block">Last</span>
+      <span class="pagination-last__label hidden">Last</span>
       <ChevronRightIcon />
     </slot>
   </PaginationLast>
 </template>
+
+<style scoped lang="scss">
+.pagination-last {
+  @media (min-width: 640px) {
+    padding-right: 0.625rem;
+  }
+}
+
+.pagination-last__label {
+  @media (min-width: 640px) {
+    display: block;
+  }
+}
+</style>

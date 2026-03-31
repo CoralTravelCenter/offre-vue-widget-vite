@@ -36,7 +36,7 @@ const selectedValue = computed({
       <TabsTrigger
         v-if="!isHotelOnly"
         value="package"
-        class="offre-tour-type-tabs__trigger inline-flex items-center justify-center rounded-l-[6px] rounded-r-none border border-[#D9D9D9] bg-white px-[18px] py-[5px] text-[14px] font-normal leading-[22px] text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary"
+        class="offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--package inline-flex items-center justify-center border bg-white font-normal text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary"
       >
         Пакетный тур
       </TabsTrigger>
@@ -44,8 +44,8 @@ const selectedValue = computed({
       <TabsTrigger
         value="hotel"
         :class="[
-          'offre-tour-type-tabs__trigger inline-flex items-center justify-center rounded-r-[6px] rounded-l-none border border-[#D9D9D9] bg-white px-[18px] py-[5px] text-[14px] font-normal leading-[22px] text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary',
-          props.isHotelOnly ? 'col-span-2 rounded-[6px]' : '-ml-px'
+          'offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--hotel inline-flex items-center justify-center border bg-white font-normal text-foreground transition-colors hover:text-primary data-[state=active]:z-10 data-[state=active]:border-primary data-[state=active]:text-primary',
+          props.isHotelOnly ? 'offre-tour-type-tabs__trigger--single col-span-2' : '-ml-px'
         ]"
       >
         Только отель
@@ -53,3 +53,24 @@ const selectedValue = computed({
     </TabsList>
   </Tabs>
 </template>
+
+<style scoped lang="scss">
+.offre-tour-type-tabs__trigger {
+  border-color: var(--offre-color-control-border);
+  padding: var(--offre-control-padding-y) var(--offre-control-padding-x);
+  font-size: var(--offre-text-control);
+  line-height: var(--offre-leading-control);
+}
+
+.offre-tour-type-tabs__trigger--package {
+  border-radius: var(--offre-radius-segment) 0 0 var(--offre-radius-segment);
+}
+
+.offre-tour-type-tabs__trigger--hotel {
+  border-radius: 0 var(--offre-radius-segment) var(--offre-radius-segment) 0;
+}
+
+.offre-tour-type-tabs__trigger--single {
+  border-radius: var(--offre-radius-segment);
+}
+</style>

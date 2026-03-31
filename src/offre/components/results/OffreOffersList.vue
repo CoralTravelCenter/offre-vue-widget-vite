@@ -29,7 +29,7 @@ const normalizedProducts = computed(() => {
 </script>
 
 <template>
-  <section class="offre-offers-list grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1">
+  <section class="offre-offers-list grid grid-cols-1 gap-4">
     <OffreOfferCard
       v-for="entry in normalizedProducts"
       :key="entry.key"
@@ -44,3 +44,11 @@ const normalizedProducts = computed(() => {
     />
   </section>
 </template>
+
+<style scoped lang="scss">
+.offre-offers-list {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>

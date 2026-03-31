@@ -55,6 +55,35 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
+    --offre-color-warning: #fff1cc;
+    --offre-color-discount: #52c41a;
+    --offre-color-exclusive: #e84f0e;
+    --offre-color-star: #fadb14;
+    --offre-color-control-border: #d9d9d9;
+    --offre-color-chip-border: #f0f0f0;
+    --offre-radius-badge: 4px;
+    --offre-radius-segment: 6px;
+    --offre-radius-button: 8px;
+    --offre-radius-media: 12px;
+    --offre-radius-card: 20px;
+    --offre-text-caption: 10px;
+    --offre-text-meta: 12px;
+    --offre-text-body: 14px;
+    --offre-text-button: 16px;
+    --offre-text-title: 20px;
+    --offre-text-price: 24px;
+    --offre-text-control: 14px;
+    --offre-leading-meta: 1.3;
+    --offre-leading-title: 1.2;
+    --offre-leading-button: 1.3;
+    --offre-leading-control: 22px;
+    --offre-control-padding-x: 18px;
+    --offre-control-padding-y: 5px;
+    --offre-region-tab-padding-y: 9px;
+    --offre-shadow-popover: 0 10px 30px rgba(15, 23, 42, 0.16);
+    --offre-border-popover-row: rgba(204, 214, 228, 0.6);
+    --offre-glow-bonus-strong: rgba(0, 147, 208, 0.3);
+    --offre-glow-bonus-soft: rgba(0, 147, 208, 0.24);
 }
 
 .dark {
@@ -108,6 +137,35 @@
     --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
     --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --offre-color-warning: #fff1cc;
+    --offre-color-discount: #52c41a;
+    --offre-color-exclusive: #e84f0e;
+    --offre-color-star: #fadb14;
+    --offre-color-control-border: #d9d9d9;
+    --offre-color-chip-border: #f0f0f0;
+    --offre-radius-badge: 4px;
+    --offre-radius-segment: 6px;
+    --offre-radius-button: 8px;
+    --offre-radius-media: 12px;
+    --offre-radius-card: 20px;
+    --offre-text-caption: 10px;
+    --offre-text-meta: 12px;
+    --offre-text-body: 14px;
+    --offre-text-button: 16px;
+    --offre-text-title: 20px;
+    --offre-text-price: 24px;
+    --offre-text-control: 14px;
+    --offre-leading-meta: 1.3;
+    --offre-leading-title: 1.2;
+    --offre-leading-button: 1.3;
+    --offre-leading-control: 22px;
+    --offre-control-padding-x: 18px;
+    --offre-control-padding-y: 5px;
+    --offre-region-tab-padding-y: 9px;
+    --offre-shadow-popover: 0 10px 30px rgba(15, 23, 42, 0.16);
+    --offre-border-popover-row: rgba(204, 214, 228, 0.6);
+    --offre-glow-bonus-strong: rgba(0, 147, 208, 0.3);
+    --offre-glow-bonus-soft: rgba(0, 147, 208, 0.24);
 }
 
 @theme inline {
