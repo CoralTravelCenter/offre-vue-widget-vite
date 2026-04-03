@@ -48,10 +48,7 @@ watch(
   () => [props.adultsCount, props.childrenAges] as const,
   () => {
     syncAppliedStateFromProps();
-
-    if (!isOpen.value) {
-      syncDraftStateFromApplied();
-    }
+    syncDraftStateFromApplied();
   },
   {immediate: true, deep: true}
 );
@@ -102,8 +99,6 @@ function applyDraft() {
 }
 
 function resetToInitial() {
-  syncAppliedStateFromProps();
-  syncDraftStateFromApplied();
   emit("reset");
 }
 </script>
@@ -125,8 +120,9 @@ function resetToInitial() {
 
     <PopoverContent
       side="top"
-      align="center"
+      align="end"
       class="offre-offer-guests-control__popover w-[min(300px,calc(100vw-32px))] rounded-xl border bg-white p-3"
+      :style="{ borderColor: 'var(--offre-color-chip-border)' }"
     >
       <div class="offre-offer-guests-control__layout">
         <div class="offre-offer-guests-control__header">
@@ -358,6 +354,10 @@ function resetToInitial() {
 
 .offre-offer-guests-control__primary {
   border-radius: var(--offre-radius-segment);
+  height: 40px;
+  min-height: 40px;
+  padding-bottom: 0;
+  padding-top: 0;
 }
 
 .offre-offer-guests-control__primary {

@@ -150,7 +150,7 @@ export function formatPassengerPartyText(params: {
   const parts: string[] = [];
 
   if (adultsCount > 0) {
-    parts.push(`${adultsCount} ${pluralizeByCount(adultsCount, ["взрослый", "взрослых", "взрослых"])}`);
+    parts.push(`${adultsCount} ${pluralizeByCount(adultsCount, ["взрослого", "взрослых", "взрослых"])}`);
   }
 
   if (childrenCount > 0) {

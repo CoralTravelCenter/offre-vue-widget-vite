@@ -75,7 +75,7 @@ function increment() {
   align-items: center;
   background: transparent;
   border: 1px solid var(--offre-color-control-border);
-  border-radius: 999px;
+  border-radius: 8px;
   color: #262626;
   cursor: pointer;
   display: inline-flex;

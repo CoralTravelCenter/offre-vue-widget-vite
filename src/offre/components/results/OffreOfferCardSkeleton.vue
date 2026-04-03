@@ -196,17 +196,20 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__aside {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     margin-top: auto;
     padding-top: 6px;
     position: relative;
+    width: 100%;
   }
 
   &__tour-type {
     display: grid;
     gap: 8px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 
   &__tour-type-item {
@@ -220,6 +223,7 @@ import {Skeleton} from "ui/skeleton";
     min-height: 84px;
     padding-right: 96px;
     position: relative;
+    width: 100%;
   }
 
   &__old-price {
@@ -327,7 +331,7 @@ import {Skeleton} from "ui/skeleton";
     align-items: start;
     display: grid;
     gap: 16px;
-    grid-template-columns: minmax(0, 320px) minmax(0, 1fr) minmax(0, 300px);
+    grid-template-columns: 240px minmax(0, 1fr) 320px;
 
     &__body {
       padding: 0;
@@ -336,13 +340,65 @@ import {Skeleton} from "ui/skeleton";
     &__media,
     &__image {
       height: 100%;
-      min-height: 260px;
+      min-height: 240px;
     }
 
     &__aside {
       align-self: stretch;
+      border-left: 1px solid #e5e7eb;
+      justify-content: space-between;
+      min-height: 100%;
+      padding-left: 12px;
       padding-top: 0;
+      width: 100%;
     }
+
+    &__tour-type {
+      gap: 0;
+    }
+
+    &__tour-type-item {
+      height: 40px;
+    }
+
+    &__pricing {
+      min-height: 104px;
+      padding-right: 104px;
+      width: 100%;
+    }
+
+    &__old-price {
+      width: 28%;
+    }
+
+    &__current-price {
+      height: 40px;
+      margin-top: 8px;
+      width: 78%;
+    }
+
+    &__price-note {
+      margin-top: 2px;
+      width: 34%;
+    }
+
+    &__discount {
+      height: 28px;
+      right: -8px;
+      width: 88px;
+    }
+
+    &__cashback {
+      height: 50px;
+    }
+
+    &__button {
+      height: 48px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
   }
 }
 </style>

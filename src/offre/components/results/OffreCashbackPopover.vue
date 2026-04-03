@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { ref } from "vue";
 import { useEventListener } from "@vueuse/core";
-import { useViewportBreakpoints } from "app/composables/useViewportBreakpoints";
 import OffreCashbackBanner from "offre/components/results/OffreCashbackBanner.vue";
 import type { CoralBonusInfo } from "offre/lib/coral-bonus";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
@@ -12,92 +11,19 @@ interface Props {
 
 defineProps<Props>();
 
-const { isLg, isXl, isXXL } = useViewportBreakpoints();
-const isDesktopPopoverHoverMode = computed(() => {
-  return isLg.value || isXl.value || isXXL.value;
-});
 const isCashbackPopoverOpen = ref(false);
-let cashbackPopoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
-function clearCashbackPopoverCloseTimer() {
-  if (!cashbackPopoverCloseTimer) {
-    return;
-  }
-
-  clearTimeout(cashbackPopoverCloseTimer);
-  cashbackPopoverCloseTimer = null;
-}
-
-function openCashbackPopover() {
-  clearCashbackPopoverCloseTimer();
-  isCashbackPopoverOpen.value = true;
-}
-
-function scheduleCashbackPopoverClose() {
-  clearCashbackPopoverCloseTimer();
-  cashbackPopoverCloseTimer = setTimeout(() => {
-    isCashbackPopoverOpen.value = false;
-    cashbackPopoverCloseTimer = null;
-  }, 100);
-}
 
 function handleCashbackPopoverOpenChange(nextOpen: boolean) {
   isCashbackPopoverOpen.value = nextOpen;
 }
-
-function handleCashbackTriggerEnter() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  openCashbackPopover();
-}
-
-function handleCashbackTriggerLeave() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  scheduleCashbackPopoverClose();
-}
-
-function handleCashbackContentEnter() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  openCashbackPopover();
-}
-
-function handleCashbackContentLeave() {
-  if (!isDesktopPopoverHoverMode.value) {
-    return;
-  }
-
-  scheduleCashbackPopoverClose();
-}
-
-watch(isDesktopPopoverHoverMode, (isDesktop) => {
-  if (isDesktop) {
-    return;
-  }
-
-  clearCashbackPopoverCloseTimer();
-  isCashbackPopoverOpen.value = false;
-});
 
 useEventListener("scroll", () => {
   if (!isCashbackPopoverOpen.value) {
     return;
   }
 
-  clearCashbackPopoverCloseTimer();
   isCashbackPopoverOpen.value = false;
 }, { passive: true, capture: true });
-
-onBeforeUnmount(() => {
-  clearCashbackPopoverCloseTimer();
-});
 </script>
 
 <template>
@@ -110,8 +36,6 @@ onBeforeUnmount(() => {
         type="button"
         class="offre-cashback-popover m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-inherit outline-none hover:brightness-[0.98] active:brightness-[0.95]"
         aria-label="Показать условия кешбэка CoralBonus"
-        @mouseenter="handleCashbackTriggerEnter"
-        @mouseleave="handleCashbackTriggerLeave"
       >
         <OffreCashbackBanner
           :amount-label="cashbackInfo.finalBonusLabel"
@@ -124,8 +48,6 @@ onBeforeUnmount(() => {
       side="top"
       align="center"
       class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-white px-3 py-0"
-      @mouseenter="handleCashbackContentEnter"
-      @mouseleave="handleCashbackContentLeave"
     >
       <div class="offre-cashback-popover__body text-foreground">
         <div class="offre-cashback-popover__list flex flex-col font-semibold">
