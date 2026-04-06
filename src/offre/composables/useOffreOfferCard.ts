@@ -1,6 +1,7 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "offre/api/types";
 import {
+  stripEnglishBracketFragments,
   resolveHotelImageUrl,
   resolveOfferHref
 } from "offre/lib/product-offer";
@@ -11,24 +12,6 @@ import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
 interface OffreOfferCardHotelCategory {
   name?: string;
   starCount?: number;
-}
-
-function stripEnglishBracketFragments(value: string | undefined) {
-  const source = String(value ?? "").trim();
-
-  if (!source) {
-    return "";
-  }
-
-  const normalized = source
-    .replace(/\s*\(([A-Za-z0-9\s.'&,/+-]+)\)\s*/g, " ")
-    .replace(/\s*,\s*/g, ", ")
-    .replace(/,\s*,+/g, ", ")
-    .replace(/^,\s*|\s*,\s*$/g, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-
-  return normalized || source;
 }
 
 function getReferenceRecord<TValue extends object>(

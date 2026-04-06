@@ -36,6 +36,24 @@ function normalizePriceValue(value: number | string | undefined) {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+export function stripEnglishBracketFragments(value: string | undefined) {
+  const source = String(value ?? "").trim();
+
+  if (!source) {
+    return "";
+  }
+
+  const normalized = source
+    .replace(/\s*\(([A-Za-z0-9\s.'&,/+-]+)\)\s*/g, " ")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/,\s*,+/g, ", ")
+    .replace(/^,\s*|\s*,\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return normalized || source;
+}
+
 export function normalizePricingOption(value: unknown): PricingOption {
   const extractedValue = (
     value && typeof value === "object"

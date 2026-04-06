@@ -16,6 +16,8 @@ import { offreQueryPersisters } from "offre/query/persister";
 import type { OffreHotelRuntimeEntry } from "offre/types";
 import { stableStringify } from "shared/lib/stable-stringify";
 
+const PRODUCTS_QUERY_CONCURRENCY = 6;
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -70,6 +72,39 @@ function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
+async function runConcurrentSettledTasks<TValue>(
+  tasks: Array<() => Promise<TValue>>,
+  concurrency: number
+) {
+  const results: Array<PromiseSettledResult<TValue>> = new Array(tasks.length);
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < tasks.length) {
+      const taskIndex = cursor;
+      cursor += 1;
+
+      try {
+        results[taskIndex] = {
+          status: "fulfilled",
+          value: await tasks[taskIndex]()
+        };
+      } catch (error) {
+        results[taskIndex] = {
+          status: "rejected",
+          reason: error
+        };
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(Math.max(concurrency, 1), tasks.length || 1) }, () => worker())
+  );
+
+  return results;
+}
+
 export function useOffreProductsQuery(params: {
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>;
   hotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
@@ -103,12 +138,12 @@ export function useOffreProductsQuery(params: {
       const products: NonNullable<B2CPriceSearchResult["products"]> = [];
       const reference: B2CPriceSearchReference = {};
       let failedQueries = 0;
-
-      const responses = await Promise.allSettled(productQueryDescriptors.value.map((descriptor) => {
-        return descriptor.onlyhotel
+      const tasks = productQueryDescriptors.value.map((descriptor) => {
+        return () => descriptor.onlyhotel
           ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
           : packagePriceSearchList(descriptor.searchCriterias, { signal });
-      }));
+      });
+      const responses = await runConcurrentSettledTasks(tasks, PRODUCTS_QUERY_CONCURRENCY);
 
       for (const response of responses) {
         if (response.status === "rejected") {

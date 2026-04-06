@@ -21,12 +21,12 @@ const props = withDefaults(defineProps<Props>(), {
 const visibleTabs = computed(() => props.tabs.filter((tab) => !tab.disabled));
 const availableTabIds = computed(() => visibleTabs.value.map((tab) => tab.id));
 
-const shellRef = ref<HTMLElement | null>(null);
+const rootRef = ref<HTMLElement | null>(null);
 const scrollerRef = ref<HTMLElement | null>(null);
 const hasInitialScrollSync = ref(false);
 
 function syncScrollerElement() {
-	scrollerRef.value = shellRef.value?.querySelector<HTMLElement>("[data-slot='tabs-list']") ?? null;
+	scrollerRef.value = rootRef.value?.querySelector<HTMLElement>("[data-slot='tabs-list']") ?? null;
 }
 
 function scrollToValue(value: string, behavior: ScrollBehavior = "smooth") {
@@ -71,14 +71,14 @@ onMounted(async () => {
 
 <template>
 	<RegionTabsNavSkeleton v-if="isLoading"/>
-	<Tabs v-else v-model="modelValue" class="region-tabs-nav">
-		<div
-				ref="shellRef"
-				class="region-tabs-nav__shell min-w-0"
-		>
+	<div v-else ref="rootRef" class="region-tabs-nav min-w-0">
+		<Tabs
+      v-model="modelValue"
+      class="min-w-0"
+    >
 			<TabsList
 					:aria-label="ariaLabel"
-					class="region-tabs-nav__list offre-scroll-no-bar offre-scroll-snap-x flex w-full items-center justify-start gap-2 overflow-x-auto bg-white"
+					class="region-tabs-nav__list offre-scroll-no-bar offre-scroll-snap-x flex w-full items-center justify-start gap-2 overflow-x-auto bg-transparent"
 			>
 				<TabsTrigger
 						v-for="tab in visibleTabs"
@@ -90,11 +90,15 @@ onMounted(async () => {
 					{{ tab.label }}
 				</TabsTrigger>
 			</TabsList>
-		</div>
-	</Tabs>
+		</Tabs>
+	</div>
 </template>
 
 <style scoped lang="scss">
+.region-tabs-nav__list {
+  background-color: transparent;
+}
+
 .region-tabs-nav__item {
   border-color: var(--offre-color-chip-border);
   color: inherit;

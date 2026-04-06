@@ -7,9 +7,11 @@ import ViewModeSwitch from "offre/components/controls/ViewModeSwitch.vue";
 import RegionTabsNav from "offre/components/RegionTabsNav.vue";
 import OffreOffersList from "offre/components/results/OffreOffersList.vue";
 import OffreOffersListSkeleton from "offre/components/results/OffreOffersListSkeleton.vue";
-import type { B2CRoomCriteria } from "offre/api/types";
+import OffreMapViewSkeleton from "offre/components/results/OffreMapViewSkeleton.vue";
+import OffreMapView from "offre/components/results/OffreMapView.vue";
 import {useOffreFiltersQueryState} from "offre/composables/useOffreFiltersQueryState";
 import {useOffreProductsQuery} from "offre/composables/useOffreProductsQuery";
+import {useOffreWidgetUiState} from "offre/composables/useOffreWidgetUiState";
 import {useOffreWidgetListState} from "offre/composables/useOffreWidgetListState";
 import {getWidgetHotelId} from "offre/lib/payload";
 import type {OffreWidgetRootProps} from "shared/types/widget";
@@ -32,21 +34,6 @@ const TABLET_TOP_OFFSET = 57;
 const MOBILE_TOP_OFFSET = 74;
 const PAGINATION_DESKTOP_BREAKPOINT = "(min-width: 768px)";
 const PRODUCTS_PAGE_SIZE = 5;
-
-function resolveInitialGuestsState(roomCriterias: B2CRoomCriteria[] | undefined) {
-  const passengers = roomCriterias?.[0]?.passengers ?? [
-    { age: 20, passengerType: 0 },
-    { age: 20, passengerType: 0 }
-  ];
-
-  return {
-    adultsCount: passengers.filter((passenger) => Number(passenger.passengerType) === 0).length || 2,
-    childrenAges: passengers
-      .filter((passenger) => Number(passenger.passengerType) !== 0)
-      .map((passenger) => Number(passenger.age))
-      .filter((age) => Number.isFinite(age))
-  };
-}
 
 const props = withDefaults(defineProps<OffreWidgetRootProps>(), {
   options: () => ({}),
@@ -71,35 +58,6 @@ const {
     () => props.options,
     () => props.hotelsList
 );
-const selectedGuests = ref(resolveInitialGuestsState(options.value.roomCriterias));
-const selectedRoomCriterias = computed<B2CRoomCriteria[]>(() => {
-  return [{
-    passengers: [
-      ...Array.from({ length: selectedGuests.value.adultsCount }, () => ({
-        age: 20,
-        passengerType: 0
-      })),
-      ...selectedGuests.value.childrenAges.map((age) => ({
-        age,
-        passengerType: 1
-      }))
-    ]
-  }];
-});
-const effectiveSearchOptions = computed(() => ({
-  ...options.value,
-  roomCriterias: selectedRoomCriterias.value
-}));
-const guestsFilterKey = computed(() => JSON.stringify(selectedGuests.value));
-
-watch(
-  () => options.value.roomCriterias,
-  (nextRoomCriterias) => {
-    selectedGuests.value = resolveInitialGuestsState(nextRoomCriterias);
-  },
-  { immediate: true }
-);
-
 const hotelOrderById = computed(() => {
   return props.hotelsList.reduce<Map<string, number>>((accumulator, hotelEntry, index) => {
     const hotelId = getWidgetHotelId(hotelEntry);
@@ -110,6 +68,16 @@ const hotelOrderById = computed(() => {
 
     return accumulator;
   }, new Map<string, number>());
+});
+
+const {
+  selectedGuests,
+  effectiveSearchOptions,
+  guestsFilterKey,
+  handleGuestsApply,
+  handleGuestsReset
+} = useOffreWidgetUiState({
+  optionsSource: options
 });
 
 const {
@@ -157,8 +125,7 @@ function resolveNavigationTopOffset() {
 
 const navigationStickyOptions = computed(() => ({
   top: resolveNavigationTopOffset(),
-  bottom: STICKY_BOTTOM_OFFSET,
-  side: "both",
+  side: "top",
   zIndex: CONTROLS_STICKY_Z_INDEX
 }));
 
@@ -167,6 +134,7 @@ const paginationSiblingCount = computed(() => {
   return isPaginationDesktop.value ? 1 : 0;
 });
 const paginationShowEdges = computed(() => true);
+const hasActivatedMapView = ref(false);
 const hotelRuntimeById = computed(() => {
   return matchedHotelsDirectory.value.reduce<Map<string, typeof matchedHotelsDirectory.value[number]>>((accumulator, hotel) => {
     accumulator.set(String(hotel.id), hotel);
@@ -191,50 +159,52 @@ const {
   pageSize: PRODUCTS_PAGE_SIZE
 });
 
-function handleGuestsApply(value: { adultsCount: number; childrenAges: number[] }) {
-  selectedGuests.value = {
-    adultsCount: value.adultsCount,
-    childrenAges: [...value.childrenAges].sort((left, right) => left - right)
-  };
-}
+watch(viewMode, (nextValue) => {
+  if (nextValue === "map") {
+    hasActivatedMapView.value = true;
+  }
+}, { immediate: true });
 
-function handleGuestsReset() {
-  selectedGuests.value = resolveInitialGuestsState(options.value.roomCriterias);
-}
+const mapViewKey = computed(() => {
+  return [
+    activeRegionId.value ?? "",
+    selectedDepartureId.value ?? "",
+    selectedTimeframe.value ?? "",
+    guestsFilterKey.value
+  ].join("|");
+});
 </script>
 
 <template>
   <div class="offre-widget-container">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation-shell overflow-clip rounded-2xl"
+        class="offre-widget-navigation bg-white py-2"
     >
-      <div class="offre-widget-navigation bg-white py-2">
-        <RegionTabsNav
-            :model-value="activeRegionId"
-            :isLoading="regionsLoading"
-            :tabs="regionTabs"
-            class="offre-widget-navigation__tabs nav"
-            @update:model-value="setActiveRegion"
-        />
-        <OffreControls
-            v-model:selected-departure-id="selectedDepartureId"
-            v-model:selected-timeframe="selectedTimeframe"
-            :adults-count="selectedGuests.adultsCount"
-            :children-ages="selectedGuests.childrenAges"
-            :departures="departures"
-            :departures-loading="departuresLoading"
-            :timeframe-options="timeframeOptions"
-            :timeframes-loading="regionsLoading"
-            @apply-guests="handleGuestsApply"
-            @reset-guests="handleGuestsReset"
-        />
-        <ViewModeSwitch v-model="viewMode"/>
-      </div>
+      <RegionTabsNav
+          :model-value="activeRegionId"
+          :isLoading="regionsLoading"
+          :tabs="regionTabs"
+          class="offre-widget-navigation__tabs nav"
+          @update:model-value="setActiveRegion"
+      />
+      <OffreControls
+          v-model:selected-departure-id="selectedDepartureId"
+          v-model:selected-timeframe="selectedTimeframe"
+          :adults-count="selectedGuests.adultsCount"
+          :children-ages="selectedGuests.childrenAges"
+          :departures="departures"
+          :departures-loading="departuresLoading"
+          :timeframe-options="timeframeOptions"
+          :timeframes-loading="regionsLoading"
+          @apply-guests="handleGuestsApply"
+          @reset-guests="handleGuestsReset"
+      />
+      <ViewModeSwitch v-model="viewMode"/>
     </div>
 
     <div
-        v-if="viewMode === 'list'"
+        v-show="viewMode === 'list'"
         class="offre-widget-results mt-4"
     >
       <div
@@ -325,10 +295,21 @@ function handleGuestsReset() {
     </div>
 
     <div
-        v-else
-        class="offre-widget-state offre-widget-state--map mt-4 rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+        v-if="hasActivatedMapView"
+        v-show="viewMode === 'map'"
+        class="offre-widget-results mt-4"
     >
-      Режим карты пока не подключен
+      <OffreMapViewSkeleton
+          v-if="requestState === 'loading'"
+      />
+
+      <OffreMapView
+          v-else
+          :key="mapViewKey"
+          :products="productsList"
+          :pricing-mode="effectiveSearchOptions.pricing"
+          :search-options="effectiveSearchOptions"
+      />
     </div>
   </div>
 </template>
@@ -344,11 +325,9 @@ function handleGuestsReset() {
   padding-right: 16px;
 }
 
-.offre-widget-navigation-shell {
-  transition: box-shadow 0.2s ease;
-}
-
 .offre-widget-navigation {
+  background-color: #fff;
+  border-radius: 16px;
   display: grid;
   grid-template-columns: 1fr min-content;
   gap: 8px;
@@ -356,6 +335,7 @@ function handleGuestsReset() {
   grid-template-areas:
     "nav nav"
     "inputs switcher";
+  transition: box-shadow 0.2s ease;
 }
 
 @media (min-width: 1024px) {
@@ -366,7 +346,7 @@ function handleGuestsReset() {
   }
 }
 
-.offre-widget-navigation-shell.sticked {
+.offre-widget-navigation.sticked {
   box-shadow: 0 0 14px rgba(0, 0, 0, 0.14);
 }
 

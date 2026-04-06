@@ -4,18 +4,12 @@ import {UsersIcon} from "lucide-vue-next";
 import OffreOfferGuestsStepper from "offre/components/results/OffreOfferGuestsStepper.vue";
 import {Button} from "ui/button";
 import {Popover, PopoverContent, PopoverTrigger} from "ui/popover";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "ui/select";
 
 interface Props {
   adultsCount?: number;
   childrenAges?: number[];
   disabled?: boolean;
 }
-
-const CHILD_AGE_OPTIONS = Array.from({length: 18}, (_, index) => ({
-  label: `${index} ${index === 1 ? "год" : (index > 1 && index < 5 ? "года" : "лет")}`,
-  value: String(index)
-}));
 
 const props = withDefaults(defineProps<Props>(), {
   adultsCount: 2,
@@ -76,15 +70,13 @@ function updateChildrenCount(delta: number) {
   draftChildrenAges.value = [...draftChildrenAges.value, 7];
 }
 
-function updateChildAge(index: number, value: string) {
-  const nextValue = Number(value);
-
-  if (!Number.isFinite(nextValue)) {
-    return;
-  }
-
+function updateChildAge(index: number, value: number) {
   draftChildrenAges.value = draftChildrenAges.value.map((age, ageIndex) => {
-    return ageIndex === index ? nextValue : age;
+    if (ageIndex !== index) {
+      return age;
+    }
+
+    return Math.max(0, Math.min(17, value));
   });
 }
 
@@ -122,7 +114,7 @@ function resetToInitial() {
       side="top"
       align="end"
       class="offre-offer-guests-control__popover w-[min(300px,calc(100vw-32px))] rounded-xl border bg-white p-3"
-      :style="{ borderColor: 'var(--offre-color-chip-border)' }"
+      :style="{ borderColor: 'var(--offre-color-chip-border)', boxShadow: 'none' }"
     >
       <div class="offre-offer-guests-control__layout">
         <div class="offre-offer-guests-control__header">
@@ -163,25 +155,19 @@ function resetToInitial() {
               :key="`child-age-${index}`"
               class="offre-offer-guests-control__child-age"
             >
-            <Select
-              :model-value="String(age)"
-              @update:model-value="updateChildAge(index, String($event))"
-            >
-              <SelectTrigger class="offre-offer-guests-control__age-trigger w-full rounded-lg border text-left text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent class="offre-offer-guests-control__age-content rounded-lg">
-                <SelectItem
-                  v-for="option in CHILD_AGE_OPTIONS"
-                  :key="option.value"
-                  :value="option.value"
-                  class="offre-offer-guests-control__age-item"
-                >
-                  {{ option.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div class="offre-offer-guests-control__child-label">
+                Ребенок {{ index + 1 }}
+              </div>
+              <input
+                :value="age"
+                type="number"
+                min="0"
+                max="17"
+                inputmode="numeric"
+                class="offre-offer-guests-control__age-input"
+                @input="updateChildAge(index, Number(($event.target as HTMLInputElement).value))"
+              >
+            </div>
           </div>
         </div>
 
@@ -249,10 +235,6 @@ function resetToInitial() {
   }
 }
 
-.offre-offer-guests-control__popover {
-  box-shadow: var(--offre-shadow-popover);
-}
-
 .offre-offer-guests-control__layout {
   display: grid;
   gap: 12px;
@@ -311,41 +293,48 @@ function resetToInitial() {
 .offre-offer-guests-control__children-grid {
   display: grid;
   gap: 6px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .offre-offer-guests-control__child-age {
+  align-items: center;
+  display: grid;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) 72px;
   min-width: 0;
 }
 
-.offre-offer-guests-control__age-trigger {
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+.offre-offer-guests-control__age-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  background-color: #fff;
+  border: 1px solid var(--offre-color-chip-border);
+  border-radius: 8px;
+  color: #262626;
+  font-size: var(--offre-text-meta);
+  line-height: var(--offre-leading-meta);
+  min-height: 32px;
+  padding: 0 10px;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  width: 100%;
 
   &:hover {
     border-color: rgb(74 158 212);
     color: rgb(74 158 212);
   }
+
+  &:focus {
+    border-color: rgb(74 158 212);
+    color: #262626;
+    outline: none;
+  }
 }
 
-.offre-offer-guests-control__age-content {
-  padding: 6px;
-}
-
-.offre-offer-guests-control__age-item {
-  border-radius: 8px;
-  color: #262626;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.offre-offer-guests-control__age-item[data-highlighted] {
-  background-color: transparent;
-  color: rgb(74 158 212);
-}
-
-.offre-offer-guests-control__age-item[data-state="checked"] {
-  background-color: #e5f7ff;
-  color: rgb(74 158 212);
+.offre-offer-guests-control__age-input::-webkit-outer-spin-button,
+.offre-offer-guests-control__age-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .offre-offer-guests-control__actions {
