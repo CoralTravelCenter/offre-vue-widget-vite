@@ -3,180 +3,42 @@ import { Skeleton } from "ui/skeleton";
 </script>
 
 <template>
-  <section class="offre-map-view-skeleton" aria-hidden="true">
-    <div class="offre-map-view-skeleton__canvas">
-      <div class="offre-map-view-skeleton__panel">
-        <div class="offre-map-view-skeleton__panel-head">
-          <Skeleton class="offre-map-view-skeleton__title" />
-          <Skeleton class="offre-map-view-skeleton__switch" />
+  <section
+    aria-hidden="true"
+    class="overflow-hidden rounded-[24px] bg-white"
+  >
+    <div class="relative min-h-[500px] overflow-hidden lg:h-[520px] lg:min-h-0">
+      <div class="absolute inset-0 h-full bg-[linear-gradient(180deg,#eef6fb_0%,#f7fbfd_100%)]">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_28%,rgba(22,119,255,0.12)_0_4px,transparent_5px),radial-gradient(circle_at_72%_34%,rgba(22,119,255,0.12)_0_4px,transparent_5px),radial-gradient(circle_at_58%_74%,rgba(22,119,255,0.12)_0_4px,transparent_5px),linear-gradient(0deg,rgba(255,255,255,0.86),rgba(255,255,255,0.86)),linear-gradient(135deg,#f2f4f7_25%,transparent_25%),linear-gradient(225deg,#f2f4f7_25%,transparent_25%),linear-gradient(315deg,#f2f4f7_25%,transparent_25%),linear-gradient(45deg,#f2f4f7_25%,#fbfcfd_25%)] [background-position:0_0,-16px_0,-16px_0,0_0,-16px_0,-16px_0,0_0,0_0] [background-size:auto,auto,auto,auto,32px_32px,32px_32px,32px_32px,32px_32px]" />
+
+        <Skeleton class="absolute left-[38%] top-[28%] h-7 w-[72px] rounded-full bg-[#d7ecfb]" />
+        <Skeleton class="absolute left-[62%] top-[46%] h-7 w-[72px] rounded-full bg-[#d7ecfb]" />
+        <Skeleton class="absolute left-[48%] top-[66%] h-7 w-[72px] rounded-full bg-[#d7ecfb]" />
+      </div>
+
+      <div class="absolute bottom-4 left-4 top-4 z-[2] hidden w-[23%] max-w-[300px] overflow-hidden rounded-[14px] border border-[#f0f0f0] bg-[rgba(255,255,255,0.96)] shadow-[0_8px_22px_rgba(0,0,0,0.08)] lg:block">
+        <div class="grid gap-[10px] px-3 pb-2 pt-3">
+          <Skeleton class="h-[18px] w-32 bg-[#e5e7eb]" />
+          <Skeleton class="h-8 w-full bg-[#e5e7eb]" />
         </div>
 
-        <Skeleton class="offre-map-view-skeleton__search" />
+        <Skeleton class="mx-3 mb-[10px] h-9 bg-[#e5e7eb]" />
 
-        <div class="offre-map-view-skeleton__list">
+        <div class="grid gap-1.5 px-3 pb-3">
           <div
             v-for="index in 4"
             :key="index"
-            class="offre-map-view-skeleton__card"
+            class="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded-[10px] border border-[#f0f0f0] bg-white p-1.5"
           >
-            <Skeleton class="offre-map-view-skeleton__card-media" />
-            <div class="offre-map-view-skeleton__card-main">
-              <Skeleton class="offre-map-view-skeleton__card-title" />
-              <Skeleton class="offre-map-view-skeleton__card-location" />
-              <Skeleton class="offre-map-view-skeleton__card-price" />
+            <Skeleton class="h-16 w-16 rounded-[8px] bg-[#e5e7eb]" />
+            <div class="grid gap-1.5">
+              <Skeleton class="h-4 w-[82%] bg-[#e5e7eb]" />
+              <Skeleton class="h-[14px] w-[58%] bg-[#e5e7eb]" />
+              <Skeleton class="h-[18px] w-[46%] bg-[#e5e7eb]" />
             </div>
           </div>
         </div>
       </div>
-
-      <div class="offre-map-view-skeleton__map">
-        <Skeleton class="offre-map-view-skeleton__marker offre-map-view-skeleton__marker--one" />
-        <Skeleton class="offre-map-view-skeleton__marker offre-map-view-skeleton__marker--two" />
-        <Skeleton class="offre-map-view-skeleton__marker offre-map-view-skeleton__marker--three" />
-      </div>
     </div>
   </section>
 </template>
-
-<style scoped lang="scss">
-.offre-map-view-skeleton__canvas {
-  background: linear-gradient(180deg, #eef6fb 0%, #f7fbfd 100%);
-  border-radius: 24px;
-  min-height: 500px;
-  overflow: hidden;
-  position: relative;
-}
-
-.offre-map-view-skeleton__panel {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #f0f0f0;
-  border-radius: 14px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
-  display: none;
-  left: 12px;
-  overflow: hidden;
-  position: absolute;
-  top: 12px;
-  width: 280px;
-  z-index: 2;
-}
-
-.offre-map-view-skeleton__panel-head {
-  display: grid;
-  gap: 10px;
-  padding: 12px 12px 8px;
-}
-
-.offre-map-view-skeleton__title {
-  background-color: #e5e7eb;
-  height: 18px;
-  width: 128px;
-}
-
-.offre-map-view-skeleton__switch {
-  background-color: #e5e7eb;
-  height: 32px;
-  width: 100%;
-}
-
-.offre-map-view-skeleton__search {
-  background-color: #e5e7eb;
-  height: 36px;
-  margin: 0 12px 10px;
-}
-
-.offre-map-view-skeleton__list {
-  display: grid;
-  gap: 6px;
-  padding: 0 12px 12px;
-}
-
-.offre-map-view-skeleton__card {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 64px minmax(0, 1fr);
-  padding: 6px;
-}
-
-.offre-map-view-skeleton__card-media {
-  background-color: #e5e7eb;
-  border-radius: 8px;
-  height: 64px;
-  width: 64px;
-}
-
-.offre-map-view-skeleton__card-main {
-  display: grid;
-  gap: 6px;
-}
-
-.offre-map-view-skeleton__card-title {
-  background-color: #e5e7eb;
-  height: 16px;
-  width: 82%;
-}
-
-.offre-map-view-skeleton__card-location {
-  background-color: #e5e7eb;
-  height: 14px;
-  width: 58%;
-}
-
-.offre-map-view-skeleton__card-price {
-  background-color: #e5e7eb;
-  height: 18px;
-  width: 46%;
-}
-
-.offre-map-view-skeleton__map {
-  background:
-    radial-gradient(circle at 20% 28%, rgba(22, 119, 255, 0.12) 0 4px, transparent 5px),
-    radial-gradient(circle at 72% 34%, rgba(22, 119, 255, 0.12) 0 4px, transparent 5px),
-    radial-gradient(circle at 58% 74%, rgba(22, 119, 255, 0.12) 0 4px, transparent 5px),
-    linear-gradient(0deg, rgba(255,255,255,0.86), rgba(255,255,255,0.86)),
-    linear-gradient(135deg, #f2f4f7 25%, transparent 25%) -16px 0/32px 32px,
-    linear-gradient(225deg, #f2f4f7 25%, transparent 25%) -16px 0/32px 32px,
-    linear-gradient(315deg, #f2f4f7 25%, transparent 25%) 0 0/32px 32px,
-    linear-gradient(45deg, #f2f4f7 25%, #fbfcfd 25%) 0 0/32px 32px;
-  height: 100%;
-  inset: 0;
-  position: absolute;
-}
-
-.offre-map-view-skeleton__marker {
-  background-color: #d7ecfb;
-  border-radius: 999px;
-  height: 28px;
-  position: absolute;
-  width: 72px;
-}
-
-.offre-map-view-skeleton__marker--one {
-  left: 38%;
-  top: 28%;
-}
-
-.offre-map-view-skeleton__marker--two {
-  left: 62%;
-  top: 46%;
-}
-
-.offre-map-view-skeleton__marker--three {
-  left: 48%;
-  top: 66%;
-}
-
-@media (min-width: 1024px) {
-  .offre-map-view-skeleton__canvas {
-    height: 520px;
-    min-height: 0;
-  }
-
-  .offre-map-view-skeleton__panel {
-    display: block;
-  }
-}
-</style>

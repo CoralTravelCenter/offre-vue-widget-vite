@@ -309,6 +309,8 @@ const mapViewKey = computed(() => {
           :products="productsList"
           :pricing-mode="effectiveSearchOptions.pricing"
           :search-options="effectiveSearchOptions"
+          :product-reference="productReference"
+          :selected-departure-name="selectedDeparture?.name ?? ''"
       />
     </div>
   </div>

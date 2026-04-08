@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { MapPinIcon } from "lucide-vue-next";
 import { computed } from "vue";
+import mapMarkerDefault from "./icons/map-marker-default.svg";
+import mapMarkerElite from "./icons/map-marker-elite.svg";
+import mapMarkerFamily from "./icons/map-marker-family.svg";
 
 interface Props {
+  hotelId: string;
   priceLabel?: string;
   isFamilyClub?: boolean;
   isEliteHotel?: boolean;
@@ -10,96 +13,51 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  hotelId: "",
   priceLabel: "",
   isFamilyClub: false,
   isEliteHotel: false,
   isOpen: false
 });
-
 const emit = defineEmits<{
   toggle: [];
 }>();
 
-const markerToneClass = computed(() => {
+const markerIconSrc = computed(() => {
   if (props.isFamilyClub) {
-    return "offre-map-marker__placemark--family";
+    return mapMarkerFamily;
   }
 
   if (props.isEliteHotel) {
-    return "offre-map-marker__placemark--elite";
+    return mapMarkerElite;
   }
 
-  return "offre-map-marker__placemark--default";
+  return mapMarkerDefault;
 });
 </script>
 
 <template>
   <div
-    :class="[
-      'offre-map-marker relative h-[37px] w-7 -translate-x-1/2 -translate-y-full text-[14px] leading-none',
-      isOpen ? 'offre-map-marker--open' : ''
-    ]"
+    :data-map-hotel-id="hotelId"
+    class="relative h-[29px] w-[22px] -translate-x-1/2 -translate-y-full cursor-pointer text-[14px] leading-none"
   >
     <button
       type="button"
-      :class="['offre-map-marker__placemark absolute inset-0 cursor-pointer border-0 bg-transparent p-0', markerToneClass]"
+      class="absolute inset-0 h-full w-full cursor-pointer border-0 bg-transparent p-0"
       @click.stop="emit('toggle')"
     >
-      <MapPinIcon class="offre-map-marker__icon" />
+      <img
+        :src="markerIconSrc"
+        alt=""
+        class="pointer-events-none block h-[29px] w-[22px] [filter:drop-shadow(0_3px_7px_rgba(15,23,42,0.16))]"
+      >
     </button>
 
     <div
       v-if="priceLabel && !isOpen"
-      class="offre-map-marker__price-badge"
+      class="pointer-events-none absolute left-[24px] top-0 rounded-full bg-[rgba(255,255,255,0.92)] px-[6px] py-[4px] text-[11px] leading-none whitespace-nowrap text-[#262626] shadow-[0_1px_2px_rgba(0,0,0,0.16)] backdrop-blur-[4px]"
     >
       {{ priceLabel }}
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-.offre-map-marker__placemark {
-  align-items: center;
-  filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.16));
-  display: inline-flex;
-  height: 37px;
-  justify-content: center;
-  transition: transform 0.15s ease;
-  width: 28px;
-}
-
-.offre-map-marker__placemark--default {
-  color: #1677ff;
-}
-
-.offre-map-marker__placemark--family {
-  color: #13c2c2;
-}
-
-.offre-map-marker__placemark--elite {
-  color: #262626;
-}
-
-.offre-map-marker__icon {
-  fill: rgba(255, 255, 255, 0.9);
-  height: 37px;
-  stroke: currentColor;
-  stroke-width: 2;
-  width: 28px;
-}
-
-.offre-map-marker__price-badge {
-  backdrop-filter: blur(4px);
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 999px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
-  color: #262626;
-  left: 30px;
-  font-size: 12px;
-  line-height: 1;
-  padding: 5px 7px;
-  position: absolute;
-  text-wrap: nowrap;
-  top: 2px;
-}
-</style>
