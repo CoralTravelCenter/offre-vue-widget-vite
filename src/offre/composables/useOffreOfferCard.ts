@@ -5,6 +5,7 @@ import {
   resolveHotelImageUrl,
   resolveOfferHref
 } from "offre/lib/product-offer";
+import { getReferenceValue } from "offre/lib/reference";
 import { useOffreOfferPricing } from "offre/composables/useOffreOfferPricing";
 import { useOffreOfferTerms } from "offre/composables/useOffreOfferTerms";
 import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
@@ -12,37 +13,6 @@ import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
 interface OffreOfferCardHotelCategory {
   name?: string;
   starCount?: number;
-}
-
-function getReferenceRecord<TValue extends object>(
-  reference: B2CPriceSearchReference,
-  field: string
-) {
-  const value = reference[field];
-
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, TValue>;
-}
-
-function getReferenceValue<TValue extends object>(
-  reference: B2CPriceSearchReference,
-  field: string,
-  key: string | number | undefined
-) {
-  if (key === null || key === undefined || key === "") {
-    return null;
-  }
-
-  const record = getReferenceRecord<TValue>(reference, field);
-
-  if (!record) {
-    return null;
-  }
-
-  return record[String(key)] ?? null;
 }
 
 export function useOffreOfferCard(params: {

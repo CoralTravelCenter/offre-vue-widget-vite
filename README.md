@@ -48,7 +48,9 @@ Bootstrap, парсинг payload и mount/unmount лежат в [src/widget/ent
 
 - [src/shared/types/widget.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/shared/types/widget.ts) — контракт payload виджета.
 - [src/offre/lib/payload.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/payload.ts) — нормализация `options` и `hotels`, приведение входных данных к runtime-формату.
-- [src/dev/fixtures/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/fixtures/offre-payloads.ts) — dev fixtures.
+- [src/dev/fixtures/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/fixtures/offre-payloads.ts) — основной мок payload для dev-режима; здесь лежат данные, из которых собирается JSON-скрипт виджета.
+- [src/dev/main.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/main.ts) — вставляет моковый `script[type="application/json"]` в локальном playground.
+- [src/monkey/dev.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/monkey/dev.ts) — вставляет тот же моковый JSON-скрипт в userscript-режиме на живом сайте.
 
 ### Данные и API
 

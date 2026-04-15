@@ -19,9 +19,6 @@ const props = withDefaults(defineProps<Props>(), {
   isEliteHotel: false,
   isOpen: false
 });
-const emit = defineEmits<{
-  toggle: [];
-}>();
 
 const markerIconSrc = computed(() => {
   if (props.isFamilyClub) {
@@ -41,17 +38,11 @@ const markerIconSrc = computed(() => {
     :data-map-hotel-id="hotelId"
     class="relative h-[29px] w-[22px] -translate-x-1/2 -translate-y-full cursor-pointer text-[14px] leading-none"
   >
-    <button
-      type="button"
-      class="absolute inset-0 h-full w-full cursor-pointer border-0 bg-transparent p-0"
-      @click.stop="emit('toggle')"
+    <img
+      :src="markerIconSrc"
+      alt=""
+      class="pointer-events-none block h-[29px] w-[22px] [filter:drop-shadow(0_3px_7px_rgba(15,23,42,0.16))]"
     >
-      <img
-        :src="markerIconSrc"
-        alt=""
-        class="pointer-events-none block h-[29px] w-[22px] [filter:drop-shadow(0_3px_7px_rgba(15,23,42,0.16))]"
-      >
-    </button>
 
     <div
       v-if="priceLabel && !isOpen"

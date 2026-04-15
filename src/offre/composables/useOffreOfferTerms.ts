@@ -2,41 +2,11 @@ import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import { getCityGenitiveCase } from "app/plugins/city-spelling";
 import type { B2COffer, B2CPriceSearchReference } from "offre/api/types";
 import { formatOfferDate, pluralizeNights } from "offre/lib/product-offer";
+import { getReferenceValue } from "offre/lib/reference";
 import type { OffreOfferCardTerm } from "offre/types/offer-card";
 
 interface OffreOfferCardReferenceValue {
   name?: string;
-}
-
-function getReferenceRecord<TValue extends object>(
-  reference: B2CPriceSearchReference,
-  field: string
-) {
-  const value = reference[field];
-
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, TValue>;
-}
-
-function getReferenceValue<TValue extends object>(
-  reference: B2CPriceSearchReference,
-  field: string,
-  key: string | number | undefined
-) {
-  if (key === null || key === undefined || key === "") {
-    return null;
-  }
-
-  const record = getReferenceRecord<TValue>(reference, field);
-
-  if (!record) {
-    return null;
-  }
-
-  return record[String(key)] ?? null;
 }
 
 export function useOffreOfferTerms(params: {

@@ -1,4 +1,5 @@
 import type { B2CHotelImage, B2COfferRoomPassenger } from "offre/api/types";
+import { useOffreRussianNumerals } from "offre/composables/useOffreRussianNumerals";
 
 const PRICE_SUFFIX_MAP = {
   "per-person": "за 1 взрослого",
@@ -30,6 +31,10 @@ type PricingOption = "default" | "per-person" | "per-night";
 const priceFormatter = new Intl.NumberFormat("ru-RU", {
   maximumFractionDigits: 0
 });
+const {
+  formatAdultsCountLabel,
+  formatChildrenCountLabel
+} = useOffreRussianNumerals();
 
 function normalizePriceValue(value: number | string | undefined) {
   const amount = Number(value);
@@ -121,25 +126,6 @@ function resolvePassengerPartyLabel(passengers: B2COfferRoomPassenger[] | undefi
   });
 }
 
-function pluralizeByCount(value: number, forms: [string, string, string]) {
-  const normalizedValue = Math.abs(Number(value)) % 100;
-  const lastDigit = normalizedValue % 10;
-
-  if (normalizedValue > 10 && normalizedValue < 20) {
-    return forms[2];
-  }
-
-  if (lastDigit === 1) {
-    return forms[0];
-  }
-
-  if (lastDigit > 1 && lastDigit < 5) {
-    return forms[1];
-  }
-
-  return forms[2];
-}
-
 export function resolveOfferPartySuffix(
   pricingOption: unknown,
   passengers: B2COfferRoomPassenger[] | undefined
@@ -168,11 +154,11 @@ export function formatPassengerPartyText(params: {
   const parts: string[] = [];
 
   if (adultsCount > 0) {
-    parts.push(`${adultsCount} ${pluralizeByCount(adultsCount, ["взрослого", "взрослых", "взрослых"])}`);
+    parts.push(formatAdultsCountLabel(adultsCount));
   }
 
   if (childrenCount > 0) {
-    parts.push(`${childrenCount} ${childrenCount === 1 ? "ребенка" : "детей"}`);
+    parts.push(formatChildrenCountLabel(childrenCount));
   }
 
   if (parts.length === 0) {

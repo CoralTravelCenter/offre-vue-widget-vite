@@ -191,6 +191,9 @@ const activeMapOverlayModel = computed<OffreMapOverlayModel | null>(() => {
 		starItems: activeMapPointStarItems.value
 	};
 });
+const selectedMapPoints = computed(() => {
+	return activeMapPoint.value ? [activeMapPoint.value] : [];
+});
 const hasMapPoints = computed(() => filteredMapPoints.value.length > 0);
 
 watch([mapPoints, filteredMapPoints], () => {
@@ -292,7 +295,7 @@ onMounted(async () => {
 						:grid-size="90"
 						zoom-on-cluster-click
 				>
-		<template #cluster="{ length, clusterer }">
+					<template #cluster="{ length, clusterer }">
             <OffreMapClusterBadge
               :count="length"
               :min-price="getMapClusterPriceRange(clusterer.features).min"
@@ -303,7 +306,7 @@ onMounted(async () => {
 					<YandexMapMarker
 							v-for="point in mapPointsExceptSelected"
 							:key="point.key"
-							:settings="{ coordinates: [point.longitude, point.latitude], zIndex: 1, properties: { currentPriceValue: point.currentPriceValue } }"
+							:settings="{ coordinates: [point.longitude, point.latitude], zIndex: 1, properties: { currentPriceValue: point.currentPriceValue }, onClick: () => handleMarkerToggle(point.hotelId) }"
 					>
 						<OffreMapMarker
 								:hotel-id="point.hotelId"
@@ -311,35 +314,39 @@ onMounted(async () => {
 								:is-family-club="point.isFamilyClub"
 								:is-elite-hotel="point.isEliteHotel"
 								:is-open="false"
-								@toggle="handleMarkerToggle(point.hotelId)"
 						/>
 					</YandexMapMarker>
+				</YandexMapClusterer>
 
-					<YandexMapMarker
-							v-if="activeMapPoint"
-							:key="`selected-${activeMapPoint.key}`"
-							:settings="{ coordinates: [activeMapPoint.longitude, activeMapPoint.latitude], zIndex: 100, properties: { currentPriceValue: activeMapPoint.currentPriceValue } }"
-					>
-						<div class="relative overflow-visible">
+				<YandexMapMarker
+						v-for="selectedPoint in selectedMapPoints"
+						:key="`selected-${selectedPoint.key}`"
+						:settings="{ coordinates: [selectedPoint.longitude, selectedPoint.latitude], zIndex: 100, properties: { currentPriceValue: selectedPoint.currentPriceValue }, onClick: () => handleMarkerToggle(selectedPoint.hotelId) }"
+				>
+					<div class="pointer-events-none relative overflow-visible">
+						<div class="pointer-events-auto">
 							<OffreMapMarker
-									:hotel-id="activeMapPoint.hotelId"
-									:price-label="activeMapPoint.currentPriceLabel"
-									:is-family-club="activeMapPoint.isFamilyClub"
-									:is-elite-hotel="activeMapPoint.isEliteHotel"
+									:hotel-id="selectedPoint.hotelId"
+									:price-label="selectedPoint.currentPriceLabel"
+									:is-family-club="selectedPoint.isFamilyClub"
+									:is-elite-hotel="selectedPoint.isEliteHotel"
 									:is-open="true"
-									@toggle="handleMarkerToggle(activeMapPoint.hotelId)"
 							/>
+						</div>
 
+						<div
+								v-if="activeMapOverlayModel && !showBottomMapOverlay"
+								class="pointer-events-auto absolute bottom-11 left-4 z-[60]"
+								@click.stop
+						>
 							<OffreMapOverlayCard
-									v-if="activeMapOverlayModel && !showBottomMapOverlay"
-									class="pointer-events-auto absolute bottom-10 left-2 z-[60] hidden w-[min(420px,calc(100vw-32px))] min-[1024px]:block"
+									class="pointer-events-auto w-[min(420px,calc(100vw-32px))]"
 									:model="activeMapOverlayModel"
 									@close="closeOverlay"
 							/>
 						</div>
-					</YandexMapMarker>
-
-				</YandexMapClusterer>
+					</div>
+				</YandexMapMarker>
 			</YandexMap>
 
 			<div
