@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { MinusIcon, PlusIcon } from "lucide-vue-next";
+import { Button } from "ui/button";
 
 interface Props {
   label: string;
@@ -27,80 +28,37 @@ function increment() {
 </script>
 
 <template>
-  <div class="offre-offer-guests-stepper">
-    <span class="offre-offer-guests-stepper__label">{{ label }}</span>
-    <div class="offre-offer-guests-stepper__controls">
-      <button
+  <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+    <span class="text-[12px] font-normal leading-[1.2] text-[#3f3f46]">
+      {{ label }}
+    </span>
+
+    <div class="inline-flex items-center gap-3">
+      <Button
         type="button"
-        class="offre-offer-guests-stepper__button"
+        variant="ghost"
+        size="icon-lg"
         :disabled="decrementDisabled"
+        class="size-6 rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] hover:bg-[#ededed] hover:text-[#2f2f35]"
         @click="decrement"
       >
-        <MinusIcon class="size-4" />
-      </button>
-      <span class="offre-offer-guests-stepper__value">{{ modelValue }}</span>
-      <button
+        <MinusIcon class="size-2.5" />
+      </Button>
+
+      <span class="min-w-5 text-center text-[12px] font-normal leading-none text-[#2f2f35]">
+        {{ modelValue }}
+      </span>
+
+      <Button
         type="button"
-        class="offre-offer-guests-stepper__button"
+        variant="ghost"
+        size="icon-lg"
         :disabled="incrementDisabled"
+        class="size-6 rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] hover:bg-[#ededed] hover:text-[#2f2f35]"
         @click="increment"
       >
-        <PlusIcon class="size-4" />
-      </button>
+        <PlusIcon class="size-2.5" />
+      </Button>
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-.offre-offer-guests-stepper {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.offre-offer-guests-stepper__label {
-  color: #262626;
-  font-size: var(--offre-text-meta);
-  line-height: var(--offre-leading-meta);
-}
-
-.offre-offer-guests-stepper__controls {
-  align-items: center;
-  display: inline-flex;
-  gap: 8px;
-}
-
-.offre-offer-guests-stepper__button {
-  align-items: center;
-  background: transparent;
-  border: 1px solid var(--offre-color-control-border);
-  border-radius: 8px;
-  color: #262626;
-  cursor: pointer;
-  display: inline-flex;
-  height: 26px;
-  justify-content: center;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
-  width: 26px;
-
-  &:hover:not(:disabled) {
-    background-color: transparent;
-    border-color: rgb(74 158 212);
-    color: rgb(74 158 212);
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
-  }
-}
-
-.offre-offer-guests-stepper__value {
-  color: #262626;
-  font-size: var(--offre-text-body);
-  line-height: 1.25rem;
-  min-width: 20px;
-  text-align: center;
-}
-</style>
