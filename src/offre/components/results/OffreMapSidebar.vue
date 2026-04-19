@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useDebounceFn } from "@vueuse/core";
+import { ref, watch } from "vue";
 import OffreTourTypeTabs from "offre/components/results/OffreTourTypeTabs.vue";
 import type { OffreMapDisplayPoint } from "offre/components/results/offre-map.types";
 
@@ -10,7 +12,7 @@ interface Props {
   isUpdatingPrices?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   activeHotelId: null,
   isUpdatingPrices: false
 });
@@ -20,6 +22,24 @@ const emit = defineEmits<{
   "update:mapOfferMode": [value: "package" | "hotel"];
   focus: [hotelId: string];
 }>();
+
+const localSearchQuery = ref(props.searchQuery);
+
+watch(() => props.searchQuery, (nextValue) => {
+  if (nextValue !== localSearchQuery.value) {
+    localSearchQuery.value = nextValue;
+  }
+});
+
+const emitSearchQuery = useDebounceFn((value: string) => {
+  emit("update:searchQuery", value);
+}, 250);
+
+function handleSearchInput(event: Event) {
+  const nextValue = (event.target as HTMLInputElement).value;
+  localSearchQuery.value = nextValue;
+  emitSearchQuery(nextValue);
+}
 </script>
 
 <template>
@@ -42,11 +62,11 @@ const emit = defineEmits<{
 
     <label class="block px-3 pb-[10px]">
       <input
-        :value="searchQuery"
+        :value="localSearchQuery"
         type="text"
         placeholder="Поиск отеля"
         class="block h-9 w-full appearance-none rounded-[8px] border border-[#f0f0f0] bg-[#fafafa] px-[10px] text-[13px] leading-[18px] text-[#262626] outline-none transition-[border-color,background-color] duration-150 ease-[ease] placeholder:text-[#bfbfbf] focus:border-[rgb(74_158_212)] focus:bg-white"
-        @input="emit('update:searchQuery', ($event.target as HTMLInputElement).value)"
+        @input="handleSearchInput"
       >
     </label>
 

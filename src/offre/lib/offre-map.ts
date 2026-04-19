@@ -32,8 +32,27 @@ export function getMapClusterPriceRange(features: Array<{ properties?: { current
   };
 }
 
-export function normalizeMapSearchValue(value: string) {
-  return value.trim().toLocaleLowerCase("ru-RU");
+export function normalizeMapSearchValue(value: string | null | undefined) {
+  const source = String(value ?? "");
+
+  if (!source) {
+    return "";
+  }
+
+  const normalizedSource = (() => {
+    try {
+      return source.normalize("NFKC");
+    } catch {
+      return source;
+    }
+  })();
+
+  return normalizedSource
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^\p{L}\p{N}\s]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function getMapReferenceValue<TValue extends object>(

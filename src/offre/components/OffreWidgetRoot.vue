@@ -77,6 +77,14 @@ const guestsPersistenceKey = computed(() => {
     options: props.options
   });
 });
+const viewModePersistenceKey = computed(() => {
+  return stableStringify({
+    brandKey: props.brandKey,
+    hotels: props.hotelsList.map((hotelEntry) => getWidgetHotelId(hotelEntry)),
+    options: props.options,
+    mode: "results-view"
+  });
+});
 
 const {
   selectedGuests,
@@ -165,6 +173,7 @@ const {
   selectedDepartureIdSource: selectedDepartureId,
   selectedTimeframeSource: selectedTimeframe,
   guestsFilterKeySource: guestsFilterKey,
+  storageKeySource: viewModePersistenceKey,
   pageSize: PRODUCTS_PAGE_SIZE
 });
 

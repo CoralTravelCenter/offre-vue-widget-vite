@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {refDebounced, useMediaQuery} from "@vueuse/core";
-import {computed, onMounted, reactive, ref, shallowRef, watch} from "vue";
+import { useMediaQuery } from "@vueuse/core";
+import {computed, nextTick, onMounted, reactive, ref, shallowRef, watch} from "vue";
 import type {B2CPriceSearchReference, B2CProduct} from "offre/api/types";
 import OffreMapClusterBadge from "offre/components/results/OffreMapClusterBadge.vue";
 import OffreMapMarker from "offre/components/results/OffreMapMarker.vue";
@@ -34,7 +34,8 @@ import {
 	YandexMapClusterer,
 	YandexMapDefaultFeaturesLayer,
 	YandexMapDefaultSchemeLayer,
-	YandexMapMarker
+	YandexMapMarker,
+	YandexMapOverlay
 } from "vue-yandex-maps";
 
 const YMAPS_API_KEY = "49de5080-fb39-46f1-924b-dee5ddbad2f1";
@@ -51,8 +52,8 @@ const ymapsInitialized = ref(false);
 const map = shallowRef();
 const clusterer = shallowRef();
 const activeHotelId = ref<string | null>(null);
+const popupHotelId = ref<string | null>(null);
 const hotelSearchQuery = ref("");
-const debouncedHotelSearchQuery = refDebounced(hotelSearchQuery, 140);
 const showBottomMapOverlay = useMediaQuery("(max-width: 1023px)");
 const mapSettings = reactive({
 	location: {
@@ -61,6 +62,10 @@ const mapSettings = reactive({
 	},
 	controls: []
 });
+
+type OffreMapSearchPoint = OffreMapDisplayPoint & {
+	searchIndex: string;
+};
 
 const baseMapPoints = computed(() => {
 	return props.products
@@ -102,7 +107,7 @@ const {
 	searchOptions: computed(() => props.searchOptions)
 });
 
-const mapPoints = computed<OffreMapDisplayPoint[]>(() => {
+const mapPoints = computed<OffreMapSearchPoint[]>(() => {
 	return baseMapPoints.value.map((point) => {
 		const effectiveOffer = mapOfferMode.value === "hotel"
 				? hotelOffersByHotelId.value.get(point.hotelId) ?? point.packageOffer
@@ -122,6 +127,7 @@ const mapPoints = computed<OffreMapDisplayPoint[]>(() => {
 			currentPriceValue,
 			currentPriceLabel: formatCurrencySafe(currentPriceValue),
 			priceSuffix: resolveOfferPartySuffix(props.pricingMode, effectiveOffer?.rooms?.[0]?.passengers),
+			searchIndex: normalizeMapSearchValue(`${point.hotelName} ${point.locationLabel}`),
 			offerHref: resolveOfferHref({
 				redirectionUrl: effectiveOffer?.link?.redirectionUrl,
 				queryParam: effectiveOffer?.link?.queryParam,
@@ -138,20 +144,20 @@ const sortedBaseMapPoints = computed(() => {
 });
 
 const filteredMapPoints = computed(() => {
-	const searchValue = normalizeMapSearchValue(debouncedHotelSearchQuery.value);
+	const searchValue = normalizeMapSearchValue(hotelSearchQuery.value);
 
 	if (!searchValue) {
 		return sortedBaseMapPoints.value;
 	}
 
 	return sortedBaseMapPoints.value.filter((point) => {
-		return normalizeMapSearchValue(`${point.hotelName} ${point.locationLabel}`).includes(searchValue);
+		return point.searchIndex.includes(searchValue);
 	});
 });
 
 const activeMapPoint = computed(() => {
-	return filteredMapPoints.value.find((point) => point.hotelId === activeHotelId.value)
-			?? mapPoints.value.find((point) => point.hotelId === activeHotelId.value)
+	return filteredMapPoints.value.find((point) => point.hotelId === popupHotelId.value)
+			?? mapPoints.value.find((point) => point.hotelId === popupHotelId.value)
 			?? null;
 });
 const activeMapPointHotelStarCount = computed(() => {
@@ -165,13 +171,6 @@ const activeMapPointHotelStarCount = computed(() => {
 });
 const activeMapPointStarItems = computed<boolean[]>(() => {
 	return Array.from({length: 5}, (_, index) => index < activeMapPointHotelStarCount.value);
-});
-const mapPointsExceptSelected = computed(() => {
-	if (!activeHotelId.value) {
-		return filteredMapPoints.value;
-	}
-
-	return filteredMapPoints.value.filter((point) => point.hotelId !== activeHotelId.value);
 });
 const {
 	terms: activeMapPointTerms
@@ -191,14 +190,30 @@ const activeMapOverlayModel = computed<OffreMapOverlayModel | null>(() => {
 		starItems: activeMapPointStarItems.value
 	};
 });
-const selectedMapPoints = computed(() => {
-	return activeMapPoint.value ? [activeMapPoint.value] : [];
+const overlayBounds = computed<[[number, number], [number, number]] | null>(() => {
+	if (!activeMapPoint.value) {
+		return null;
+	}
+
+	const longitude = activeMapPoint.value.longitude;
+	const latitude = activeMapPoint.value.latitude;
+	const longitudeDelta = 0.0001;
+	const latitudeDelta = 0.0001;
+
+	return [
+		[longitude - longitudeDelta, latitude + latitudeDelta],
+		[longitude + longitudeDelta, latitude - latitudeDelta]
+	];
 });
 const hasMapPoints = computed(() => filteredMapPoints.value.length > 0);
 
 watch([mapPoints, filteredMapPoints], () => {
-	if (activeHotelId.value && !mapPoints.value.some((point) => point.hotelId === activeHotelId.value)) {
+	if (activeHotelId.value && !filteredMapPoints.value.some((point) => point.hotelId === activeHotelId.value)) {
 		activeHotelId.value = null;
+	}
+
+	if (popupHotelId.value && !filteredMapPoints.value.some((point) => point.hotelId === popupHotelId.value)) {
+		popupHotelId.value = null;
 	}
 });
 
@@ -231,16 +246,34 @@ function focusPoint(hotelId: string) {
 	});
 }
 
+async function openPopupForHotel(hotelId: string) {
+	popupHotelId.value = null;
+
+	await nextTick();
+	await new Promise<void>((resolve) => {
+		requestAnimationFrame(() => resolve());
+	});
+
+	if (activeHotelId.value !== hotelId) {
+		return;
+	}
+
+	popupHotelId.value = hotelId;
+}
+
 function handleMarkerToggle(hotelId: string) {
 	if (activeHotelId.value === hotelId) {
+		popupHotelId.value = null;
 		activeHotelId.value = null;
 		return;
 	}
 
 	focusPoint(hotelId);
+	void openPopupForHotel(hotelId);
 }
 
 function closeOverlay() {
+	popupHotelId.value = null;
 	activeHotelId.value = null;
 }
 
@@ -290,63 +323,46 @@ onMounted(async () => {
 				<YandexMapDefaultSchemeLayer/>
 				<YandexMapDefaultFeaturesLayer/>
 
-				<YandexMapClusterer
-						v-model="clusterer"
-						:grid-size="90"
-						zoom-on-cluster-click
+				<YandexMapOverlay
+						v-if="activeMapOverlayModel && overlayBounds && !showBottomMapOverlay"
+						:key="`overlay-${activeMapOverlayModel.point.key}`"
+						:settings="{ bounds: overlayBounds }"
 				>
-					<template #cluster="{ length, clusterer }">
-            <OffreMapClusterBadge
-              :count="length"
-              :min-price="getMapClusterPriceRange(clusterer.features).min"
-              :max-price="getMapClusterPriceRange(clusterer.features).max"
-            />
-					</template>
+					<OffreMapOverlayCard
+							class="offre-map-overlay-card pointer-events-auto"
+							:model="activeMapOverlayModel"
+							@click.stop
+							@close="closeOverlay"
+					/>
+				</YandexMapOverlay>
 
-					<YandexMapMarker
-							v-for="point in mapPointsExceptSelected"
-							:key="point.key"
-							:settings="{ coordinates: [point.longitude, point.latitude], zIndex: 1, properties: { currentPriceValue: point.currentPriceValue }, onClick: () => handleMarkerToggle(point.hotelId) }"
+					<YandexMapClusterer
+							v-model="clusterer"
+							:grid-size="90"
+							zoom-on-cluster-click
 					>
-						<OffreMapMarker
-								:hotel-id="point.hotelId"
-								:price-label="point.currentPriceLabel"
-								:is-family-club="point.isFamilyClub"
-								:is-elite-hotel="point.isEliteHotel"
-								:is-open="false"
-						/>
-					</YandexMapMarker>
-				</YandexMapClusterer>
+						<template #cluster="{ length, clusterer }">
+	            <OffreMapClusterBadge
+	              :count="length"
+	              :min-price="getMapClusterPriceRange(clusterer.features).min"
+	              :max-price="getMapClusterPriceRange(clusterer.features).max"
+	            />
+						</template>
 
-				<YandexMapMarker
-						v-for="selectedPoint in selectedMapPoints"
-						:key="`selected-${selectedPoint.key}`"
-						:settings="{ coordinates: [selectedPoint.longitude, selectedPoint.latitude], zIndex: 100, properties: { currentPriceValue: selectedPoint.currentPriceValue }, onClick: () => handleMarkerToggle(selectedPoint.hotelId) }"
-				>
-					<div class="pointer-events-none relative overflow-visible">
-						<div class="pointer-events-auto">
-							<OffreMapMarker
-									:hotel-id="selectedPoint.hotelId"
-									:price-label="selectedPoint.currentPriceLabel"
-									:is-family-club="selectedPoint.isFamilyClub"
-									:is-elite-hotel="selectedPoint.isEliteHotel"
-									:is-open="true"
-							/>
-						</div>
-
-						<div
-								v-if="activeMapOverlayModel && !showBottomMapOverlay"
-								class="pointer-events-auto absolute bottom-11 left-4 z-[60]"
-								@click.stop
+						<YandexMapMarker
+								v-for="point in filteredMapPoints"
+								:key="point.key"
+								:settings="{ coordinates: [point.longitude, point.latitude], zIndex: activeHotelId === point.hotelId ? 1100 : 1, properties: { currentPriceValue: point.currentPriceValue }, onClick: () => handleMarkerToggle(point.hotelId) }"
 						>
-							<OffreMapOverlayCard
-									class="pointer-events-auto w-[min(420px,calc(100vw-32px))]"
-									:model="activeMapOverlayModel"
-									@close="closeOverlay"
+							<OffreMapMarker
+									:hotel-id="point.hotelId"
+									:price-label="point.currentPriceLabel"
+									:is-family-club="point.isFamilyClub"
+									:is-elite-hotel="point.isEliteHotel"
+									:is-open="activeHotelId === point.hotelId"
 							/>
-						</div>
-					</div>
-				</YandexMapMarker>
+						</YandexMapMarker>
+					</YandexMapClusterer>
 			</YandexMap>
 
 			<div
@@ -362,3 +378,22 @@ onMounted(async () => {
 		</div>
 	</section>
 </template>
+
+<style scoped>
+:global(.offre-map-overlay-card) {
+  box-shadow: none;
+}
+
+:global(.__ymap_overlay) {
+  width: 0 !important;
+  height: 0 !important;
+  overflow: visible;
+  pointer-events: none;
+}
+
+:global(.__ymap_overlay .offre-map-overlay-card) {
+  width: min(420px, calc(100vw - 32px));
+  transform: translate(18px, calc(-100% - 40px));
+  pointer-events: auto;
+}
+</style>
