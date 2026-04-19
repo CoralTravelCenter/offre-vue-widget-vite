@@ -23,9 +23,10 @@ const emit = defineEmits<{
   reset: [];
 }>();
 
-const AGE_OPTIONS = Array.from({length: 18}, (_, age) => age);
+const CHILD_AGE_OPTIONS = Array.from({length: 19}, (_, age) => age);
 
 const isOpen = ref(false);
+const activeChildAgeGridIndex = ref<number | null>(null);
 const appliedAdultsCount = ref(2);
 const appliedChildrenAges = ref<number[]>([]);
 const draftAdultsCount = ref(2);
@@ -35,25 +36,6 @@ const canReset = computed(() => {
   return appliedAdultsCount.value !== 2 || appliedChildrenAges.value.length > 0;
 });
 
-function formatAgeLabel(age: number) {
-  const normalizedAge = Math.max(0, Math.min(17, Number(age) || 0));
-  const remainder100 = normalizedAge % 100;
-  const remainder10 = normalizedAge % 10;
-
-  if (remainder100 >= 11 && remainder100 <= 14) {
-    return `${normalizedAge} лет`;
-  }
-
-  if (remainder10 === 1) {
-    return `${normalizedAge} год`;
-  }
-
-  if (remainder10 >= 2 && remainder10 <= 4) {
-    return `${normalizedAge} года`;
-  }
-
-  return `${normalizedAge} лет`;
-}
 
 function syncAppliedStateFromProps() {
   appliedAdultsCount.value = Math.max(1, Number(props.adultsCount) || 2);
@@ -77,7 +59,10 @@ watch(
 watch(isOpen, (nextOpen) => {
   if (nextOpen) {
     syncDraftStateFromApplied();
+    return;
   }
+
+  activeChildAgeGridIndex.value = null;
 });
 
 function updateAdultsCount(delta: number) {
@@ -87,6 +72,14 @@ function updateAdultsCount(delta: number) {
 function updateChildrenCount(delta: number) {
   if (delta < 0) {
     draftChildrenAges.value = draftChildrenAges.value.slice(0, -1);
+
+    if (activeChildAgeGridIndex.value !== null) {
+      activeChildAgeGridIndex.value = draftChildrenAges.value[activeChildAgeGridIndex.value]
+      === undefined
+          ? null
+          : activeChildAgeGridIndex.value;
+    }
+
     return;
   }
 
@@ -97,17 +90,45 @@ function updateChildrenCount(delta: number) {
   draftChildrenAges.value = [...draftChildrenAges.value, 7];
 }
 
-function updateChildAge(index: number, value: string) {
-  const nextAge = Math.max(0, Math.min(17, Number(value) || 0));
+function updateChildAge(index: number, age: string) {
+  const nextAge = Math.max(0, Math.min(18, Number(age) || 0));
 
-  draftChildrenAges.value = draftChildrenAges.value.map((age, ageIndex) => {
-    return ageIndex === index ? nextAge : age;
+  draftChildrenAges.value = draftChildrenAges.value.map((value, valueIndex) => {
+    return valueIndex === index ? nextAge : value;
   });
+
+  activeChildAgeGridIndex.value = null;
 }
 
-function removeChild(index: number) {
-  draftChildrenAges.value = draftChildrenAges.value.filter((_, childIndex) => childIndex !== index);
+function toggleChildAgeGrid(index: number) {
+  activeChildAgeGridIndex.value = activeChildAgeGridIndex.value === index ? null : index;
 }
+
+function formatChildAge(age: number) {
+  const normalizedAge = Math.max(0, Math.min(18, Number(age) || 0));
+
+  if (normalizedAge === 0) {
+    return "до 1 года";
+  }
+
+  const remainder100 = normalizedAge % 100;
+  const remainder10 = normalizedAge % 10;
+
+  if (remainder100 >= 11 && remainder100 <= 14) {
+    return `${normalizedAge} лет`;
+  }
+
+  if (remainder10 === 1) {
+    return `${normalizedAge} год`;
+  }
+
+  if (remainder10 >= 2 && remainder10 <= 4) {
+    return `${normalizedAge} года`;
+  }
+
+  return `${normalizedAge} лет`;
+}
+
 
 function applyDraft() {
   appliedAdultsCount.value = draftAdultsCount.value;
@@ -145,11 +166,11 @@ function resetToInitial() {
         side="top"
         align="end"
         :side-offset="12"
-        class="min-w-[300px] w-auto max-w-[calc(100vw-24px)] rounded-[24px] border-[#e9e9e7] bg-white p-4 shadow-[0_20px_80px_rgba(15,23,42,0.08)]"
+        class="min-w-75 w-auto max-w-[calc(100vw-24px)] rounded-3xl border-[#e9e9e7] bg-white p-4 shadow-[0_20px_80px_rgba(15,23,42,0.08)]"
     >
       <div class="grid gap-4">
-        <div class="flex items-center justify-between gap-4">
-          <div class="text-[16px] font-normal leading-none text-black">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-[16px] font-bold leading-none text-black">
             Туристы
           </div>
 
@@ -188,18 +209,44 @@ function resetToInitial() {
               v-if="draftChildrenAges.length > 0"
               class="grid gap-3"
           >
+            <div class="text-[12px] font-bold leading-[1.2] text-black">
+              Возраст детей
+            </div>
+
             <div
                 v-for="(age, index) in draftChildrenAges"
                 :key="`child-age-${index}`"
-                class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
+                class="grid gap-3"
             >
-              <div class="text-[12px] font-normal leading-[1.2] text-[#3f3f46]">
-                Ребенок {{ index + 1 }}
+              <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                <div class="text-[12px] font-normal leading-[1.2] text-[#3f3f46]">
+                  Ребенок {{ index + 1 }}
+                </div>
+
+                <button
+                    type="button"
+                    class="min-w-[70px] cursor-pointer rounded-[6px] bg-[#F5F5F5] px-3 py-2 text-[12px] font-normal leading-none text-black transition-colors hover:bg-primary hover:text-primary-foreground"
+                    @click="toggleChildAgeGrid(index)"
+                >
+                  {{ formatChildAge(age) }}
+                </button>
               </div>
 
-              <Button class="h-10 min-w-[96px] rounded-[14px] bg-[#F5F5F5] px-3 text-[12px] font-normal text-black hover:bg-[#ededed]">
-                {{ age }} лет
-              </Button>
+              <div
+                  v-if="activeChildAgeGridIndex === index"
+                  class="grid grid-cols-6 gap-1 rounded-[12px] bg-white p-0"
+              >
+                <button
+                    v-for="childAge in CHILD_AGE_OPTIONS"
+                    :key="childAge"
+                    type="button"
+                    class="flex size-[35px] items-center justify-center rounded-[8px] border border-transparent bg-[#F5F5F5] px-2 py-1 text-[12px] font-normal leading-none text-black transition-colors hover:bg-primary hover:text-primary-foreground"
+                    :class="childAge === age ? 'bg-primary text-primary-foreground' : ''"
+                    @click="updateChildAge(index, String(childAge))"
+                >
+                  {{ childAge === 0 ? "0" : childAge }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -208,7 +255,7 @@ function resetToInitial() {
 
         <Button
             type="button"
-            class="h-12 w-full rounded-[18px] bg-[#4a96cf] text-[12px] font-normal text-white hover:bg-[#3b89c3]"
+            class="w-full rounded-[8px] bg-primary px-4 py-2 text-[16px] font-normal text-primary-foreground hover:bg-primary/90"
             @click="applyDraft"
         >
           Применить

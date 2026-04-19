@@ -33,13 +33,13 @@ function increment() {
       {{ label }}
     </span>
 
-    <div class="inline-flex items-center gap-3">
+    <div class="inline-flex items-center gap-[12px]">
       <Button
         type="button"
         variant="ghost"
         size="icon-lg"
         :disabled="decrementDisabled"
-        class="size-6 rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] hover:bg-[#ededed] hover:text-[#2f2f35]"
+        class="size-6 cursor-pointer rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] transition-colors hover:bg-primary hover:text-primary-foreground"
         @click="decrement"
       >
         <MinusIcon class="size-2.5" />
@@ -54,7 +54,7 @@ function increment() {
         variant="ghost"
         size="icon-lg"
         :disabled="incrementDisabled"
-        class="size-6 rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] hover:bg-[#ededed] hover:text-[#2f2f35]"
+        class="size-6 cursor-pointer rounded-[8px] bg-[#f5f5f5] p-0 text-[#2f2f35] transition-colors hover:bg-primary hover:text-primary-foreground"
         @click="increment"
       >
         <PlusIcon class="size-2.5" />

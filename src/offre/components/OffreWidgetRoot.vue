@@ -14,6 +14,7 @@ import {useOffreProductsQuery} from "offre/composables/useOffreProductsQuery";
 import {useOffreWidgetUiState} from "offre/composables/useOffreWidgetUiState";
 import {useOffreWidgetListState} from "offre/composables/useOffreWidgetListState";
 import {getWidgetHotelId} from "offre/lib/payload";
+import {stableStringify} from "shared/lib/stable-stringify";
 import type {OffreWidgetRootProps} from "shared/types/widget";
 import {
   Pagination,
@@ -69,6 +70,13 @@ const hotelOrderById = computed(() => {
     return accumulator;
   }, new Map<string, number>());
 });
+const guestsPersistenceKey = computed(() => {
+  return stableStringify({
+    brandKey: props.brandKey,
+    hotels: props.hotelsList.map((hotelEntry) => getWidgetHotelId(hotelEntry)),
+    options: props.options
+  });
+});
 
 const {
   selectedGuests,
@@ -77,7 +85,8 @@ const {
   handleGuestsApply,
   handleGuestsReset
 } = useOffreWidgetUiState({
-  optionsSource: options
+  optionsSource: options,
+  storageKeySource: guestsPersistenceKey
 });
 
 const {
