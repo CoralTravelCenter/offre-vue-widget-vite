@@ -47,9 +47,9 @@ useEventListener("scroll", () => {
     <PopoverContent
       side="top"
       align="center"
-      class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-white px-3 py-0"
+      class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-brand-card px-3 py-0"
     >
-      <div class="offre-cashback-popover__body text-foreground">
+      <div class="offre-cashback-popover__body text-brand-foreground">
         <div class="offre-cashback-popover__list flex flex-col font-semibold">
           <div
             v-for="promo in cashbackInfo.listOfPromos"
@@ -62,7 +62,7 @@ useEventListener("scroll", () => {
             <a
               v-if="promo.content_link"
               :href="promo.content_link"
-              class="offre-cashback-popover__description cursor-pointer text-right underline decoration-1 underline-offset-2 hover:text-primary"
+              class="offre-cashback-popover__description cursor-pointer text-right underline decoration-1 underline-offset-2 hover:text-brand-primary"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -82,7 +82,7 @@ useEventListener("scroll", () => {
             </div>
             <a
               href="https://coralbonus.ru/registration?promo=R3R5VO93GKG8N1PGQC1UP0G6EICQLRWEN3Z64WZGC4YBYIKHFJV55IND5O20WUJ"
-              class="offre-cashback-popover__activate inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 py-1.5 text-primary-foreground hover:bg-primary/90 active:bg-primary/80"
+              class="offre-cashback-popover__activate inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-brand-primary px-3 py-1.5 text-brand-primary-foreground hover:bg-brand-primary/90 active:bg-brand-primary/80"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -101,15 +101,15 @@ useEventListener("scroll", () => {
 }
 
 .offre-cashback-popover__content {
-  box-shadow: var(--offre-shadow-popover);
+  box-shadow: var(--brand-shadow-popover);
 }
 
 .offre-cashback-popover__list {
-  font-size: var(--offre-text-meta);
+  font-size: var(--brand-text-meta);
 }
 
 .offre-cashback-popover__row {
-  border-color: var(--offre-border-popover-row);
+  border-color: var(--brand-border-popover-row);
 }
 
 .offre-cashback-popover__description,

@@ -21,12 +21,12 @@ const emit = defineEmits<{
 <template>
 	<div
 			:class="mobile
-      ? 'pointer-events-auto relative grid w-[min(360px,100%)] max-w-[calc(100%-16px)] rounded-[12px] border border-[#f0f0f0] bg-white p-1.5 shadow-[0_10px_28px_rgba(15,23,42,0.14)]'
-      : 'pointer-events-auto grid w-max max-w-[calc(100vw-32px)] rounded-[12px] border border-[#f0f0f0] bg-white p-1.5 shadow-[0_10px_28px_rgba(15,23,42,0.14)]'"
+      ? 'pointer-events-auto relative grid w-[min(360px,100%)] max-w-[calc(100%-16px)] rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover'
+      : 'pointer-events-auto grid w-max max-w-[calc(100vw-32px)] rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover'"
 	>
 		<button
 				type="button"
-				class="absolute right-2 top-2 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border border-[#d9d9d9] bg-white p-0 text-[14px]"
+				class="absolute right-2 top-2 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border border-brand-control-border bg-brand-card p-0 text-[14px]"
 				aria-label="Закрыть"
 				@click.stop="emit('close')"
 		>
@@ -49,16 +49,16 @@ const emit = defineEmits<{
 			<div class="grid min-w-0 gap-1.5">
 				<div
 						v-if="model.starItems.length"
-						class="flex gap-0.5 leading-none text-[#fadb14]"
+						class="flex gap-0.5 leading-none text-brand-star"
 				>
 					<StarIcon
 							v-for="(isFilled, index) in model.starItems"
 							:key="`overlay-star-${index}`"
-							:class="isFilled ? 'h-4 w-4 fill-current text-[#fadb14]' : 'h-4 w-4 text-border'"
+							:class="isFilled ? 'h-4 w-4 fill-current text-brand-star' : 'h-4 w-4 text-brand-border'"
 					/>
 				</div>
 
-				<div class="pr-5 text-[14px] font-semibold leading-[1.2] text-[#262626]">
+				<div class="pr-5 text-[14px] font-semibold leading-[1.2] text-brand-foreground">
 					{{ model.point.hotelName }}
 				</div>
 
@@ -72,13 +72,13 @@ const emit = defineEmits<{
 					<div class="grid min-w-0 gap-0">
 						<div
 								v-if="model.point.currentPriceLabel"
-								class="text-[18px] font-semibold leading-[22px] text-primary"
+								class="text-[18px] font-semibold leading-[22px] text-brand-primary"
 						>
 							{{ model.point.currentPriceLabel }}
 						</div>
 						<div
 								v-if="model.point.currentPriceLabel && model.point.priceSuffix"
-								class="text-[12px] leading-4 text-primary"
+								class="text-[12px] leading-4 text-brand-primary"
 						>
 							{{ model.point.priceSuffix }}
 						</div>

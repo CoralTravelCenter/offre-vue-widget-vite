@@ -17,17 +17,16 @@ defineProps<Props>()
 	<div class="offre-city-select flex-1">
 		<Select v-model="modelValue" :disabled="disabled">
 			<SelectTrigger
-					class="offre-city-select__trigger w-full cursor-pointer rounded-lg border text-sm"
+					class="offre-city-select__trigger w-full bg-background"
 			>
 				<SelectValue :placeholder="placeholder"/>
 			</SelectTrigger>
-			<SelectContent :body-lock="false" class="offre-city-select__content rounded-lg">
+			<SelectContent :body-lock="false" class="offre-city-select__content">
 				<SelectItem
 						v-for="option in options"
 						:key="option.id"
 						:value="option.id"
 						:text-value="option.label"
-						class="offre-city-select__item"
 				>
 					{{ option.label }}
 				</SelectItem>
@@ -47,34 +46,5 @@ defineProps<Props>()
 		width: 180px;
 		flex: none;
 	}
-}
-
-.offre-city-select__content {
-	padding: 8px;
-}
-
-.offre-city-select__trigger:hover {
-	border-color: rgb(74 158 212);
-	color: rgb(74 158 212);
-}
-
-.offre-city-select__item {
-	border-radius: 8px;
-	color: #262626;
-	transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.offre-city-select__trigger {
-	transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.offre-city-select__item[data-highlighted] {
-	background-color: transparent;
-	color: rgb(74 158 212);
-}
-
-.offre-city-select__item[data-state="checked"] {
-	background-color: #e5f7ff;
-	color: rgb(74 158 212);
 }
 </style>

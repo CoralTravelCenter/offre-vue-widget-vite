@@ -21,7 +21,7 @@ withDefaults(defineProps<Props>(), {
 				>
 			</div>
 			<div class="offre-cashback-banner__title flex flex-col mr-auto">
-				<span class="offre-cashback-banner__amount font-medium text-black">Кешбэк до {{ amountLabel }}</span>
+				<span class="offre-cashback-banner__amount font-medium text-brand-foreground">Кешбэк до {{ amountLabel }}</span>
 				<span class="offre-cashback-banner__subtitle-text">на карту CoralBonus</span>
 			</div>
 			<CashbackHintIcon class="offre-cashback-banner__hint h-5 w-5 shrink-0"/>
@@ -31,12 +31,12 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped lang="scss">
 .offre-cashback-banner {
-  background: var(--offre-color-warning);
-  border-radius: var(--offre-radius-badge);
+  background: var(--brand-warning);
+  border-radius: var(--brand-radius-badge);
 }
 
 .offre-cashback-banner__amount {
-  font-size: var(--offre-text-body);
+  font-size: var(--brand-text-body);
   line-height: 1rem;
 }
 
@@ -54,7 +54,7 @@ withDefaults(defineProps<Props>(), {
 
 	88% {
 		transform: scale(1.04);
-		filter: drop-shadow(0 0 6px var(--offre-glow-bonus-strong));
+		filter: drop-shadow(0 0 6px var(--brand-glow-bonus-strong));
 	}
 
 	90% {
@@ -64,7 +64,7 @@ withDefaults(defineProps<Props>(), {
 
 	92% {
 		transform: scale(1.03);
-		filter: drop-shadow(0 0 5px var(--offre-glow-bonus-soft));
+		filter: drop-shadow(0 0 5px var(--brand-glow-bonus-soft));
 	}
 
 	94% {

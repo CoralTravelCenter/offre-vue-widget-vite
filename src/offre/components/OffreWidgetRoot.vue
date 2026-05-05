@@ -197,7 +197,7 @@ const mapViewKey = computed(() => {
   <div class="offre-widget-container">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation bg-white py-2"
+        class="offre-widget-navigation bg-brand-card py-2"
     >
       <RegionTabsNav
           :model-value="activeRegionId"
@@ -234,14 +234,14 @@ const mapViewKey = computed(() => {
 
       <div
           v-else-if="productsError"
-          class="offre-widget-state offre-widget-state--error rounded-2xl border bg-white px-4 py-6 text-sm text-destructive"
+          class="offre-widget-state offre-widget-state--error rounded-2xl border border-brand-border bg-brand-card px-4 py-6 text-sm text-brand-destructive"
       >
         Ошибка загрузки туров
       </div>
 
       <div
           v-else-if="noMatchedProducts"
-          class="offre-widget-state offre-widget-state--empty rounded-2xl border bg-white px-4 py-6 text-sm text-muted-foreground"
+          class="offre-widget-state offre-widget-state--empty rounded-2xl border border-brand-border bg-brand-card px-4 py-6 text-sm text-brand-muted-foreground"
       >
         По выбранным параметрам ничего не найдено
       </div>
@@ -274,7 +274,7 @@ const mapViewKey = computed(() => {
           >
             <PaginationPrevious
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
             >
               <ChevronLeftIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationPrevious>
@@ -289,21 +289,21 @@ const mapViewKey = computed(() => {
                   size="icon-lg"
                   :value="item.value"
                   :class="item.value === currentPage
-                  ? 'offre-widget-pagination__item size-10 rounded-lg border border-primary bg-primary p-0 text-primary-foreground hover:bg-primary hover:text-primary-foreground'
-                  : 'offre-widget-pagination__item size-10 rounded-lg border border-border bg-card p-0 text-foreground'"
+                  ? 'offre-widget-pagination__item size-10 rounded-lg border border-brand-primary bg-brand-primary p-0 text-brand-primary-foreground hover:bg-brand-primary hover:text-brand-primary-foreground'
+                  : 'offre-widget-pagination__item size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground'"
               >
                 {{ item.value }}
               </PaginationItem>
 
               <PaginationEllipsis
                   v-else
-                  class="offre-widget-pagination__ellipsis size-10 text-foreground"
+                  class="offre-widget-pagination__ellipsis size-10 text-brand-foreground"
               />
             </template>
 
             <PaginationNext
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-border bg-card p-0 text-foreground"
+                class="offre-widget-pagination__control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
             >
               <ChevronRightIcon class="offre-widget-pagination__icon size-4"/>
             </PaginationNext>
@@ -346,8 +346,8 @@ const mapViewKey = computed(() => {
 }
 
 .offre-widget-navigation {
-  background-color: #fff;
-  border-radius: 16px;
+  background-color: var(--brand-card);
+  border-radius: var(--brand-radius-chip);
   display: grid;
   grid-template-columns: 1fr min-content;
   gap: 8px;
@@ -367,7 +367,7 @@ const mapViewKey = computed(() => {
 }
 
 .offre-widget-navigation.sticked {
-  box-shadow: 0 0 14px rgba(0, 0, 0, 0.14);
+  box-shadow: var(--brand-shadow-widget);
 }
 
 .nav {
@@ -376,9 +376,9 @@ const mapViewKey = computed(() => {
 
 .offre-widget-pagination__control:hover,
 .offre-widget-pagination__item:not([data-selected]):hover {
-  background-color: #fff;
-  border-color: rgb(74 158 212);
-  color: rgb(74 158 212);
+  background-color: var(--brand-card);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
 }
 
 </style>

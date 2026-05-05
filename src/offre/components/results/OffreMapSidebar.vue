@@ -43,11 +43,11 @@ function handleSearchInput(event: Event) {
 </script>
 
 <template>
-  <aside class="absolute bottom-4 left-4 top-4 z-[30] hidden w-[300px] overflow-hidden rounded-[14px] border border-[#f0f0f0] bg-[rgba(255,255,255,0.94)] shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-[10px] lg:flex lg:flex-col">
+  <aside class="absolute bottom-4 left-4 top-4 z-[30] hidden w-[300px] overflow-hidden rounded-[14px] border border-brand-border bg-brand-card/95 shadow-brand-popover backdrop-blur-[10px] lg:flex lg:flex-col">
     <div class="grid gap-[10px] px-3 pb-2 pt-3">
       <div class="flex items-center justify-between gap-3">
-        <div class="text-[15px] font-semibold leading-[18px] text-[#262626]">Отели на карте</div>
-        <div class="rounded-full border border-[#f0f0f0] bg-[#fafafa] px-2 py-[1px] text-[12px] leading-[18px] text-[#8c8c8c]">
+        <div class="text-[15px] font-semibold leading-[18px] text-brand-foreground">Отели на карте</div>
+        <div class="rounded-full border border-brand-border bg-brand-muted px-2 py-[1px] text-[12px] leading-[18px] text-brand-muted-foreground">
           <template v-if="isUpdatingPrices && mapOfferMode === 'hotel'">обновляем...</template>
           <template v-else>{{ points.length }}</template>
         </div>
@@ -65,7 +65,7 @@ function handleSearchInput(event: Event) {
         :value="localSearchQuery"
         type="text"
         placeholder="Поиск отеля"
-        class="block h-9 w-full appearance-none rounded-[8px] border border-[#f0f0f0] bg-[#fafafa] px-[10px] text-[13px] leading-[18px] text-[#262626] outline-none transition-[border-color,background-color] duration-150 ease-[ease] placeholder:text-[#bfbfbf] focus:border-[rgb(74_158_212)] focus:bg-white"
+        class="block h-9 w-full appearance-none rounded-[8px] border border-brand-border bg-brand-muted px-[10px] text-[13px] leading-[18px] text-brand-foreground outline-none transition-[border-color,background-color] duration-150 ease-[ease] placeholder:text-brand-muted-foreground focus:border-brand-primary focus:bg-brand-card"
         @input="handleSearchInput"
       >
     </label>
@@ -76,8 +76,8 @@ function handleSearchInput(event: Event) {
         :key="`list-${point.key}`"
         type="button"
         :class="[
-          'grid w-full grid-cols-[56px_minmax(0,1fr)] items-stretch gap-2 rounded-[10px] border border-[#f0f0f0] bg-[rgba(255,255,255,0.92)] p-1.5 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-[rgb(74_158_212)] hover:bg-white',
-          activeHotelId === point.hotelId ? 'border-[rgb(74_158_212)] bg-white' : ''
+          'grid w-full grid-cols-[56px_minmax(0,1fr)] items-stretch gap-2 rounded-[10px] border border-brand-border bg-brand-card/90 p-1.5 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-brand-primary hover:bg-brand-card',
+          activeHotelId === point.hotelId ? 'border-brand-primary bg-brand-card' : ''
         ]"
         @click="emit('focus', point.hotelId)"
       >
@@ -93,18 +93,18 @@ function handleSearchInput(event: Event) {
         </div>
 
         <div class="grid min-w-0 gap-0.5">
-          <div class="overflow-hidden text-[13px] font-semibold leading-4 text-[#262626] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+          <div class="overflow-hidden text-[13px] font-semibold leading-4 text-brand-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
             {{ point.hotelName }}
           </div>
           <div
             v-if="point.locationLabel"
-            class="text-[11px] leading-[15px] text-[#8c8c8c]"
+            class="text-[11px] leading-[15px] text-brand-muted-foreground"
           >
             {{ point.locationLabel }}
           </div>
           <div
             v-if="point.currentPriceLabel"
-            class="mt-px text-[14px] font-semibold leading-[18px] text-[var(--primary)]"
+            class="mt-px text-[14px] font-semibold leading-[18px] text-brand-primary"
           >
             {{ point.currentPriceLabel }}
           </div>
@@ -113,7 +113,7 @@ function handleSearchInput(event: Event) {
 
       <div
         v-if="!points.length"
-        class="px-0 py-6 text-center text-[14px] leading-5 text-[#8c8c8c]"
+        class="px-0 py-6 text-center text-[14px] leading-5 text-brand-muted-foreground"
       >
         Ничего не найдено
       </div>

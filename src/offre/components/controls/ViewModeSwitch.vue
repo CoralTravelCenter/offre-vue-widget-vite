@@ -35,8 +35,8 @@ function toggleViewMode() {
 
   &:hover {
     background-color: transparent;
-    border-color: rgb(74 158 212);
-    color: rgb(74 158 212);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
   }
 }
 </style>

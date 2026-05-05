@@ -37,7 +37,7 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 
 <template>
   <div
-    class="offre-offer-pricing-panel mt-auto flex min-w-0 flex-col gap-2 overflow-visible border-t border-border pt-2"
+    class="offre-offer-pricing-panel mt-auto flex min-w-0 flex-col gap-2 overflow-visible border-t border-brand-border pt-2"
   >
     <OffreTourTypeTabs
       v-model="modelValue"
@@ -69,26 +69,26 @@ const modelValue = defineModel<OffreTourType>({ required: true });
     <template v-else>
       <div class="offre-offer-pricing-panel__tour-info">
         <div class="offre-offer-pricing-panel__pricing relative overflow-visible">
-          <div class="offre-offer-pricing-panel__caption text-muted-foreground">
+          <div class="offre-offer-pricing-panel__caption text-brand-muted-foreground">
             цена от:
           </div>
 
           <div
             v-if="oldPriceLabel"
-            class="offre-offer-pricing-panel__old-price text-muted-foreground decoration-destructive line-through"
+            class="offre-offer-pricing-panel__old-price text-brand-muted-foreground decoration-brand-destructive line-through"
           >
             {{ oldPriceLabel }}
           </div>
 
           <div class="offre-offer-pricing-panel__price-row flex flex-wrap items-baseline gap-1">
-            <div class="offre-offer-pricing-panel__current-price font-semibold text-primary">
+            <div class="offre-offer-pricing-panel__current-price font-semibold text-brand-primary">
               {{ currentPriceLabel || "Цена по запросу" }}
             </div>
           </div>
 
           <div
             v-if="currentPriceLabel && priceSuffix"
-            class="offre-offer-pricing-panel__price-suffix text-primary"
+            class="offre-offer-pricing-panel__price-suffix text-brand-primary"
           >
             {{ priceSuffix }}
           </div>
@@ -138,9 +138,9 @@ const modelValue = defineModel<OffreTourType>({ required: true });
   position: absolute;
   top: 50%;
   right: 0;
-  background: var(--offre-color-discount);
-  border-radius: var(--offre-radius-badge);
-  font-size: var(--offre-text-meta);
+  background: var(--brand-discount);
+  border-radius: var(--brand-radius-badge);
+  font-size: var(--brand-text-meta);
   transform: translateY(-50%);
   z-index: 1;
   padding-left: 12px;
@@ -168,12 +168,12 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 }
 
 .offre-offer-pricing-panel__caption {
-  font-size: var(--offre-text-caption);
+  font-size: var(--brand-text-caption);
   line-height: 0.875rem;
 }
 
 .offre-offer-pricing-panel__old-price {
-  font-size: var(--offre-text-body);
+  font-size: var(--brand-text-body);
   line-height: 1.375rem;
 }
 
@@ -184,11 +184,11 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 }
 
 .offre-offer-pricing-panel__current-price {
-  font-size: var(--offre-text-price);
+  font-size: var(--brand-text-price);
 }
 
 .offre-offer-pricing-panel__price-suffix {
-  font-size: var(--offre-text-price-suffix);
+  font-size: var(--brand-text-price-suffix);
   line-height: 1rem;
   margin-top: 2px;
   white-space: nowrap;
@@ -227,7 +227,7 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 }
 
 .offre-offer-pricing-panel__loading-discount {
-  border-radius: var(--offre-radius-badge);
+  border-radius: var(--brand-radius-badge);
   height: 28px;
   position: absolute;
   right: 0;
@@ -237,15 +237,15 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 }
 
 .offre-offer-pricing-panel__loading-cashback {
-  border-radius: var(--offre-radius-badge);
+  border-radius: var(--brand-radius-badge);
   height: 50px;
   width: 100%;
 }
 
 .offre-offer-pricing-panel__action {
-  border-radius: var(--offre-radius-button);
-  font-size: var(--offre-text-button);
-  line-height: var(--offre-leading-button);
+  border-radius: var(--brand-radius-button);
+  font-size: var(--brand-text-button);
+  line-height: var(--brand-leading-button);
 }
 
 .offre-offer-pricing-panel__tour-info {

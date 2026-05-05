@@ -154,10 +154,10 @@ function resetToInitial() {
           type="button"
           variant="outline"
           :disabled="disabled"
-          class="flex size-10 min-h-10 min-w-10 items-center justify-center rounded-[10px] border-(--offre-color-chip-border) bg-transparent p-0 text-foreground shadow-none transition-[border-color,color,background-color] hover:border-[#4a9ed4] hover:bg-transparent hover:text-[#4a9ed4] lg:w-auto lg:min-w-0 lg:gap-2 lg:px-3"
+          class="flex size-10 min-h-10 min-w-10 items-center justify-center rounded-[10px] border-brand-chip-border bg-transparent p-0 text-brand-foreground shadow-none transition-[border-color,color,background-color] hover:border-brand-primary hover:bg-transparent hover:text-brand-primary lg:w-auto lg:min-w-0 lg:gap-2 lg:px-3"
           aria-label="Изменить состав туристов"
       >
-        <UsersIcon class="size-4 shrink-0 text-[#262626] transition-colors lg:hidden"/>
+        <UsersIcon class="size-4 shrink-0 text-brand-foreground transition-colors lg:hidden"/>
         <span class="hidden text-sm lg:inline">Туристы</span>
       </Button>
     </PopoverTrigger>
@@ -166,17 +166,17 @@ function resetToInitial() {
         side="top"
         align="end"
         :side-offset="12"
-        class="min-w-75 w-auto max-w-[calc(100vw-24px)] rounded-3xl border-[#e9e9e7] bg-white p-4 shadow-[0_20px_80px_rgba(15,23,42,0.08)]"
+        class="min-w-75 w-auto max-w-[calc(100vw-24px)] rounded-3xl border-brand-border bg-brand-card p-4 shadow-brand-popover"
     >
       <div class="grid gap-4">
         <div class="flex items-center justify-between gap-3">
-          <div class="text-[16px] font-bold leading-none text-black">
+          <div class="text-[16px] font-bold leading-none text-brand-foreground">
             Туристы
           </div>
 
           <button
               type="button"
-              class="text-[12px] font-normal leading-none text-[#4a9ed4] transition-colors hover:text-[#3277b2] disabled:pointer-events-none disabled:opacity-40"
+              class="text-[12px] font-normal leading-none text-brand-primary transition-colors hover:text-brand-primary/80 disabled:pointer-events-none disabled:opacity-40"
               :disabled="!canReset"
               @click="resetToInitial"
           >
@@ -184,7 +184,7 @@ function resetToInitial() {
           </button>
         </div>
 
-        <Separator class="bg-[#ecebe8]"/>
+        <Separator class="bg-brand-border"/>
 
         <OffreOfferGuestsStepper
             label="Взрослых"
@@ -194,7 +194,7 @@ function resetToInitial() {
             @update:model-value="updateAdultsCount"
         />
 
-        <Separator class="bg-[#ecebe8]"/>
+        <Separator class="bg-brand-border"/>
 
         <div class="grid gap-4">
           <OffreOfferGuestsStepper
@@ -209,7 +209,7 @@ function resetToInitial() {
               v-if="draftChildrenAges.length > 0"
               class="grid gap-3"
           >
-            <div class="text-[12px] font-bold leading-[1.2] text-black">
+            <div class="text-[12px] font-bold leading-[1.2] text-brand-foreground">
               Возраст детей
             </div>
 
@@ -219,13 +219,13 @@ function resetToInitial() {
                 class="grid gap-3"
             >
               <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-                <div class="text-[12px] font-normal leading-[1.2] text-[#3f3f46]">
+                <div class="text-[12px] font-normal leading-[1.2] text-brand-foreground/80">
                   Ребенок {{ index + 1 }}
                 </div>
 
                 <button
                     type="button"
-                    class="min-w-[70px] cursor-pointer rounded-[6px] bg-[#F5F5F5] px-3 py-2 text-[12px] font-normal leading-none text-black transition-colors hover:bg-primary hover:text-primary-foreground"
+                    class="min-w-[70px] cursor-pointer rounded-[6px] bg-brand-muted px-3 py-2 text-[12px] font-normal leading-none text-brand-foreground transition-colors hover:bg-brand-primary hover:text-brand-primary-foreground"
                     @click="toggleChildAgeGrid(index)"
                 >
                   {{ formatChildAge(age) }}
@@ -234,14 +234,14 @@ function resetToInitial() {
 
               <div
                   v-if="activeChildAgeGridIndex === index"
-                  class="grid grid-cols-6 gap-1 rounded-[12px] bg-white p-0"
+                  class="grid grid-cols-6 gap-1 rounded-[12px] bg-brand-card p-0"
               >
                 <button
                     v-for="childAge in CHILD_AGE_OPTIONS"
                     :key="childAge"
                     type="button"
-                    class="flex size-[35px] items-center justify-center rounded-[8px] border border-transparent bg-[#F5F5F5] px-2 py-1 text-[12px] font-normal leading-none text-black transition-colors hover:bg-primary hover:text-primary-foreground"
-                    :class="childAge === age ? 'bg-primary text-primary-foreground' : ''"
+                    class="flex size-[35px] items-center justify-center rounded-[8px] border border-transparent bg-brand-muted px-2 py-1 text-[12px] font-normal leading-none text-brand-foreground transition-colors hover:bg-brand-primary hover:text-brand-primary-foreground"
+                    :class="childAge === age ? 'bg-brand-primary text-brand-primary-foreground' : ''"
                     @click="updateChildAge(index, String(childAge))"
                 >
                   {{ childAge === 0 ? "0" : childAge }}
@@ -251,11 +251,11 @@ function resetToInitial() {
           </div>
         </div>
 
-        <Separator class="bg-[#ecebe8]"/>
+        <Separator class="bg-brand-border"/>
 
         <Button
             type="button"
-            class="w-full rounded-[8px] bg-primary px-4 py-2 text-[16px] font-normal text-primary-foreground hover:bg-primary/90"
+            class="w-full rounded-[8px] bg-brand-primary px-4 py-2 text-[16px] font-normal text-brand-primary-foreground hover:bg-brand-primary/90"
             @click="applyDraft"
         >
           Применить

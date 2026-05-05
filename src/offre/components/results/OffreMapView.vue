@@ -285,17 +285,17 @@ onMounted(async () => {
 </script>
 
 <template>
-	<section class="overflow-hidden rounded-2xl bg-white">
+	<section class="overflow-hidden rounded-2xl bg-brand-card">
 		<div
 				v-if="!ymapsInitialized"
-				class="px-4 py-12 text-center text-[14px] leading-[22px] text-[#8c8c8c]"
+				class="px-4 py-12 text-center text-[14px] leading-[22px] text-brand-muted-foreground"
 		>
 			Загрузка карты...
 		</div>
 
 		<div
 				v-else-if="!hasMapPoints"
-				class="px-4 py-12 text-center text-[14px] leading-[22px] text-[#8c8c8c]"
+				class="px-4 py-12 text-center text-[14px] leading-[22px] text-brand-muted-foreground"
 		>
 			Для выбранных офферов нет координат отелей
 		</div>

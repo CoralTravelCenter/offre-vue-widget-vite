@@ -3,7 +3,7 @@ import {Skeleton} from "ui/skeleton";
 </script>
 
 <template>
-  <article class="offre-offer-card-skeleton border border-border bg-white p-2" aria-hidden="true">
+  <article class="offre-offer-card-skeleton border border-brand-border bg-brand-card p-2" aria-hidden="true">
     <div class="offre-offer-card-skeleton__media">
       <Skeleton class="offre-offer-card-skeleton__image"/>
 
@@ -62,14 +62,14 @@ import {Skeleton} from "ui/skeleton";
 
 <style scoped lang="scss">
 .offre-offer-card-skeleton {
-  border-radius: var(--offre-radius-card);
+  border-radius: var(--brand-radius-card);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
 
   &__media {
-    border-radius: var(--offre-radius-media);
+    border-radius: var(--brand-radius-media);
     overflow: hidden;
     position: relative;
   }
@@ -174,7 +174,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__usp-list {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--brand-border);
     display: grid;
     gap: 8px;
     margin-top: 12px;
@@ -214,7 +214,7 @@ import {Skeleton} from "ui/skeleton";
 
   &__tour-type-item {
     background-color: #e5e7eb;
-    border-radius: var(--offre-radius-segment);
+    border-radius: var(--brand-radius-segment);
     height: 32px;
     width: 100%;
   }
@@ -248,7 +248,7 @@ import {Skeleton} from "ui/skeleton";
 
   &__discount {
     background-color: #e5e7eb;
-    border-radius: var(--offre-radius-badge);
+    border-radius: var(--brand-radius-badge);
     height: 28px;
     position: absolute;
     right: 0;
@@ -259,14 +259,14 @@ import {Skeleton} from "ui/skeleton";
 
   &__cashback {
     background-color: #e5e7eb;
-    border-radius: var(--offre-radius-badge);
+    border-radius: var(--brand-radius-badge);
     height: 50px;
     width: 100%;
   }
 
   &__button {
     background-color: #e5e7eb;
-    border-radius: var(--offre-radius-button);
+    border-radius: var(--brand-radius-button);
     height: 48px;
     width: 100%;
   }
@@ -345,7 +345,7 @@ import {Skeleton} from "ui/skeleton";
 
     &__aside {
       align-self: stretch;
-      border-left: 1px solid #e5e7eb;
+      border-left: 1px solid var(--brand-border);
       justify-content: space-between;
       min-height: 100%;
       padding-left: 12px;

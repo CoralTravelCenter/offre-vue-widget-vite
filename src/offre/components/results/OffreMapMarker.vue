@@ -46,7 +46,7 @@ const markerIconSrc = computed(() => {
 
     <div
       v-if="priceLabel && !isOpen"
-      class="pointer-events-none absolute left-[24px] top-0 rounded-full bg-[rgba(255,255,255,0.92)] px-[6px] py-[4px] text-[11px] leading-none whitespace-nowrap text-[#262626] shadow-[0_1px_2px_rgba(0,0,0,0.16)] backdrop-blur-[4px]"
+      class="pointer-events-none absolute left-[24px] top-0 rounded-full bg-brand-card/90 px-[6px] py-[4px] text-[11px] leading-none whitespace-nowrap text-brand-foreground shadow-[0_1px_2px_rgba(0,0,0,0.16)] backdrop-blur-[4px]"
     >
       {{ priceLabel }}
     </div>

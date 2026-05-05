@@ -5,7 +5,7 @@ import { Skeleton } from "ui/skeleton";
 <template>
   <section
     aria-hidden="true"
-    class="overflow-hidden rounded-[24px] bg-white"
+    class="overflow-hidden rounded-[24px] bg-brand-card"
   >
     <div class="relative min-h-[500px] overflow-hidden lg:h-[520px] lg:min-h-0">
       <div class="absolute inset-0 h-full bg-[linear-gradient(180deg,#eef6fb_0%,#f7fbfd_100%)]">
@@ -16,7 +16,7 @@ import { Skeleton } from "ui/skeleton";
         <Skeleton class="absolute left-[48%] top-[66%] h-7 w-[72px] rounded-full bg-[#d7ecfb]" />
       </div>
 
-      <div class="absolute bottom-4 left-4 top-4 z-[2] hidden w-[23%] max-w-[300px] overflow-hidden rounded-[14px] border border-[#f0f0f0] bg-[rgba(255,255,255,0.96)] shadow-[0_8px_22px_rgba(0,0,0,0.08)] lg:block">
+      <div class="absolute bottom-4 left-4 top-4 z-[2] hidden w-[23%] max-w-[300px] overflow-hidden rounded-[14px] border border-brand-border bg-brand-card/95 shadow-brand-popover lg:block">
         <div class="grid gap-[10px] px-3 pb-2 pt-3">
           <Skeleton class="h-[18px] w-32 bg-[#e5e7eb]" />
           <Skeleton class="h-8 w-full bg-[#e5e7eb]" />
@@ -28,7 +28,7 @@ import { Skeleton } from "ui/skeleton";
           <div
             v-for="index in 4"
             :key="index"
-            class="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded-[10px] border border-[#f0f0f0] bg-white p-1.5"
+            class="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded-[10px] border border-brand-border bg-brand-card p-1.5"
           >
             <Skeleton class="h-16 w-16 rounded-[8px] bg-[#e5e7eb]" />
             <div class="grid gap-1.5">
