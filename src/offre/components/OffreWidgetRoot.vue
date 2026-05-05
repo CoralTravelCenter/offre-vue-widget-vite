@@ -194,16 +194,16 @@ const mapViewKey = computed(() => {
 </script>
 
 <template>
-  <div class="offre-widget-container">
+  <div class="offre-widget">
     <div
         v-sticky="navigationStickyOptions"
-        class="offre-widget-navigation bg-brand-card py-2"
+        class="offre-widget__navigation bg-brand-card py-2"
     >
       <RegionTabsNav
           :model-value="activeRegionId"
           :isLoading="regionsLoading"
           :tabs="regionTabs"
-          class="offre-widget-navigation__tabs nav"
+          class="offre-widget__tabs"
           @update:model-value="setActiveRegion"
       />
       <OffreControls
@@ -223,25 +223,25 @@ const mapViewKey = computed(() => {
 
     <div
         v-show="viewMode === 'list'"
-        class="offre-widget-results mt-4"
+        class="offre-widget__results offre-widget__results--list mt-4"
     >
       <div
           v-if="requestState === 'loading'"
-          class="offre-widget-state offre-widget-state--loading"
+          class="offre-widget__state offre-widget__state--loading"
       >
         <OffreOffersListSkeleton />
       </div>
 
       <div
           v-else-if="productsError"
-          class="offre-widget-state offre-widget-state--error rounded-2xl border border-brand-border bg-brand-card px-4 py-6 text-sm text-brand-destructive"
+          class="offre-widget__state offre-widget__state--error border border-brand-border bg-brand-card px-4 py-6 text-brand-destructive"
       >
         Ошибка загрузки туров
       </div>
 
       <div
           v-else-if="noMatchedProducts"
-          class="offre-widget-state offre-widget-state--empty rounded-2xl border border-brand-border bg-brand-card px-4 py-6 text-sm text-brand-muted-foreground"
+          class="offre-widget__state offre-widget__state--empty border border-brand-border bg-brand-card px-4 py-6 text-brand-muted-foreground"
       >
         По выбранным параметрам ничего не найдено
       </div>
@@ -261,7 +261,7 @@ const mapViewKey = computed(() => {
 
         <Pagination
             v-if="hasPagination"
-            class="offre-widget-pagination mt-6"
+            class="offre-widget__pagination mt-6"
             v-model:page="currentPage"
             :items-per-page="PRODUCTS_PAGE_SIZE"
             :sibling-count="paginationSiblingCount"
@@ -270,13 +270,13 @@ const mapViewKey = computed(() => {
         >
           <PaginationContent
               v-slot="{ items }"
-              class="offre-widget-pagination__content gap-2"
+              class="offre-widget__pagination-content gap-2"
           >
             <PaginationPrevious
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
+                class="offre-widget__pagination-control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
             >
-              <ChevronLeftIcon class="offre-widget-pagination__icon size-4"/>
+              <ChevronLeftIcon class="offre-widget__pagination-icon size-4"/>
             </PaginationPrevious>
 
             <template
@@ -289,23 +289,23 @@ const mapViewKey = computed(() => {
                   size="icon-lg"
                   :value="item.value"
                   :class="item.value === currentPage
-                  ? 'offre-widget-pagination__item size-10 rounded-lg border border-brand-primary bg-brand-primary p-0 text-brand-primary-foreground hover:bg-brand-primary hover:text-brand-primary-foreground'
-                  : 'offre-widget-pagination__item size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground'"
+                  ? 'offre-widget__pagination-item size-10 rounded-lg border border-brand-primary bg-brand-primary p-0 text-brand-primary-foreground hover:bg-brand-primary hover:text-brand-primary-foreground'
+                  : 'offre-widget__pagination-item size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground'"
               >
                 {{ item.value }}
               </PaginationItem>
 
               <PaginationEllipsis
                   v-else
-                  class="offre-widget-pagination__ellipsis size-10 text-brand-foreground"
+                  class="offre-widget__pagination-ellipsis size-10 text-brand-foreground"
               />
             </template>
 
             <PaginationNext
                 size="icon-lg"
-                class="offre-widget-pagination__control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
+                class="offre-widget__pagination-control size-10 rounded-lg border border-brand-border bg-brand-card p-0 text-brand-foreground"
             >
-              <ChevronRightIcon class="offre-widget-pagination__icon size-4"/>
+              <ChevronRightIcon class="offre-widget__pagination-icon size-4"/>
             </PaginationNext>
           </PaginationContent>
         </Pagination>
@@ -315,7 +315,7 @@ const mapViewKey = computed(() => {
     <div
         v-if="hasActivatedMapView"
         v-show="viewMode === 'map'"
-        class="offre-widget-results mt-4"
+        class="offre-widget__results offre-widget__results--map mt-4"
     >
       <OffreMapViewSkeleton
           v-if="requestState === 'loading'"
@@ -335,17 +335,22 @@ const mapViewKey = computed(() => {
 </template>
 
 <style scoped lang="scss">
-.offre-widget-container,
-.offre-widget-results {
+.offre-widget,
+.offre-widget__results {
   overflow: visible;
 }
 
-.offre-widget-results {
+.offre-widget__results {
   margin-right: -16px;
   padding-right: 16px;
 }
 
-.offre-widget-navigation {
+.offre-widget__results--map {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.offre-widget__navigation {
   background-color: var(--brand-card);
   border-radius: var(--brand-radius-chip);
   display: grid;
@@ -359,23 +364,43 @@ const mapViewKey = computed(() => {
 }
 
 @media (min-width: 1024px) {
-  .offre-widget-navigation {
+  .offre-widget__navigation {
     align-items: center;
     grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-areas: "nav inputs switcher";
   }
 }
 
-.offre-widget-navigation.sticked {
+.offre-widget__navigation.sticked {
   box-shadow: var(--brand-shadow-widget);
 }
 
-.nav {
+.offre-widget__tabs {
   grid-area: nav;
 }
 
-.offre-widget-pagination__control:hover,
-.offre-widget-pagination__item:not([data-selected]):hover {
+.offre-widget__state {
+  border-radius: var(--brand-radius-panel);
+  font-size: var(--brand-text-body);
+  line-height: var(--brand-leading-control);
+}
+
+.offre-widget__pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.offre-widget__pagination-content {
+  align-items: center;
+}
+
+.offre-widget__pagination-control,
+.offre-widget__pagination-item {
+  border-radius: var(--brand-radius-button);
+}
+
+.offre-widget__pagination-control:hover,
+.offre-widget__pagination-item:not([data-selected]):hover {
   background-color: var(--brand-card);
   border-color: var(--brand-primary);
   color: var(--brand-primary);

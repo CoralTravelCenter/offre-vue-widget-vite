@@ -33,7 +33,11 @@ const itemWidths = computed(() => {
 </template>
 
 <style scoped lang="scss">
+.region-tabs-nav-skeleton {
+  --offre-region-tabs-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+}
+
 .region-tabs-nav-skeleton__item {
-  background-color: #e5e7eb;
+  background-color: var(--offre-region-tabs-skeleton-fill);
 }
 </style>

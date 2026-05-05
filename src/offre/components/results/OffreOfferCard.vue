@@ -128,13 +128,13 @@ const starItems = computed(() => {
 			<div class="offre-offer-card__badges absolute left-2.5 top-2.5 flex flex-col gap-2">
 				<Badge
 						v-if="isRecommended"
-						class="offre-offer-card__badge offre-offer-card__badge--recommended border-transparent bg-brand-card px-2 py-1 font-normal leading-none text-brand-foreground"
+						class="offre-offer-card__badge offre-offer-card__badge--recommended border-transparent bg-brand-card text-brand-foreground"
 				>
 					Рекомендуем
 				</Badge>
 				<Badge
 						v-if="isExclusive"
-						class="offre-offer-card__badge offre-offer-card__badge--exclusive border-transparent px-2 py-1 font-normal leading-none text-brand-primary-foreground"
+						class="offre-offer-card__badge offre-offer-card__badge--exclusive border-transparent text-brand-primary-foreground"
 				>
 					Эксклюзив
 				</Badge>
@@ -192,14 +192,14 @@ const starItems = computed(() => {
 				>
 					<Badge
 							v-if="isEliteHotel"
-							class="offre-offer-card__label offre-offer-card__label--elite inline-grid h-6 place-content-center border-transparent bg-black px-3 font-light leading-none text-white"
+							class="offre-offer-card__label offre-offer-card__label--elite inline-grid place-content-center border-transparent"
 					>
 						Elite Service
 					</Badge>
 
 					<Badge
 							v-if="hasFamilyClub"
-							class="offre-offer-card__label offre-offer-card__label--family inline-grid h-6 place-content-center border-transparent bg-brand-accent px-3 font-light leading-none text-brand-accent-foreground"
+							class="offre-offer-card__label offre-offer-card__label--family inline-grid place-content-center border-transparent bg-brand-accent text-brand-accent-foreground"
 					>
 						Family Club
 					</Badge>
@@ -253,6 +253,7 @@ const starItems = computed(() => {
 
 <style scoped lang="scss">
 .offre-offer-card {
+	--offre-offer-card-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
 	border-radius: var(--brand-radius-card);
 
 	@media (min-width: 1024px) {
@@ -288,7 +289,7 @@ const starItems = computed(() => {
 }
 
 .offre-offer-card__terms-skeleton-item {
-	background-color: #e5e7eb;
+	background-color: var(--offre-offer-card-skeleton-fill);
 	height: 16px;
 }
 
@@ -311,6 +312,9 @@ const starItems = computed(() => {
 .offre-offer-card__badge {
 	border-radius: var(--brand-radius-media);
 	font-size: var(--brand-text-meta);
+	font-weight: 400;
+	line-height: 1;
+	padding: 4px 8px;
 }
 
 .offre-offer-card__badge--exclusive {
@@ -344,6 +348,15 @@ const starItems = computed(() => {
 .offre-offer-card__label {
 	border-radius: var(--brand-radius-segment);
 	font-size: var(--brand-text-meta);
+	font-weight: 300;
+	height: 24px;
+	line-height: 1;
+	padding: 0 12px;
+}
+
+.offre-offer-card__label--elite {
+	background-color: var(--brand-foreground);
+	color: var(--brand-card);
 }
 
 .offre-offer-card__body {

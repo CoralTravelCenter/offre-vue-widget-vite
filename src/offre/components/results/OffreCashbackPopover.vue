@@ -45,6 +45,7 @@ useEventListener("scroll", () => {
     </PopoverTrigger>
 
     <PopoverContent
+      size="brand"
       side="top"
       align="center"
       class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-brand-card px-3 py-0"

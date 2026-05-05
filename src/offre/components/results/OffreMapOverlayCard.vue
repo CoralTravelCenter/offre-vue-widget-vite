@@ -20,13 +20,16 @@ const emit = defineEmits<{
 
 <template>
 	<div
-			:class="mobile
-      ? 'pointer-events-auto relative grid w-[min(360px,100%)] max-w-[calc(100%-16px)] rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover'
-      : 'pointer-events-auto grid w-max max-w-[calc(100vw-32px)] rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover'"
+			:class="[
+				'offre-map-overlay-card pointer-events-auto grid rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover',
+				mobile
+					? 'offre-map-overlay-card--mobile relative w-[min(360px,100%)] max-w-[calc(100%-16px)]'
+					: 'offre-map-overlay-card--desktop w-max max-w-[calc(100vw-32px)]'
+			]"
 	>
 		<button
 				type="button"
-				class="absolute right-2 top-2 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border border-brand-control-border bg-brand-card p-0 text-[14px]"
+				class="offre-map-overlay-card__close absolute right-2 top-2 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border border-brand-control-border bg-brand-card p-0 text-[14px]"
 				aria-label="Закрыть"
 				@click.stop="emit('close')"
 		>
@@ -34,22 +37,27 @@ const emit = defineEmits<{
 		</button>
 
 		<div
-				:class="mobile ? 'grid grid-cols-[112px_minmax(0,1fr)] gap-[10px]' : 'grid grid-cols-[112px_minmax(220px,1fr)] gap-[10px]'">
+				:class="[
+					'offre-map-overlay-card__content grid gap-[10px]',
+					mobile
+						? 'offre-map-overlay-card__content--mobile grid-cols-[112px_minmax(0,1fr)]'
+						: 'offre-map-overlay-card__content--desktop grid-cols-[112px_minmax(220px,1fr)]'
+				]">
 			<div
 					v-if="model.point.imageUrl"
-					class="overflow-hidden rounded-[10px]"
+					class="offre-map-overlay-card__media overflow-hidden rounded-[10px]"
 			>
 				<img
 						:src="model.point.imageUrl"
 						:alt="model.point.hotelName"
-						class="block h-full w-full object-cover"
+						class="offre-map-overlay-card__image block h-full w-full object-cover"
 				>
 			</div>
 
-			<div class="grid min-w-0 gap-1.5">
+			<div class="offre-map-overlay-card__body grid min-w-0 gap-1.5">
 				<div
 						v-if="model.starItems.length"
-						class="flex gap-0.5 leading-none text-brand-star"
+						class="offre-map-overlay-card__stars flex gap-0.5 leading-none text-brand-star"
 				>
 					<StarIcon
 							v-for="(isFilled, index) in model.starItems"
@@ -58,7 +66,7 @@ const emit = defineEmits<{
 					/>
 				</div>
 
-				<div class="pr-5 text-[14px] font-semibold leading-[1.2] text-brand-foreground">
+				<div class="offre-map-overlay-card__title pr-5 text-[14px] font-semibold leading-[1.2] text-brand-foreground">
 					{{ model.point.hotelName }}
 				</div>
 
@@ -68,17 +76,22 @@ const emit = defineEmits<{
 				/>
 
 				<div
-						:class="mobile ? 'grid gap-2 grid-cols-[minmax(0,1fr)]' : 'grid items-center gap-2 grid-cols-[minmax(0,1fr)_auto]'">
-					<div class="grid min-w-0 gap-0">
+						:class="[
+							'offre-map-overlay-card__footer grid gap-2',
+							mobile
+								? 'offre-map-overlay-card__footer--mobile grid-cols-[minmax(0,1fr)]'
+								: 'offre-map-overlay-card__footer--desktop items-center grid-cols-[minmax(0,1fr)_auto]'
+						]">
+					<div class="offre-map-overlay-card__pricing grid min-w-0 gap-0">
 						<div
 								v-if="model.point.currentPriceLabel"
-								class="text-[18px] font-semibold leading-[22px] text-brand-primary"
+								class="offre-map-overlay-card__price text-[18px] font-semibold leading-[22px] text-brand-primary"
 						>
 							{{ model.point.currentPriceLabel }}
 						</div>
 						<div
 								v-if="model.point.currentPriceLabel && model.point.priceSuffix"
-								class="text-[12px] leading-4 text-brand-primary"
+								class="offre-map-overlay-card__price-suffix text-[12px] leading-4 text-brand-primary"
 						>
 							{{ model.point.priceSuffix }}
 						</div>

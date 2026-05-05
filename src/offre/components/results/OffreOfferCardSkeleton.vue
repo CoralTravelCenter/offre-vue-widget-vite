@@ -62,6 +62,7 @@ import {Skeleton} from "ui/skeleton";
 
 <style scoped lang="scss">
 .offre-offer-card-skeleton {
+  --offre-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
   border-radius: var(--brand-radius-card);
   display: flex;
   flex-direction: column;
@@ -75,7 +76,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__image {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: inherit;
     display: block;
     height: 200px;
@@ -92,7 +93,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__badge {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: 999px;
     height: 28px;
     width: 92px;
@@ -108,14 +109,14 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__location {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 14px;
     margin-bottom: 8px;
     width: 52%;
   }
 
   &__title {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 24px;
     width: 100%;
   }
@@ -139,7 +140,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__star {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: 999px;
     height: 18px;
     width: 18px;
@@ -152,7 +153,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__term {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 16px;
     width: 68%;
   }
@@ -182,7 +183,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__usp {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 16px;
     width: 74%;
   }
@@ -213,7 +214,7 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__tour-type-item {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: var(--brand-radius-segment);
     height: 32px;
     width: 100%;
@@ -227,27 +228,27 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__old-price {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 14px;
     width: 30%;
   }
 
   &__current-price {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 38px;
     margin-top: 8px;
     width: 74%;
   }
 
   &__price-note {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     height: 12px;
     margin-top: 2px;
     width: 46%;
   }
 
   &__discount {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: var(--brand-radius-badge);
     height: 28px;
     position: absolute;
@@ -258,14 +259,14 @@ import {Skeleton} from "ui/skeleton";
   }
 
   &__cashback {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: var(--brand-radius-badge);
     height: 50px;
     width: 100%;
   }
 
   &__button {
-    background-color: #e5e7eb;
+    background-color: var(--offre-skeleton-fill);
     border-radius: var(--brand-radius-button);
     height: 48px;
     width: 100%;

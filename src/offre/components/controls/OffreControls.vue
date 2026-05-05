@@ -38,15 +38,17 @@ const isTimeframeDisabled = computed(() => {
 </script>
 
 <template>
-  <div class="offre-controls offre-controls__layout flex gap-2 pl-2">
+  <div class="offre-controls flex gap-2 pl-2">
     <CitySelect
         v-model="selectedDepartureId"
         :disabled="isDepartureDisabled"
+        class="offre-controls__departure"
         :options="departures"
     />
     <MonthSelect
         v-model="selectedTimeframe"
         :disabled="isTimeframeDisabled"
+        class="offre-controls__timeframe"
         :options="timeframeOptions"
     />
     <OffreOfferGuestsControl
@@ -60,8 +62,13 @@ const isTimeframeDisabled = computed(() => {
 </template>
 
 <style scoped lang="scss">
-.offre-controls__layout {
+.offre-controls {
   grid-area: inputs;
+}
+
+.offre-controls__departure,
+.offre-controls__timeframe {
+  min-width: 0;
 }
 
 .offre-controls__guests {

@@ -58,7 +58,8 @@ const modelValue = defineModel<OffreTourType>({ required: true });
         <Skeleton class="offre-offer-pricing-panel__loading-cashback"/>
 
         <Button
-          class="offre-offer-pricing-panel__action h-12 w-full px-4 py-3"
+          size="brand"
+          class="offre-offer-pricing-panel__action w-full"
           disabled
         >
           Загрузка...
@@ -107,25 +108,24 @@ const modelValue = defineModel<OffreTourType>({ required: true });
         />
 
         <Button
-          v-if="hasOfferHref"
+          v-if="hasOfferHref && !disabled"
           as="a"
+          size="brand"
           :href="offerHref"
-          :class="[
-            'offre-offer-pricing-panel__action h-12 w-full px-4 py-3',
-            disabled ? 'pointer-events-none opacity-60' : ''
-          ]"
+          class="offre-offer-pricing-panel__action w-full"
           rel="noopener noreferrer"
           target="_blank"
         >
-          {{ disabled ? "Загрузка..." : "Выбрать" }}
+          Выбрать
         </Button>
 
         <Button
           v-else
-          class="offre-offer-pricing-panel__action h-12 w-full px-4 py-3"
+          size="brand"
+          class="offre-offer-pricing-panel__action w-full"
           disabled
         >
-          Недоступно
+          {{ disabled ? "Загрузка..." : "Недоступно" }}
         </Button>
       </div>
     </template>
@@ -133,6 +133,10 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 </template>
 
 <style scoped lang="scss">
+.offre-offer-pricing-panel {
+  --offre-offer-pricing-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+}
+
 .offre-offer-pricing-panel__discount-badge {
   overflow: hidden;
   position: absolute;
@@ -174,13 +178,13 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 
 .offre-offer-pricing-panel__old-price {
   font-size: var(--brand-text-body);
-  line-height: 1.375rem;
+  line-height: var(--brand-leading-control);
 }
 
 .offre-offer-pricing-panel__price-row,
 .offre-offer-pricing-panel__current-price,
 .offre-offer-pricing-panel__price-suffix {
-  line-height: 1.75rem;
+  line-height: var(--brand-leading-title);
 }
 
 .offre-offer-pricing-panel__current-price {
@@ -200,7 +204,7 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 .offre-offer-pricing-panel__loading-price-suffix,
 .offre-offer-pricing-panel__loading-discount,
 .offre-offer-pricing-panel__loading-cashback {
-  background-color: #e5e7eb;
+  background-color: var(--offre-offer-pricing-skeleton-fill);
 }
 
 .offre-offer-pricing-panel__loading-caption {
@@ -245,7 +249,9 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 .offre-offer-pricing-panel__action {
   border-radius: var(--brand-radius-button);
   font-size: var(--brand-text-button);
+  height: 48px;
   line-height: var(--brand-leading-button);
+  padding: 12px 16px;
 }
 
 .offre-offer-pricing-panel__tour-info {
@@ -272,7 +278,7 @@ const modelValue = defineModel<OffreTourType>({ required: true });
       top: 0;
       bottom: 0;
       width: 1px;
-      background-color: #e5e7eb;
+      background-color: var(--brand-border);
     }
   }
 }

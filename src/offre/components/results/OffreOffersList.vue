@@ -43,6 +43,7 @@ const normalizedProducts = computed(() => {
       :hotel-runtime-entry="entry.hotelRuntimeEntry"
       :brand-key="brandKey"
       :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
+      class="offre-offers-list__item"
       @update:tour-type="emit('update-tour-type', String(entry.product.hotel?.id ?? ''), $event)"
     />
   </section>
@@ -50,11 +51,12 @@ const normalizedProducts = computed(() => {
 
 <style scoped lang="scss">
 .offre-offers-list {
-  margin-right: -16px;
-  padding-right: 16px;
-
   @media (min-width: 768px) and (max-width: 1023px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.offre-offers-list__item {
+  min-width: 0;
 }
 </style>

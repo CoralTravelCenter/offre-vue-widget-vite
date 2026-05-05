@@ -17,9 +17,9 @@ function toggleViewMode() {
   <Button
       type="button"
       variant="outline"
-      size="icon"
+      size="brand"
       :aria-label="isListMode ? 'Переключить на карту' : 'Переключить на список'"
-      class="offre-view-mode-switch switcher mr-2 size-10 shrink-0 rounded-lg border"
+      class="offre-view-mode-switch mr-2 size-10 shrink-0 border"
       @click="toggleViewMode"
   >
     <MapPinned v-if="isListMode" class="offre-view-mode-switch__icon size-4"/>
@@ -28,8 +28,10 @@ function toggleViewMode() {
 </template>
 
 <style scoped lang="scss">
-.switcher {
+.offre-view-mode-switch {
   background-color: transparent;
+  border-color: var(--brand-control-border);
+  border-radius: var(--brand-radius-button);
   grid-area: switcher;
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 

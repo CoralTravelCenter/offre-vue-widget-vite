@@ -32,4 +32,8 @@ withDefaults(defineProps<Props>(), {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.offre-offers-list-skeleton__item {
+  overflow: hidden;
+}
 </style>

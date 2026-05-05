@@ -8,9 +8,11 @@ const modelValue = defineModel<OffreTourType>({ required: true });
 const props = withDefaults(defineProps<{
   isHotelOnly?: boolean;
   disabled?: boolean;
+  size?: "default" | "compact";
 }>(), {
   isHotelOnly: false,
-  disabled: false
+  disabled: false,
+  size: "default"
 });
 
 const selectedValue = computed({
@@ -30,12 +32,16 @@ const selectedValue = computed({
 <template>
   <Tabs
     v-model="selectedValue"
-    class="offre-tour-type-tabs w-full"
+    :class="[
+      'offre-tour-type-tabs w-full',
+      props.size === 'compact' ? 'offre-tour-type-tabs--compact' : ''
+    ]"
   >
     <TabsList class="offre-tour-type-tabs__list grid w-full grid-cols-2 bg-brand-card p-0">
       <TabsTrigger
         v-if="!isHotelOnly"
         value="package"
+        size="brand"
         class="offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--package inline-flex items-center justify-center border bg-brand-card font-normal text-brand-foreground data-[state=active]:z-10 data-[state=active]:border-brand-primary data-[state=active]:text-brand-primary"
       >
         Пакетный тур
@@ -47,6 +53,7 @@ const selectedValue = computed({
           'offre-tour-type-tabs__trigger offre-tour-type-tabs__trigger--hotel inline-flex items-center justify-center border bg-brand-card font-normal text-brand-foreground data-[state=active]:z-10 data-[state=active]:border-brand-primary data-[state=active]:text-brand-primary',
           props.isHotelOnly ? 'offre-tour-type-tabs__trigger--single col-span-2' : '-ml-px'
         ]"
+        size="brand"
       >
         Только отель
       </TabsTrigger>
@@ -87,5 +94,12 @@ const selectedValue = computed({
 
 .offre-tour-type-tabs__trigger--single {
   border-radius: var(--brand-radius-segment);
+}
+
+.offre-tour-type-tabs--compact .offre-tour-type-tabs__trigger {
+  font-size: 11px;
+  height: 28px;
+  line-height: 16px;
+  padding: 6px 8px;
 }
 </style>

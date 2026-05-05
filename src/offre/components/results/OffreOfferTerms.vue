@@ -52,4 +52,8 @@ const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
 	line-height: var(--brand-leading-meta);
 	flex-wrap: wrap;
 }
+
+.offre-offer-terms__icon {
+	color: var(--brand-muted-foreground);
+}
 </style>
