@@ -1,6 +1,4 @@
-import type { B2CRoomCriteria } from "offre/api/types";
-
-export type OffreRequestState = "idle" | "loading" | "success" | "error";
+export type OffreRequestState = "idle" | "loading" | "success" | "partial" | "error";
 
 export interface OffreControlOption {
   value: string;
@@ -43,7 +41,6 @@ export interface OffreHotelRuntimeEntry {
   onlyhotel: boolean;
   usps: string[];
   timeframes: OffreHotelRuntimeTimeframe[];
-  roomCriterias?: B2CRoomCriteria[];
 }
 
 export type OffreViewMode = "list" | "map";

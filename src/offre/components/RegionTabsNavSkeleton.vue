@@ -21,23 +21,14 @@ const itemWidths = computed(() => {
 <template>
   <div
     class="region-tabs-nav-skeleton flex items-center gap-2 overflow-hidden px-2"
+    style="--offre-region-tabs-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);"
     aria-hidden="true"
   >
     <Skeleton
       v-for="(width, index) in itemWidths"
       :key="index"
-      class="region-tabs-nav-skeleton__item h-10 rounded-full"
+      class="region-tabs-nav-skeleton__item h-10 rounded-full [background-color:var(--offre-region-tabs-skeleton-fill)]"
       :style="{width}"
     />
   </div>
 </template>
-
-<style scoped lang="scss">
-.region-tabs-nav-skeleton {
-  --offre-region-tabs-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
-}
-
-.region-tabs-nav-skeleton__item {
-  background-color: var(--offre-region-tabs-skeleton-fill);
-}
-</style>

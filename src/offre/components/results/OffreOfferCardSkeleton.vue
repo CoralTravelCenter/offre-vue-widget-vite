@@ -62,12 +62,12 @@ import {Skeleton} from "ui/skeleton";
 
 <style scoped lang="scss">
 .offre-offer-card-skeleton {
-  --offre-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+  --offre-skeleton-fill: var(--brand-skeleton-base, color-mix(in srgb, var(--brand-foreground) 10%, transparent));
   border-radius: var(--brand-radius-card);
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
 
   &__media {
     border-radius: var(--brand-radius-media);
@@ -79,7 +79,7 @@ import {Skeleton} from "ui/skeleton";
     background-color: var(--offre-skeleton-fill);
     border-radius: inherit;
     display: block;
-    height: 200px;
+    height: var(--brand-offer-card-media-height);
     width: 100%;
   }
 
@@ -94,8 +94,8 @@ import {Skeleton} from "ui/skeleton";
 
   &__badge {
     background-color: var(--offre-skeleton-fill);
-    border-radius: 999px;
-    height: 28px;
+    border-radius: var(--brand-radius-badge);
+    height: 24px;
     width: 92px;
   }
 
@@ -110,14 +110,14 @@ import {Skeleton} from "ui/skeleton";
 
   &__location {
     background-color: var(--offre-skeleton-fill);
-    height: 14px;
+    height: 12px;
     margin-bottom: 8px;
     width: 52%;
   }
 
   &__title {
     background-color: var(--offre-skeleton-fill);
-    height: 24px;
+    height: 20px;
     width: 100%;
   }
 
@@ -199,7 +199,7 @@ import {Skeleton} from "ui/skeleton";
   &__aside {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
     padding-top: 6px;
     position: relative;
@@ -208,36 +208,44 @@ import {Skeleton} from "ui/skeleton";
 
   &__tour-type {
     display: grid;
-    gap: 8px;
+    gap: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
 
   &__tour-type-item {
     background-color: var(--offre-skeleton-fill);
-    border-radius: var(--brand-radius-segment);
     height: 32px;
     width: 100%;
   }
 
+  &__tour-type-item:first-child {
+    border-radius: var(--brand-radius-segment) 0 0 var(--brand-radius-segment);
+  }
+
+  &__tour-type-item:last-child {
+    border-radius: 0 var(--brand-radius-segment) var(--brand-radius-segment) 0;
+    margin-left: -1px;
+  }
+
   &__pricing {
-    min-height: 84px;
-    padding-right: 96px;
+    min-height: 76px;
+    padding-right: 104px;
     position: relative;
     width: 100%;
   }
 
   &__old-price {
     background-color: var(--offre-skeleton-fill);
-    height: 14px;
-    width: 30%;
+    height: 12px;
+    width: 72px;
   }
 
   &__current-price {
     background-color: var(--offre-skeleton-fill);
-    height: 38px;
+    height: 28px;
     margin-top: 8px;
-    width: 74%;
+    width: 68%;
   }
 
   &__price-note {
@@ -249,10 +257,10 @@ import {Skeleton} from "ui/skeleton";
 
   &__discount {
     background-color: var(--offre-skeleton-fill);
-    border-radius: var(--brand-radius-badge);
-    height: 28px;
+    border-radius: 4px 4px 0 4px;
+    height: 24px;
     position: absolute;
-    right: 0;
+    right: -17px;
     top: 50%;
     transform: translateY(-50%);
     width: 88px;
@@ -260,7 +268,7 @@ import {Skeleton} from "ui/skeleton";
 
   &__cashback {
     background-color: var(--offre-skeleton-fill);
-    border-radius: var(--brand-radius-badge);
+    border-radius: var(--brand-cashback-banner-radius);
     height: 50px;
     width: 100%;
   }
@@ -274,7 +282,7 @@ import {Skeleton} from "ui/skeleton";
 
   @media (min-width: 768px) and (max-width: 1023px) {
     &__badge {
-      height: 26px;
+      height: 24px;
     }
 
     &__body {
@@ -307,16 +315,16 @@ import {Skeleton} from "ui/skeleton";
     }
 
     &__pricing {
-      min-height: 80px;
-      padding-right: 82px;
+      min-height: 76px;
+      padding-right: 92px;
     }
 
     &__old-price {
-      width: 38%;
+      width: 72px;
     }
 
     &__current-price {
-      width: 78%;
+      width: 72%;
     }
 
     &__price-note {
@@ -341,7 +349,7 @@ import {Skeleton} from "ui/skeleton";
     &__media,
     &__image {
       height: 100%;
-      min-height: 240px;
+      min-height: var(--brand-offer-card-media-height-lg);
     }
 
     &__aside {
@@ -359,23 +367,23 @@ import {Skeleton} from "ui/skeleton";
     }
 
     &__tour-type-item {
-      height: 40px;
+      height: 32px;
     }
 
     &__pricing {
-      min-height: 104px;
+      min-height: 76px;
       padding-right: 104px;
       width: 100%;
     }
 
     &__old-price {
-      width: 28%;
+      width: 72px;
     }
 
     &__current-price {
-      height: 40px;
+      height: 28px;
       margin-top: 8px;
-      width: 78%;
+      width: 70%;
     }
 
     &__price-note {
@@ -384,8 +392,8 @@ import {Skeleton} from "ui/skeleton";
     }
 
     &__discount {
-      height: 28px;
-      right: -8px;
+      height: 24px;
+      right: -17px;
       width: 88px;
     }
 
@@ -400,6 +408,11 @@ import {Skeleton} from "ui/skeleton";
 
   @media (min-width: 1280px) {
     grid-template-columns: 300px minmax(0, 1fr) 300px;
+
+    &__media,
+    &__image {
+      min-height: var(--brand-offer-card-media-height-xl);
+    }
   }
 }
 </style>

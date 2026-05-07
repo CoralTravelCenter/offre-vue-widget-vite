@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import type { PopoverContentEmits, PopoverContentProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
-import { reactiveOmit } from "@vueuse/core"
-import {
-  PopoverContent,
-  PopoverPortal,
-  useForwardPropsEmits,
-} from "reka-ui"
-import { cn } from '@/shared/lib/utils'
+import type {PopoverContentEmits, PopoverContentProps} from "reka-ui"
+import {PopoverContent, PopoverPortal, useForwardPropsEmits,} from "reka-ui"
+import type {HTMLAttributes} from "vue"
+import {reactiveOmit} from "@vueuse/core"
+import {cn} from '@/shared/lib/utils'
 
 defineOptions({
-  inheritAttrs: false,
+	inheritAttrs: false,
 })
 
 const props = withDefaults(
-  defineProps<PopoverContentProps & { class?: HTMLAttributes["class"], size?: "default" | "brand" }>(),
-  {
-    align: "center",
-    sideOffset: 4,
-    size: "default",
-  },
+		defineProps<PopoverContentProps & { class?: HTMLAttributes["class"], size?: "default" | "brand" }>(),
+		{
+			align: "center",
+			sideOffset: 4,
+			size: "default",
+		},
 )
 const emits = defineEmits<PopoverContentEmits>()
 
@@ -29,20 +25,20 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>
-  <PopoverPortal>
-    <PopoverContent
-      data-slot="popover-content"
-      v-bind="{ ...$attrs, ...forwarded }"
-      :class="
+	<PopoverPortal>
+		<PopoverContent
+				data-slot="popover-content"
+				v-bind="{ ...$attrs, ...forwarded }"
+				:class="
         cn(
           'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--reka-popover-content-transform-origin) outline-hidden',
           props.size === 'default' && 'w-72 rounded-md border p-4 shadow-md',
-          props.size === 'brand' && 'w-auto rounded-none border-0 p-0 shadow-none',
+          props.size === 'brand' && 'w-auto rounded-none border-0 p-0',
           props.class,
         )
       "
-    >
-      <slot />
-    </PopoverContent>
-  </PopoverPortal>
+		>
+			<slot/>
+		</PopoverContent>
+	</PopoverPortal>
 </template>

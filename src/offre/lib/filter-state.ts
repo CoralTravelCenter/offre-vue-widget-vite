@@ -1,5 +1,5 @@
 import { getCityCorrectName } from "app/plugins/city-spelling";
-import type { B2CHotelInfo, B2CLocationDirectory } from "offre/api/types";
+import type { B2CHotelInfo, B2CLocation, B2CLocationDirectory } from "offre/api/types";
 import { cleanOffreRegionLabel, normalizeOffreRegionLabelForCompare } from "offre/lib/region-labels";
 import { buildHotelTimeframes } from "offre/lib/timeframes";
 import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "offre/lib/payload";
@@ -52,7 +52,6 @@ export function buildHotelsDirectory(
     id: hotel.id,
     onlyhotel: hotel.onlyhotel,
     usps: hotel.usps,
-    roomCriterias: hotel.roomCriterias,
     timeframes: buildHotelTimeframes(hotel, options)
   }));
 }
@@ -84,20 +83,18 @@ export function buildRegionOptions(params: {
   options: NormalizedOffreWidgetOptions;
 }) {
   const directory = resolveRegionDirectory(params.directories, params.options.groupBy);
-  const normalizedRegionsOrder = params.options.regionsOrder.map((entry) => {
-    return normalizeOffreRegionLabelForCompare(entry);
-  });
+  const regionOrderRank = new Map(
+    params.options.regionsOrder.map((entry, index) => [normalizeOffreRegionLabelForCompare(entry), index] as const)
+  );
   const regions: OffreRegionOption[] = Object.entries(directory).map(([id, location]) => ({
     id,
     label: cleanOffreRegionLabel(location.name)
   }));
 
-  if (normalizedRegionsOrder.length > 0) {
+  if (regionOrderRank.size > 0) {
     regions.sort((left, right) => {
-      const leftIndex = normalizedRegionsOrder.indexOf(normalizeOffreRegionLabelForCompare(left.label));
-      const rightIndex = normalizedRegionsOrder.indexOf(normalizeOffreRegionLabelForCompare(right.label));
-      const normalizedLeftIndex = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
-      const normalizedRightIndex = rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
+      const normalizedLeftIndex = regionOrderRank.get(normalizeOffreRegionLabelForCompare(left.label)) ?? Number.MAX_SAFE_INTEGER;
+      const normalizedRightIndex = regionOrderRank.get(normalizeOffreRegionLabelForCompare(right.label)) ?? Number.MAX_SAFE_INTEGER;
 
       return normalizedLeftIndex - normalizedRightIndex;
     });
@@ -124,6 +121,13 @@ export function buildDepartureOptions(
     friendlyUrl: location.friendlyUrl,
     isCurrent: location.isCurrent
   }));
+}
+
+export function getDepartureLocationsById(locations: B2CLocation[]) {
+  return locations.reduce<Map<string, B2CLocation>>((accumulator, departure) => {
+    accumulator.set(departure.id, departure);
+    return accumulator;
+  }, new Map<string, B2CLocation>());
 }
 
 export function resolvePreferredDepartureId(

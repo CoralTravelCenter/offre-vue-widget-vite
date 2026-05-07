@@ -31,6 +31,8 @@ const markerIconSrc = computed(() => {
 
   return mapMarkerDefault;
 });
+
+const hasPriceLabel = computed(() => Boolean(props.priceLabel && !props.isOpen));
 </script>
 
 <template>
@@ -45,7 +47,7 @@ const markerIconSrc = computed(() => {
     >
 
     <div
-      v-if="priceLabel && !isOpen"
+      v-if="hasPriceLabel"
       class="pointer-events-none absolute left-[24px] top-0 rounded-full bg-brand-card/90 px-[6px] py-[4px] text-[11px] leading-none whitespace-nowrap text-brand-foreground shadow-[0_1px_2px_rgba(0,0,0,0.16)] backdrop-blur-[4px]"
     >
       {{ priceLabel }}

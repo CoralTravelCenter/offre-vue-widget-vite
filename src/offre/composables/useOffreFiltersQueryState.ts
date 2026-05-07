@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/vue-query";
 import {
   computed,
-  ref,
   toValue,
-  watch,
   type MaybeRefOrGetter
 } from "vue";
 import { listDepartureLocations, listHotelsInfo } from "offre/api/client";
-import type { B2CHotelInfo } from "offre/api/types";
+import type { B2CHotelInfo, B2CLocation } from "offre/api/types";
+import { useResolvedSelection } from "offre/composables/useResolvedSelection";
 import {
   buildDepartureOptions,
   buildHotelsDirectory,
@@ -16,6 +15,7 @@ import {
   buildRegionTabs,
   buildTimeframeOptions,
   filterMatchedHotels,
+  getDepartureLocationsById,
   resolvePreferredDepartureId,
   resolvePreferredRegionId
 } from "offre/lib/filter-state";
@@ -89,55 +89,43 @@ export function useOffreFiltersQueryState(
   const departures = computed<OffreDepartureOption[]>(() => {
     return buildDepartureOptions(departuresQuery.data.value?.locations ?? []);
   });
-
-  const selectedRegionId = ref("");
-  const selectedTimeframe = ref("");
-  const selectedDepartureId = ref("");
-
-  watch(
-    regionOptions,
-    (nextRegions) => {
-      if (selectedRegionId.value && nextRegions.some((region) => region.id === selectedRegionId.value)) {
-        return;
-      }
-
-      selectedRegionId.value = resolvePreferredRegionId(
-        nextRegions,
-        options.value.wildcardOption,
-        options.value.preferRegion
-      );
-    },
-    { immediate: true }
-  );
-
-  watch(
-    timeframeOptions,
-    (nextTimeframes) => {
-      if (selectedTimeframe.value && nextTimeframes.some((timeframe) => timeframe.value === selectedTimeframe.value)) {
-        return;
-      }
-
-      selectedTimeframe.value = nextTimeframes[0]?.value ?? "";
-    },
-    { immediate: true }
-  );
-
-  watch(
-    departures,
-    (nextDepartures) => {
-      if (selectedDepartureId.value && nextDepartures.some((departure) => departure.id === selectedDepartureId.value)) {
-        return;
-      }
-
-      selectedDepartureId.value = resolvePreferredDepartureId(nextDepartures, options.value.departureCity);
-    },
-    { immediate: true }
-  );
+  const departureLocationsById = computed(() => {
+    return getDepartureLocationsById(departuresQuery.data.value?.locations ?? []);
+  });
+  const {
+    selectedValue: selectedRegionId,
+    setSelectedValue: setActiveRegion
+  } = useResolvedSelection({
+    itemsSource: regionOptions,
+    getValue: (region) => region.id,
+    getFallbackValue: (regions) => resolvePreferredRegionId(
+      regions,
+      options.value.wildcardOption,
+      options.value.preferRegion
+    )
+  });
+  const {
+    selectedValue: selectedTimeframe,
+    setSelectedValue: setSelectedTimeframe
+  } = useResolvedSelection({
+    itemsSource: timeframeOptions,
+    getValue: (timeframe) => timeframe.value,
+    getFallbackValue: (timeframes) => timeframes[0]?.value ?? ""
+  });
+  const {
+    selectedValue: selectedDepartureId,
+    setSelectedValue: setSelectedDepartureId
+  } = useResolvedSelection({
+    itemsSource: departures,
+    getValue: (departure) => departure.id,
+    getFallbackValue: (departureOptions) => resolvePreferredDepartureId(
+      departureOptions,
+      options.value.departureCity
+    )
+  });
 
   const selectedDeparture = computed(() => {
-    return (departuresQuery.data.value?.locations ?? []).find((departure) => {
-      return departure.id === selectedDepartureId.value;
-    }) ?? null;
+    return departureLocationsById.value.get(selectedDepartureId.value) ?? null;
   });
 
   const matchedHotelsDirectory = computed(() => {
@@ -153,30 +141,6 @@ export function useOffreFiltersQueryState(
   const regionTabs = computed<RegionTabItem[]>(() => {
     return buildRegionTabs(regionOptions.value);
   });
-
-  function setActiveRegion(nextRegionId: string) {
-    if (!nextRegionId) {
-      return;
-    }
-
-    selectedRegionId.value = nextRegionId;
-  }
-
-  function setSelectedTimeframe(nextTimeframe: string) {
-    if (!nextTimeframe) {
-      return;
-    }
-
-    selectedTimeframe.value = nextTimeframe;
-  }
-
-  function setSelectedDepartureId(nextDepartureId: string) {
-    if (!nextDepartureId) {
-      return;
-    }
-
-    selectedDepartureId.value = nextDepartureId;
-  }
 
   return {
     options,

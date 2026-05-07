@@ -16,16 +16,44 @@ withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
 	close: [];
 }>();
+
+function getRootClass(mobile: boolean) {
+	return [
+		"offre-map-overlay-card pointer-events-auto grid rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover",
+		mobile
+			? "offre-map-overlay-card--mobile relative w-[min(360px,100%)] max-w-[calc(100%-16px)]"
+			: "offre-map-overlay-card--desktop w-max max-w-[calc(100vw-32px)]"
+	];
+}
+
+function getContentClass(mobile: boolean) {
+	return [
+		"offre-map-overlay-card__content grid gap-[10px]",
+		mobile
+			? "offre-map-overlay-card__content--mobile grid-cols-[112px_minmax(0,1fr)]"
+			: "offre-map-overlay-card__content--desktop grid-cols-[112px_minmax(220px,1fr)]"
+	];
+}
+
+function getFooterClass(mobile: boolean) {
+	return [
+		"offre-map-overlay-card__footer grid gap-2",
+		mobile
+			? "offre-map-overlay-card__footer--mobile grid-cols-[minmax(0,1fr)]"
+			: "offre-map-overlay-card__footer--desktop items-center grid-cols-[minmax(0,1fr)_auto]"
+	];
+}
+
+function getActionClass(mobile: boolean) {
+	return mobile
+		? "offre-map-overlay-card__action offre-map-overlay-card__action--mobile h-[34px] w-full rounded-[8px] px-[14px] text-[13px]"
+		: "offre-map-overlay-card__action offre-map-overlay-card__action--desktop h-[34px] min-w-24 rounded-[8px] px-[14px] text-[13px]";
+}
 </script>
 
 <template>
 	<div
-			:class="[
-				'offre-map-overlay-card pointer-events-auto grid rounded-[12px] border border-brand-border bg-brand-card p-1.5 shadow-brand-popover',
-				mobile
-					? 'offre-map-overlay-card--mobile relative w-[min(360px,100%)] max-w-[calc(100%-16px)]'
-					: 'offre-map-overlay-card--desktop w-max max-w-[calc(100vw-32px)]'
-			]"
+			:class="getRootClass(mobile)"
 	>
 		<button
 				type="button"
@@ -37,12 +65,7 @@ const emit = defineEmits<{
 		</button>
 
 		<div
-				:class="[
-					'offre-map-overlay-card__content grid gap-[10px]',
-					mobile
-						? 'offre-map-overlay-card__content--mobile grid-cols-[112px_minmax(0,1fr)]'
-						: 'offre-map-overlay-card__content--desktop grid-cols-[112px_minmax(220px,1fr)]'
-				]">
+				:class="getContentClass(mobile)">
 			<div
 					v-if="model.point.imageUrl"
 					class="offre-map-overlay-card__media overflow-hidden rounded-[10px]"
@@ -66,7 +89,7 @@ const emit = defineEmits<{
 					/>
 				</div>
 
-				<div class="offre-map-overlay-card__title pr-5 text-[14px] font-semibold leading-[1.2] text-brand-foreground">
+				<div class="offre-map-overlay-card__title pr-5 text-[14px] font-normal leading-[1.2] text-brand-foreground">
 					{{ model.point.hotelName }}
 				</div>
 
@@ -76,16 +99,11 @@ const emit = defineEmits<{
 				/>
 
 				<div
-						:class="[
-							'offre-map-overlay-card__footer grid gap-2',
-							mobile
-								? 'offre-map-overlay-card__footer--mobile grid-cols-[minmax(0,1fr)]'
-								: 'offre-map-overlay-card__footer--desktop items-center grid-cols-[minmax(0,1fr)_auto]'
-						]">
+						:class="getFooterClass(mobile)">
 					<div class="offre-map-overlay-card__pricing grid min-w-0 gap-0">
 						<div
 								v-if="model.point.currentPriceLabel"
-								class="offre-map-overlay-card__price text-[18px] font-semibold leading-[22px] text-brand-primary"
+								class="offre-map-overlay-card__price text-[18px] font-normal leading-[22px] text-brand-primary"
 						>
 							{{ model.point.currentPriceLabel }}
 						</div>
@@ -103,13 +121,13 @@ const emit = defineEmits<{
 							:href="model.point.offerHref"
 							target="_blank"
 							rel="noopener noreferrer"
-							:class="mobile ? 'h-[34px] w-full rounded-[8px] px-[14px] text-[13px]' : 'h-[34px] min-w-24 rounded-[8px] px-[14px] text-[13px]'"
+							:class="getActionClass(mobile)"
 					>
 						Выбрать
 					</Button>
 					<Button
 							v-else
-							:class="mobile ? 'h-[34px] w-full rounded-[8px] px-[14px] text-[13px]' : 'h-[34px] min-w-24 rounded-[8px] px-[14px] text-[13px]'"
+							:class="getActionClass(mobile)"
 							disabled
 					>
 						Недоступно

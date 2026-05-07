@@ -1,4 +1,4 @@
-import { computed, ref, toValue, type MaybeRefOrGetter, watch } from "vue";
+import { computed, ref, toValue, type MaybeRefOrGetter, type Ref, watch } from "vue";
 import { buildMapPointsLocationKey } from "offre/lib/offre-map";
 import { getBoundsFromCoords, getLocationFromBounds } from "vue-yandex-maps";
 
@@ -13,6 +13,7 @@ export function useOffreMapLocation(params: {
   map: MaybeRefOrGetter<any>;
   points: MaybeRefOrGetter<MapLocationPoint[]>;
   activeHotelId: MaybeRefOrGetter<string | null>;
+  lastAutoLocationKeySource?: Ref<string>;
   mapSettings: {
     location: {
       center: [number, number];
@@ -24,7 +25,7 @@ export function useOffreMapLocation(params: {
   const map = computed(() => toValue(params.map));
   const points = computed(() => toValue(params.points));
   const activeHotelId = computed(() => toValue(params.activeHotelId));
-  const lastAutoLocationKey = ref("");
+  const lastAutoLocationKey = params.lastAutoLocationKeySource ?? ref("");
 
   watch([points, map], async ([nextPoints, nextMap], _prev, onCleanup) => {
     let cancelled = false;

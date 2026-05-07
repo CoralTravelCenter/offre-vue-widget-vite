@@ -11,29 +11,19 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <section class="offre-offers-list-skeleton" aria-hidden="true">
+  <section class="offre-offers-list-skeleton grid grid-cols-1 gap-4 -mr-4 pr-4" aria-hidden="true">
     <OffreOfferCardSkeleton
       v-for="index in items"
       :key="index"
-      class="offre-offers-list-skeleton__item"
+      class="offre-offers-list-skeleton__item overflow-hidden"
     />
   </section>
 </template>
 
 <style scoped lang="scss">
 .offre-offers-list-skeleton {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr);
-  margin-right: -16px;
-  padding-right: 16px;
-
   @media (min-width: 768px) and (max-width: 1023px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.offre-offers-list-skeleton__item {
-  overflow: hidden;
 }
 </style>

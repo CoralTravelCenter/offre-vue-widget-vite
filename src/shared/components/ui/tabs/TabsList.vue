@@ -19,7 +19,7 @@ const delegatedProps = reactiveOmit(props, "class")
     :data-size="props.size ?? 'default'"
     v-bind="delegatedProps"
     :class="cn(
-      'bg-muted text-muted-foreground inline-flex w-fit items-center justify-center data-[size=default]:h-9 data-[size=default]:rounded-lg data-[size=default]:p-[3px] data-[size=brand]:h-auto data-[size=brand]:rounded-none data-[size=brand]:p-0',
+      'bg-transparent text-muted-foreground inline-flex w-fit items-center justify-center data-[size=default]:h-9 data-[size=default]:rounded-lg data-[size=default]:p-[3px] data-[size=brand]:h-auto data-[size=brand]:rounded-none data-[size=brand]:p-0',
       props.class,
     )"
   >

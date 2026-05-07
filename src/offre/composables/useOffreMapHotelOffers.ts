@@ -4,9 +4,10 @@ import { hotelPriceSearchList } from "offre/api/client";
 import type { B2COffer, B2CProduct } from "offre/api/types";
 import { buildHotelOfferSearchCriterias } from "offre/lib/hotel-offer";
 import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import { getPrimaryMapOffer, runConcurrentMapTasks } from "offre/lib/offre-map";
+import { getPrimaryMapOffer } from "offre/lib/offre-map";
 import { offreQueryConfig } from "offre/query/config";
 import { offreQueryKeys } from "offre/query/keys";
+import { runConcurrentTasks } from "shared/lib/concurrency";
 
 const MAP_HOTEL_OFFERS_CONCURRENCY = 6;
 
@@ -35,13 +36,9 @@ export function useOffreMapHotelOffers(params: {
         return;
       }
 
-      const nextMap = new Map(hotelOffersByHotelId.value);
+      const nextMap = new Map<string, B2COffer | null>();
       const tasks = nextProducts.flatMap((product, index) => {
         const hotelId = String(product.hotel?.id ?? product.hotel?.name ?? index);
-
-        if (nextMap.has(hotelId)) {
-          return [];
-        }
 
         const searchCriterias = buildHotelOfferSearchCriterias({
           hotel: product.hotel,
@@ -66,9 +63,17 @@ export function useOffreMapHotelOffers(params: {
               }
             });
 
-            return [hotelId, hotelOffer] as const;
+            return {
+              hotelId,
+              hotelOffer,
+              hasError: false
+            } as const;
           } catch {
-            return [hotelId, null] as const;
+            return {
+              hotelId,
+              hotelOffer: null,
+              hasError: true
+            } as const;
           }
         }];
       });
@@ -80,13 +85,17 @@ export function useOffreMapHotelOffers(params: {
       }
 
       mapOfferLoading.value = true;
-      const nextEntries = await runConcurrentMapTasks(tasks, MAP_HOTEL_OFFERS_CONCURRENCY);
+      const nextEntries = await runConcurrentTasks(tasks, MAP_HOTEL_OFFERS_CONCURRENCY);
 
       if (cancelled) {
         return;
       }
 
-      nextEntries.forEach(([hotelId, hotelOffer]) => {
+      nextEntries.forEach(({ hotelId, hotelOffer, hasError }) => {
+        if (hasError) {
+          return;
+        }
+
         nextMap.set(hotelId, hotelOffer);
       });
 

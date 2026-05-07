@@ -19,26 +19,13 @@ function toggleViewMode() {
       variant="outline"
       size="brand"
       :aria-label="isListMode ? 'Переключить на карту' : 'Переключить на список'"
-      class="offre-view-mode-switch mr-2 size-10 shrink-0 border"
+      :class="[
+        'offre-view-mode-switch mr-2 size-10 shrink-0 rounded-[var(--brand-radius-button)] border border-brand-control-border bg-brand-card text-brand-foreground transition-[border-color,color,background-color] hover:border-brand-primary hover:bg-brand-card hover:text-brand-primary',
+        isListMode ? 'offre-view-mode-switch--list' : 'offre-view-mode-switch--map'
+      ]"
       @click="toggleViewMode"
   >
     <MapPinned v-if="isListMode" class="offre-view-mode-switch__icon size-4"/>
     <List v-else class="offre-view-mode-switch__icon size-4"/>
   </Button>
 </template>
-
-<style scoped lang="scss">
-.offre-view-mode-switch {
-  background-color: transparent;
-  border-color: var(--brand-control-border);
-  border-radius: var(--brand-radius-button);
-  grid-area: switcher;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
-
-  &:hover {
-    background-color: transparent;
-    border-color: var(--brand-primary);
-    color: var(--brand-primary);
-  }
-}
-</style>

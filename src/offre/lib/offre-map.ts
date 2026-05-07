@@ -1,5 +1,13 @@
 import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "offre/api/types";
-import { formatCurrencySafe } from "offre/lib/product-offer";
+import type { OffreMapDisplayPoint } from "offre/components/results/offre-map.types";
+import {
+  formatCurrencySafe,
+  resolveHotelImageUrl,
+  resolveOfferHref,
+  resolveOfferPartySuffix,
+  resolveOfferPriceValue,
+  stripEnglishBracketFragments
+} from "offre/lib/product-offer";
 import { getReferenceValue } from "offre/lib/reference";
 
 export function normalizeMapCoordinate(value: number | string | undefined) {
@@ -63,32 +71,106 @@ export function getMapReferenceValue<TValue extends object>(
   return getReferenceValue<TValue>(reference, field, key);
 }
 
+export interface OffreMapBasePoint {
+  key: string;
+  hotelId: string;
+  hotelName: string;
+  locationLabel: string;
+  imageUrl: string;
+  latitude: number;
+  longitude: number;
+  categoryKey?: string | number;
+  packageOffer: B2COffer | null;
+  isFamilyClub: boolean;
+  isEliteHotel: boolean;
+}
+
+export interface OffreMapSearchPoint extends OffreMapDisplayPoint {
+  searchIndex: string;
+}
+
+export function buildBaseMapPoints(products: B2CProduct[]) {
+  return products
+    .map<OffreMapBasePoint | null>((product, index) => {
+      const hotel = product.hotel ?? {};
+      const coordinates = hotel.coordinates ?? null;
+      const latitude = normalizeMapCoordinate(coordinates?.latitude);
+      const longitude = normalizeMapCoordinate(coordinates?.longitude);
+      const packageOffer = getPrimaryMapOffer(product);
+      const hotelId = String(hotel.id ?? hotel.name ?? index);
+
+      if (latitude === null || longitude === null) {
+        return null;
+      }
+
+      return {
+        key: String(hotel.id ?? hotel.name ?? index),
+        hotelId,
+        hotelName: stripEnglishBracketFragments(hotel.name) || "Без названия",
+        locationLabel: stripEnglishBracketFragments(hotel.locationSummary),
+        imageUrl: resolveHotelImageUrl(hotel.images),
+        latitude,
+        longitude,
+        categoryKey: hotel.categoryKey,
+        packageOffer,
+        isFamilyClub: Boolean(hotel.sunFamilyClub || hotel.coralFamilyClub),
+        isEliteHotel: Boolean(hotel.eliteHotel)
+      };
+    })
+    .filter((point): point is OffreMapBasePoint => point !== null);
+}
+
+export function buildMapSearchPoints(params: {
+  points: OffreMapBasePoint[];
+  hotelOffersByHotelId: Map<string, B2COffer | null>;
+  mapOfferMode: "package" | "hotel";
+  pricingMode?: unknown;
+  hostname: string;
+}) {
+  return params.points.map<OffreMapSearchPoint>((point) => {
+    const effectiveOffer = params.mapOfferMode === "hotel"
+      ? params.hotelOffersByHotelId.get(point.hotelId) ?? point.packageOffer
+      : point.packageOffer;
+    const passengersCount = getOfferPassengersCount(effectiveOffer);
+    const stayNights = Number(effectiveOffer?.stayNights) || 0;
+    const currentPriceValue = resolveOfferPriceValue(
+      effectiveOffer?.price?.amount,
+      params.pricingMode,
+      passengersCount,
+      stayNights
+    );
+
+    return {
+      ...point,
+      effectiveOffer,
+      currentPriceValue,
+      currentPriceLabel: formatCurrencySafe(currentPriceValue),
+      priceSuffix: resolveOfferPartySuffix(params.pricingMode, effectiveOffer?.rooms?.[0]?.passengers),
+      searchIndex: normalizeMapSearchValue(`${point.hotelName} ${point.locationLabel}`),
+      offerHref: resolveOfferHref({
+        redirectionUrl: effectiveOffer?.link?.redirectionUrl,
+        queryParam: effectiveOffer?.link?.queryParam,
+        hostname: params.hostname
+      })
+    };
+  });
+}
+
+export function buildPointsByHotelId<TPoint extends { hotelId: string }>(points: TPoint[]) {
+  return points.reduce<Map<string, TPoint>>((accumulator, point) => {
+    accumulator.set(point.hotelId, point);
+    return accumulator;
+  }, new Map<string, TPoint>());
+}
+
+export function buildHotelIdSet(points: Array<{ hotelId: string }>) {
+  return new Set(points.map((point) => point.hotelId));
+}
+
 export function buildMapPointsLocationKey(
   points: Array<{ hotelId: string; longitude: number; latitude: number }>
 ) {
   return points
     .map((point) => `${point.hotelId}:${point.longitude.toFixed(4)},${point.latitude.toFixed(4)}`)
     .join("|");
-}
-
-export async function runConcurrentMapTasks<TValue>(
-  tasks: Array<() => Promise<TValue>>,
-  concurrency: number
-) {
-  const results: TValue[] = new Array(tasks.length);
-  let cursor = 0;
-
-  async function worker() {
-    while (cursor < tasks.length) {
-      const taskIndex = cursor;
-      cursor += 1;
-      results[taskIndex] = await tasks[taskIndex]();
-    }
-  }
-
-  await Promise.all(
-    Array.from({ length: Math.min(Math.max(concurrency, 1), tasks.length || 1) }, () => worker())
-  );
-
-  return results;
 }

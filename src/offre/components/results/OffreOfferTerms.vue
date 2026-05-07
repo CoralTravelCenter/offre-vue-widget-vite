@@ -30,30 +30,18 @@ const termIconClassByKey: Record<OffreOfferCardTermIcon, string> = {
 <template>
 	<ul
 			v-if="terms.length"
-			class="offre-offer-terms m-0 flex list-none flex-wrap items-baseline gap-1 p-0 text-brand-muted-foreground"
+			class="offre-offer-terms terms m-0 flex list-none flex-wrap items-baseline gap-1 p-0 text-[length:var(--brand-text-meta)] leading-[var(--brand-leading-meta)] text-brand-muted-foreground"
 	>
 		<li
 				v-for="term in terms"
 				:key="term.key"
-				class="offre-offer-terms__item inline-flex items-center gap-1"
+				:class="['offre-offer-terms__item inline-flex items-center gap-1', term.key]"
 		>
 			<component
 					:is="termIconByKey[term.icon]"
-					class="offre-offer-terms__icon h-4 w-4 shrink-0 object-contain"
+					class="offre-offer-terms__icon h-4 w-4 shrink-0 object-contain text-brand-muted-foreground"
 			/>
 			<span class="offre-offer-terms__value">{{ term.value }}</span>
 		</li>
 	</ul>
 </template>
-
-<style scoped lang="scss">
-.offre-offer-terms {
-	font-size: var(--brand-text-meta);
-	line-height: var(--brand-leading-meta);
-	flex-wrap: wrap;
-}
-
-.offre-offer-terms__icon {
-	color: var(--brand-muted-foreground);
-}
-</style>

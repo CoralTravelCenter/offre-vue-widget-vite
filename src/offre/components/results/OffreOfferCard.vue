@@ -100,16 +100,46 @@ const {cashbackInfo} = useCoralBonus({
 });
 
 const starItems = computed(() => {
-	return Array.from({length: 5}, (_, index) => index < hotelStarCount.value);
+	return Array.from({length: hotelStarCount.value}, () => true);
 });
+
+const hasLabels = computed(() => isEliteHotel.value || hasFamilyClub.value);
+const hasUsps = computed(() => hotelUsps.value.length > 0);
+
+function getTitleClass() {
+	return [
+		"offre-offer-card__title name m-0 text-[length:var(--brand-text-title)] font-semibold leading-[var(--brand-leading-title)] text-brand-foreground [overflow-wrap:anywhere]",
+		isEliteHotel.value
+			? "offre-offer-card__title--elite tracking-[0.015em]"
+			: "offre-offer-card__title--default"
+	];
+}
+
+function getBadgeClass(kind: "recommended" | "exclusive") {
+	return [
+		"offre-offer-card__badge rounded-[var(--brand-radius-badge)] border-transparent px-2 py-1 text-[length:var(--brand-text-meta)] font-normal leading-none",
+		kind === "recommended"
+			? "offre-offer-card__badge--recommended bg-brand-card text-brand-foreground"
+			: "offre-offer-card__badge--exclusive exclusive bg-brand-exclusive text-brand-primary-foreground"
+	];
+}
+
+function getLabelClass(kind: "elite" | "family") {
+	return [
+		"offre-offer-card__label inline-grid h-6 place-content-center rounded-[var(--brand-radius-segment)] border-transparent px-3 text-[length:var(--brand-text-meta)] font-normal leading-none uppercase",
+		kind === "elite"
+			? "offre-offer-card__label--elite bg-brand-foreground text-brand-card"
+			: "offre-offer-card__label--family bg-brand-accent text-brand-accent-foreground"
+	];
+}
 </script>
 
 <template>
-	<article class="offre-offer-card flex h-full flex-col overflow-visible border border-brand-border bg-brand-card p-2">
-		<div class="offre-offer-card__media relative">
+	<article class="offre-offer-card product-card flex h-full flex-col overflow-visible rounded-[var(--brand-radius-card)] border border-brand-border bg-brand-card p-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_320px] lg:items-stretch lg:gap-4 xl:grid-cols-[300px_minmax(0,1fr)_300px]">
+		<div class="offre-offer-card__media visual-details relative">
 			<a
 					:href="offerHref"
-					class="offre-offer-card__media-link block h-full overflow-hidden rounded-[inherit]"
+					class="offre-offer-card__media-link visual block h-full overflow-hidden rounded-[inherit]"
 					rel="noopener noreferrer"
 					target="_blank"
 			>
@@ -117,111 +147,106 @@ const starItems = computed(() => {
 						v-if="imageUrl"
 						:src="imageUrl"
 						:alt="hotelName"
-					class="offre-offer-card__image block h-50 w-full object-cover"
+					class="offre-offer-card__image block h-[var(--brand-offer-card-media-height)] w-full rounded-[var(--brand-radius-media)] object-cover lg:h-full lg:min-h-[var(--brand-offer-card-media-height-lg)] xl:min-h-[var(--brand-offer-card-media-height-xl)]"
 				>
 				<div
 						v-else
-						class="offre-offer-card__image-placeholder h-50 w-full bg-brand-muted"
+						class="offre-offer-card__image-placeholder h-[var(--brand-offer-card-media-height)] w-full rounded-[var(--brand-radius-media)] bg-brand-muted lg:h-full lg:min-h-[var(--brand-offer-card-media-height-lg)] xl:min-h-[var(--brand-offer-card-media-height-xl)]"
 				/>
 			</a>
 
-			<div class="offre-offer-card__badges absolute left-2.5 top-2.5 flex flex-col gap-2">
+			<div class="offre-offer-card__badges badge-grid absolute left-[10px] top-[10px] flex flex-col gap-2">
 				<Badge
 						v-if="isRecommended"
-						class="offre-offer-card__badge offre-offer-card__badge--recommended border-transparent bg-brand-card text-brand-foreground"
+						:class="getBadgeClass('recommended')"
 				>
 					Рекомендуем
 				</Badge>
 				<Badge
 						v-if="isExclusive"
-						class="offre-offer-card__badge offre-offer-card__badge--exclusive border-transparent text-brand-primary-foreground"
+						:class="getBadgeClass('exclusive')"
 				>
 					Эксклюзив
 				</Badge>
 			</div>
 		</div>
 
-		<div class="offre-offer-card__body min-w-0 py-2">
+		<div class="offre-offer-card__body details min-w-0 py-2 lg:flex lg:flex-col lg:justify-center lg:py-0">
 			<div
 					v-if="locationLabel"
-					class="offre-offer-card__location mb-1 inline-flex self-start font-light text-brand-muted-foreground"
+					class="offre-offer-card__location location mb-1 inline-flex self-start text-[length:var(--brand-text-meta)] font-normal leading-[var(--brand-leading-meta)] text-brand-muted-foreground"
 			>
-				<MapPinIcon class="offre-offer-card__location-icon mb-0.5 mr-1 h-3.5 w-3 shrink-0"/>
+				<MapPinIcon class="offre-offer-card__location-icon mb-0.5 mr-1 h-[14px] w-3 shrink-0"/>
 				<span class="offre-offer-card__location-text truncate">{{ locationLabel }}</span>
 			</div>
 
 			<a
 					:href="offerHref"
-					class="offre-offer-card__title-link mb-1 block w-fit text-inherit no-underline hover:text-brand-primary hover:underline"
+					class="offre-offer-card__title-link hotel-name mb-1 block w-fit text-inherit no-underline transition-colors hover:text-brand-primary hover:underline lg:mb-2"
 					rel="noopener noreferrer"
 					target="_blank"
 			>
 				<h3
-						:class="[
-            'offre-offer-card__title m-0 wrap-break-word text-brand-foreground',
-            isEliteHotel
-              ? 'font-normal tracking-[0.015em]'
-              : 'font-bold'
-          ]"
+						:class="getTitleClass()"
 				>
 					{{ hotelName }}
 				</h3>
 			</a>
 
-			<div class="offre-offer-card__meta mb-2 flex flex-wrap items-center gap-2">
+			<div class="offre-offer-card__meta category-concept mb-2 flex flex-wrap items-center gap-2 lg:mb-0">
 				<div
 						v-if="hotelStarCount > 0"
-						class="offre-offer-card__stars inline-flex gap-1"
+						class="offre-offer-card__stars stars inline-flex gap-1"
 				>
 					<StarIcon
-							v-for="(isFilled, index) in starItems"
+							v-for="(_isFilled, index) in starItems"
 							:key="`hotel-star-${index}`"
-							:class="isFilled ? 'offre-offer-card__star offre-offer-card__star--filled h-5 w-5 fill-current' : 'offre-offer-card__star h-5 w-5 text-brand-border'"
+							class="offre-offer-card__star offre-offer-card__star--filled h-5 w-5 fill-current text-brand-star"
 					/>
 				</div>
 				<span
 						v-else-if="hotelCategoryName"
-						class="offre-offer-card__category"
+						class="offre-offer-card__category text-[length:var(--brand-text-body)] text-brand-star"
 				>
           {{ hotelCategoryName }}
         </span>
 
 				<div
-						v-if="isEliteHotel || hasFamilyClub"
+						v-if="hasLabels"
 						class="offre-offer-card__labels flex flex-wrap items-center gap-2"
 				>
 					<Badge
 							v-if="isEliteHotel"
-							class="offre-offer-card__label offre-offer-card__label--elite inline-grid place-content-center border-transparent"
+							:class="getLabelClass('elite')"
 					>
-						Elite Service
+						ELITE SERVICE
 					</Badge>
 
 					<Badge
 							v-if="hasFamilyClub"
-							class="offre-offer-card__label offre-offer-card__label--family inline-grid place-content-center border-transparent bg-brand-accent text-brand-accent-foreground"
+							:class="getLabelClass('family')"
 					>
-						Family Club
+						CORAL FAMILY CLUB
 					</Badge>
 				</div>
 			</div>
 
-			<div v-if="hotelOfferLoading" class="offre-offer-card__terms-skeleton" aria-hidden="true">
+			<div v-if="hotelOfferLoading" class="offre-offer-card__terms-skeleton flex flex-wrap gap-2 lg:my-4" aria-hidden="true">
 				<Skeleton
-						v-for="index in 4"
-						:key="`term-skeleton-${index}`"
-						class="offre-offer-card__terms-skeleton-item"
+						v-for="width in ['w-[34%]', 'w-[28%]', 'w-[32%]', 'w-[38%]']"
+						:key="width"
+						:class="['offre-offer-card__terms-skeleton-item h-4 bg-[color-mix(in_srgb,var(--brand-foreground)_10%,transparent)]', width]"
 				/>
 			</div>
 			<OffreOfferTerms
 					v-else
 					:terms="terms"
-					class="offre-offer-card__terms"
+					class="offre-offer-card__terms lg:my-4"
 			/>
 
 			<ul
-					v-if="hotelUsps.length"
-					class="offre-offer-card__usp-list mt-2 grid max-h-34.25 list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-brand-border pt-2 text-brand-foreground/80"
+					v-if="hasUsps"
+					class="offre-offer-card__usp-list mt-2 grid max-h-[137px] list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-brand-border pt-2 pl-0 text-[length:var(--brand-text-body)] text-[color-mix(in_srgb,var(--brand-foreground)_80%,transparent)] lg:mt-0 lg:border-t-0 lg:pt-0 lg:pl-2"
 			>
 				<li
 						v-for="usp in hotelUsps"
@@ -250,149 +275,3 @@ const starItems = computed(() => {
 		/>
 	</article>
 </template>
-
-<style scoped lang="scss">
-.offre-offer-card {
-	--offre-offer-card-skeleton-fill: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
-	border-radius: var(--brand-radius-card);
-
-	@media (min-width: 1024px) {
-		display: grid;
-		align-items: stretch;
-		grid-template-columns: 240px minmax(0, 1fr) 320px;
-		gap: 16px;
-	}
-
-	@media (min-width: 1280px) {
-		grid-template-columns: 300px minmax(0, 1fr) 300px;
-	}
-}
-
-.offre-offer-card__image,
-.offre-offer-card__image-placeholder {
-  border-radius: var(--brand-radius-media);
-
-  @media (min-width: 1024px) {
-    height: 100%;
-		min-height: 240px;
-	}
-
-	@media (min-width: 1280px) {
-		min-height: 260px;
-	}
-}
-
-.offre-offer-card__terms-skeleton {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-}
-
-.offre-offer-card__terms-skeleton-item {
-	background-color: var(--offre-offer-card-skeleton-fill);
-	height: 16px;
-}
-
-.offre-offer-card__terms-skeleton-item:nth-child(1) {
-	width: 34%;
-}
-
-.offre-offer-card__terms-skeleton-item:nth-child(2) {
-	width: 28%;
-}
-
-.offre-offer-card__terms-skeleton-item:nth-child(3) {
-	width: 32%;
-}
-
-.offre-offer-card__terms-skeleton-item:nth-child(4) {
-	width: 38%;
-}
-
-.offre-offer-card__badge {
-	border-radius: var(--brand-radius-media);
-	font-size: var(--brand-text-meta);
-	font-weight: 400;
-	line-height: 1;
-	padding: 4px 8px;
-}
-
-.offre-offer-card__badge--exclusive {
-	background: var(--brand-exclusive);
-}
-
-.offre-offer-card__location {
-	font-size: var(--brand-text-meta);
-	line-height: var(--brand-leading-meta);
-}
-
-.offre-offer-card__title {
-  font-size: var(--brand-text-title);
-  line-height: var(--brand-leading-title);
-}
-
-.offre-offer-card__title-link {
-  transition: color 0.15s ease;
-}
-
-.offre-offer-card__star--filled,
-.offre-offer-card__category {
-	color: var(--brand-star);
-}
-
-.offre-offer-card__category,
-.offre-offer-card__usp-list {
-	font-size: var(--brand-text-body);
-}
-
-.offre-offer-card__label {
-	border-radius: var(--brand-radius-segment);
-	font-size: var(--brand-text-meta);
-	font-weight: 300;
-	height: 24px;
-	line-height: 1;
-	padding: 0 12px;
-}
-
-.offre-offer-card__label--elite {
-	background-color: var(--brand-foreground);
-	color: var(--brand-card);
-}
-
-.offre-offer-card__body {
-	@media (min-width: 1024px) {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		padding: 0;
-	}
-}
-
-.offre-offer-card__title-link {
-	@media (min-width: 1024px) {
-		margin-bottom: 8px;
-	}
-}
-
-.offre-offer-card__meta {
-	@media (min-width: 1024px) {
-		margin-bottom: 0;
-	}
-}
-
-.offre-offer-card__terms,
-.offre-offer-card__terms-skeleton {
-	@media (min-width: 1024px) {
-		margin: 16px 0;
-	}
-}
-
-.offre-offer-card__usp-list {
-	@media (min-width: 1024px) {
-		border-top: 0;
-		margin-top: 0;
-		padding-top: 0;
-		padding-left: 8px;
-	}
-}
-</style>

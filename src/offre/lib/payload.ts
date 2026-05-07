@@ -39,7 +39,6 @@ export interface NormalizedWidgetHotelDescriptor extends Omit<WidgetHotelDescrip
   timeframe?: WidgetTimeframeConfig;
   nights?: number[];
   usps: string[];
-  roomCriterias?: B2CRoomCriteria[];
 }
 
 function isPassenger(value: unknown): value is { passengerType: number; age: number } {
@@ -208,13 +207,17 @@ export function normalizeWidgetHotelDescriptor(
     };
   }
 
+  const {
+    roomCriterias: _ignoredRoomCriterias,
+    ...hotelEntryRest
+  } = hotelEntry;
+
   return {
-    ...hotelEntry,
+    ...hotelEntryRest,
     id: hotelId,
     onlyhotel: Boolean(hotelEntry.onlyhotel),
     timeframe: hotelEntry.timeframe ? normalizeTimeframe(hotelEntry.timeframe) : undefined,
     nights: hotelEntry.nights ? normalizeNights(hotelEntry.nights, options.nights) : undefined,
-    roomCriterias: normalizeRoomCriterias(hotelEntry.roomCriterias),
     usps: Array.isArray(hotelEntry.usps)
       ? hotelEntry.usps.filter((entry): entry is string => typeof entry === "string")
       : []

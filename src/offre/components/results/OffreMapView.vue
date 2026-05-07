@@ -1,32 +1,27 @@
 <script setup lang="ts">
 import { useMediaQuery } from "@vueuse/core";
-import {computed, nextTick, onMounted, reactive, ref, shallowRef, watch} from "vue";
+import {computed, onMounted, reactive, ref, shallowRef} from "vue";
 import type {B2CPriceSearchReference, B2CProduct} from "offre/api/types";
 import OffreMapClusterBadge from "offre/components/results/OffreMapClusterBadge.vue";
 import OffreMapMarker from "offre/components/results/OffreMapMarker.vue";
 import OffreMapOverlayCard from "offre/components/results/OffreMapOverlayCard.vue";
 import OffreMapSidebar from "offre/components/results/OffreMapSidebar.vue";
-import type {OffreMapDisplayPoint, OffreMapOverlayModel } from "offre/components/results/offre-map.types";
+import type {OffreMapOverlayModel } from "offre/components/results/offre-map.types";
 import {useOffreMapHotelOffers} from "offre/composables/useOffreMapHotelOffers";
 import {useOffreMapLocation} from "offre/composables/useOffreMapLocation";
+import {useOffreMapSelection} from "offre/composables/useOffreMapSelection";
 import {useOffreOfferTerms} from "offre/composables/useOffreOfferTerms";
 import type {NormalizedOffreWidgetOptions} from "offre/lib/payload";
 import {
+	buildBaseMapPoints,
+	buildHotelIdSet,
+	buildMapSearchPoints,
+	buildPointsByHotelId,
 	getMapClusterPriceRange,
 	getMapReferenceValue,
-	getOfferPassengersCount,
-	getPrimaryMapOffer,
-	normalizeMapCoordinate,
-	normalizeMapSearchValue
+	normalizeMapSearchValue,
+	type OffreMapSearchPoint
 } from "offre/lib/offre-map";
-import {
-	formatCurrencySafe,
-	resolveHotelImageUrl,
-	resolveOfferHref,
-	resolveOfferPartySuffix,
-	resolveOfferPriceValue,
-	stripEnglishBracketFragments
-} from "offre/lib/product-offer";
 import {
 	createYmapsOptions,
 	initYmaps,
@@ -51,9 +46,8 @@ const props = defineProps<{
 const ymapsInitialized = ref(false);
 const map = shallowRef();
 const clusterer = shallowRef();
-const activeHotelId = ref<string | null>(null);
-const popupHotelId = ref<string | null>(null);
 const hotelSearchQuery = ref("");
+const lastAutoLocationKey = ref("");
 const showBottomMapOverlay = useMediaQuery("(max-width: 1023px)");
 const mapSettings = reactive({
 	location: {
@@ -63,39 +57,8 @@ const mapSettings = reactive({
 	controls: []
 });
 
-type OffreMapSearchPoint = OffreMapDisplayPoint & {
-	searchIndex: string;
-};
-
 const baseMapPoints = computed(() => {
-	return props.products
-			.map((product, index) => {
-				const hotel = product.hotel ?? {};
-				const coordinates = hotel.coordinates ?? null;
-				const latitude = normalizeMapCoordinate(coordinates?.latitude);
-				const longitude = normalizeMapCoordinate(coordinates?.longitude);
-				const packageOffer = getPrimaryMapOffer(product);
-				const hotelId = String(hotel.id ?? hotel.name ?? index);
-
-				if (latitude === null || longitude === null) {
-					return null;
-				}
-
-				return {
-					key: String(hotel.id ?? hotel.name ?? index),
-					hotelId,
-					hotelName: stripEnglishBracketFragments(hotel.name) || "Без названия",
-					locationLabel: stripEnglishBracketFragments(hotel.locationSummary),
-					imageUrl: resolveHotelImageUrl(hotel.images),
-					latitude,
-					longitude,
-					categoryKey: hotel.categoryKey,
-					packageOffer,
-					isFamilyClub: Boolean(hotel.sunFamilyClub || hotel.coralFamilyClub),
-					isEliteHotel: Boolean(hotel.eliteHotel)
-				};
-			})
-			.filter((point): point is NonNullable<typeof point> => point !== null);
+	return buildBaseMapPoints(props.products);
 });
 
 const {
@@ -108,32 +71,12 @@ const {
 });
 
 const mapPoints = computed<OffreMapSearchPoint[]>(() => {
-	return baseMapPoints.value.map((point) => {
-		const effectiveOffer = mapOfferMode.value === "hotel"
-				? hotelOffersByHotelId.value.get(point.hotelId) ?? point.packageOffer
-				: point.packageOffer;
-		const passengersCount = getOfferPassengersCount(effectiveOffer);
-		const stayNights = Number(effectiveOffer?.stayNights) || 0;
-		const currentPriceValue = resolveOfferPriceValue(
-				effectiveOffer?.price?.amount,
-				props.pricingMode,
-				passengersCount,
-				stayNights
-		);
-
-		return {
-			...point,
-			effectiveOffer,
-			currentPriceValue,
-			currentPriceLabel: formatCurrencySafe(currentPriceValue),
-			priceSuffix: resolveOfferPartySuffix(props.pricingMode, effectiveOffer?.rooms?.[0]?.passengers),
-			searchIndex: normalizeMapSearchValue(`${point.hotelName} ${point.locationLabel}`),
-			offerHref: resolveOfferHref({
-				redirectionUrl: effectiveOffer?.link?.redirectionUrl,
-				queryParam: effectiveOffer?.link?.queryParam,
-				hostname: typeof window === "undefined" ? "" : window.location.hostname
-			})
-		};
+	return buildMapSearchPoints({
+		points: baseMapPoints.value,
+		hotelOffersByHotelId: hotelOffersByHotelId.value,
+		mapOfferMode: mapOfferMode.value,
+		pricingMode: props.pricingMode,
+		hostname: typeof window === "undefined" ? "" : window.location.hostname
 	});
 });
 
@@ -154,11 +97,30 @@ const filteredMapPoints = computed(() => {
 		return point.searchIndex.includes(searchValue);
 	});
 });
-
-const activeMapPoint = computed(() => {
-	return filteredMapPoints.value.find((point) => point.hotelId === popupHotelId.value)
-			?? mapPoints.value.find((point) => point.hotelId === popupHotelId.value)
-			?? null;
+const mapPointsByHotelId = computed(() => {
+	return buildPointsByHotelId(mapPoints.value);
+});
+const filteredMapPointsByHotelId = computed(() => {
+	return buildPointsByHotelId(filteredMapPoints.value);
+});
+const filteredHotelIds = computed(() => {
+	return buildHotelIdSet(filteredMapPoints.value);
+});
+const {
+	activeHotelId,
+	popupHotelId,
+	activeMapPoint,
+	handleMarkerToggle,
+	closeOverlay,
+	focusPoint
+} = useOffreMapSelection({
+	map,
+	mapPointsByHotelId,
+	filteredMapPointsByHotelId,
+	filteredHotelIds,
+	setLastAutoLocationKey(value) {
+		lastAutoLocationKey.value = value;
+	}
 });
 const activeMapPointHotelStarCount = computed(() => {
 	const hotelCategory = getMapReferenceValue<{ starCount?: number }>(
@@ -170,7 +132,7 @@ const activeMapPointHotelStarCount = computed(() => {
 	return Number(hotelCategory?.starCount) || 0;
 });
 const activeMapPointStarItems = computed<boolean[]>(() => {
-	return Array.from({length: 5}, (_, index) => index < activeMapPointHotelStarCount.value);
+	return Array.from({length: activeMapPointHotelStarCount.value}, () => true);
 });
 const {
 	terms: activeMapPointTerms
@@ -207,75 +169,14 @@ const overlayBounds = computed<[[number, number], [number, number]] | null>(() =
 });
 const hasMapPoints = computed(() => filteredMapPoints.value.length > 0);
 
-watch([mapPoints, filteredMapPoints], () => {
-	if (activeHotelId.value && !filteredMapPoints.value.some((point) => point.hotelId === activeHotelId.value)) {
-		activeHotelId.value = null;
-	}
-
-	if (popupHotelId.value && !filteredMapPoints.value.some((point) => point.hotelId === popupHotelId.value)) {
-		popupHotelId.value = null;
-	}
-});
-
-const { lastAutoLocationKey } = useOffreMapLocation({
+useOffreMapLocation({
 	ymapsInitialized,
 	map,
 	points: filteredMapPoints,
 	activeHotelId,
+	lastAutoLocationKeySource: lastAutoLocationKey,
 	mapSettings
 });
-
-function focusPoint(hotelId: string) {
-	const point = filteredMapPoints.value.find((candidate) => candidate.hotelId === hotelId)
-			?? mapPoints.value.find((candidate) => candidate.hotelId === hotelId);
-
-	if (!point) {
-		return;
-	}
-
-	activeHotelId.value = point.hotelId;
-
-	if (!map.value) {
-		return;
-	}
-
-	lastAutoLocationKey.value = `focus:${hotelId}`;
-	map.value.setLocation({
-		center: [point.longitude, point.latitude],
-		duration: 500
-	});
-}
-
-async function openPopupForHotel(hotelId: string) {
-	popupHotelId.value = null;
-
-	await nextTick();
-	await new Promise<void>((resolve) => {
-		requestAnimationFrame(() => resolve());
-	});
-
-	if (activeHotelId.value !== hotelId) {
-		return;
-	}
-
-	popupHotelId.value = hotelId;
-}
-
-function handleMarkerToggle(hotelId: string) {
-	if (activeHotelId.value === hotelId) {
-		popupHotelId.value = null;
-		activeHotelId.value = null;
-		return;
-	}
-
-	focusPoint(hotelId);
-	void openPopupForHotel(hotelId);
-}
-
-function closeOverlay() {
-	popupHotelId.value = null;
-	activeHotelId.value = null;
-}
 
 onMounted(async () => {
 	createYmapsOptions({apikey: YMAPS_API_KEY});

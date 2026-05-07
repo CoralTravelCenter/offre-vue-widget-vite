@@ -40,13 +40,22 @@ function handleSearchInput(event: Event) {
   localSearchQuery.value = nextValue;
   emitSearchQuery(nextValue);
 }
+
+function getSidebarItemClass(hotelId: string) {
+  return [
+    "offre-map-sidebar__item grid w-full grid-cols-[56px_minmax(0,1fr)] items-stretch gap-2 rounded-[10px] border border-brand-border bg-brand-card/90 p-1.5 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-brand-primary hover:bg-brand-card",
+    props.activeHotelId === hotelId
+      ? "offre-map-sidebar__item--active border-brand-primary bg-brand-card"
+      : "offre-map-sidebar__item--default"
+  ];
+}
 </script>
 
 <template>
-  <aside class="offre-map-sidebar absolute bottom-4 left-4 top-4 z-[30] hidden w-[300px] overflow-hidden rounded-[14px] border border-brand-border bg-brand-card/95 shadow-brand-popover backdrop-blur-[10px] lg:flex lg:flex-col">
+  <aside class="offre-map-sidebar absolute bottom-4 left-4 top-4 z-[20] hidden w-[300px] overflow-hidden rounded-[14px] border border-brand-border bg-brand-card/95 shadow-brand-popover backdrop-blur-[10px] lg:flex lg:flex-col">
     <div class="offre-map-sidebar__header grid gap-[10px] px-3 pb-2 pt-3">
       <div class="offre-map-sidebar__header-row flex items-center justify-between gap-3">
-        <div class="offre-map-sidebar__title text-[15px] font-semibold leading-[18px] text-brand-foreground">Отели на карте</div>
+        <div class="offre-map-sidebar__title text-[15px] font-normal leading-[18px] text-brand-foreground">Отели на карте</div>
         <div class="offre-map-sidebar__count rounded-full border border-brand-border bg-brand-muted px-2 py-[1px] text-[12px] leading-[18px] text-brand-muted-foreground">
           <template v-if="isUpdatingPrices && mapOfferMode === 'hotel'">обновляем...</template>
           <template v-else>{{ points.length }}</template>
@@ -76,10 +85,7 @@ function handleSearchInput(event: Event) {
         v-for="point in points"
         :key="`list-${point.key}`"
         type="button"
-        :class="[
-          'offre-map-sidebar__item grid w-full grid-cols-[56px_minmax(0,1fr)] items-stretch gap-2 rounded-[10px] border border-brand-border bg-brand-card/90 p-1.5 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-brand-primary hover:bg-brand-card',
-          activeHotelId === point.hotelId ? 'offre-map-sidebar__item--active border-brand-primary bg-brand-card' : ''
-        ]"
+        :class="getSidebarItemClass(point.hotelId)"
         @click="emit('focus', point.hotelId)"
       >
         <div
@@ -94,7 +100,7 @@ function handleSearchInput(event: Event) {
         </div>
 
         <div class="offre-map-sidebar__item-body grid min-w-0 gap-0.5">
-          <div class="offre-map-sidebar__item-title overflow-hidden text-[13px] font-semibold leading-4 text-brand-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+          <div class="offre-map-sidebar__item-title overflow-hidden text-[13px] font-normal leading-4 text-brand-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
             {{ point.hotelName }}
           </div>
           <div
@@ -105,7 +111,7 @@ function handleSearchInput(event: Event) {
           </div>
           <div
             v-if="point.currentPriceLabel"
-            class="offre-map-sidebar__item-price mt-px text-[14px] font-semibold leading-[18px] text-brand-primary"
+            class="offre-map-sidebar__item-price mt-px text-[14px] font-normal leading-[18px] text-brand-primary"
           >
             {{ point.currentPriceLabel }}
           </div>

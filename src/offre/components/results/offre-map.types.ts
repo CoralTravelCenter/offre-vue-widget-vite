@@ -24,3 +24,5 @@ export interface OffreMapOverlayModel {
   terms: OffreOfferCardTerm[];
   starItems: boolean[];
 }
+
+export type { OffreMapSearchPoint } from "offre/lib/offre-map";

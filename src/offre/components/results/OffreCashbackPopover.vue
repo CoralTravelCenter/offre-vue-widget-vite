@@ -34,7 +34,7 @@ useEventListener("scroll", () => {
     <PopoverTrigger as-child>
       <button
         type="button"
-        class="offre-cashback-popover m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-inherit outline-none hover:brightness-[0.98] active:brightness-[0.95]"
+        class="offre-cashback-popover cashback m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-inherit outline-none transition-[filter] hover:brightness-[0.98] active:brightness-[0.95]"
         aria-label="Показать условия кешбэка CoralBonus"
       >
         <OffreCashbackBanner
@@ -48,22 +48,22 @@ useEventListener("scroll", () => {
       size="brand"
       side="top"
       align="center"
-      class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-brand-card px-3 py-0"
+      class="offre-cashback-popover__content w-[min(var(--reka-popover-trigger-width),calc(100vw-32px))] max-w-[calc(100vw-32px)] rounded-xl border-0 bg-brand-card px-3 py-0 shadow-brand-popover"
     >
-      <div class="offre-cashback-popover__body text-brand-foreground">
-        <div class="offre-cashback-popover__list flex flex-col font-semibold">
+      <div class="offre-cashback-popover__body text-[length:var(--brand-text-meta)] leading-[var(--brand-leading-meta)] text-brand-foreground">
+        <div class="offre-cashback-popover__list promos-grid flex flex-col font-normal">
           <div
             v-for="promo in cashbackInfo.listOfPromos"
             :key="`${promo.content_txt ?? 'promo'}-${promo.content_num ?? ''}`"
-            class="offre-cashback-popover__row inline-flex items-center justify-between gap-4 border-b py-3 text-balance"
+            class="offre-cashback-popover__row inline-flex items-center justify-between gap-4 border-b border-[var(--brand-border-popover-row)] py-3 text-balance"
           >
-            <span class="offre-cashback-popover__value text-left">
+            <span class="offre-cashback-popover__value value text-left">
               {{ promo.content_num ?? "" }}
             </span>
             <a
               v-if="promo.content_link"
               :href="promo.content_link"
-              class="offre-cashback-popover__description cursor-pointer text-right underline decoration-1 underline-offset-2 hover:text-brand-primary"
+              class="offre-cashback-popover__description description cursor-pointer text-right underline decoration-1 underline-offset-2 transition-[color,background-color] hover:text-brand-primary"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -71,19 +71,19 @@ useEventListener("scroll", () => {
             </a>
             <span
               v-else
-              class="offre-cashback-popover__description text-left"
+              class="offre-cashback-popover__description description text-left transition-[color,background-color]"
             >
               {{ promo.content_txt }}
             </span>
           </div>
 
-          <div class="offre-cashback-popover__actions inline-flex items-center justify-between gap-4 py-3 text-balance">
-            <div class="offre-cashback-popover__info text-left font-semibold">
+          <div class="offre-cashback-popover__actions info-action inline-flex items-center justify-between gap-4 py-3 text-balance">
+            <div class="offre-cashback-popover__info info text-left font-normal">
               Для начисления бонусов, укажите номер карты в поле "Примечание к заказу"
             </div>
             <a
               href="https://coralbonus.ru/registration?promo=R3R5VO93GKG8N1PGQC1UP0G6EICQLRWEN3Z64WZGC4YBYIKHFJV55IND5O20WUJ"
-              class="offre-cashback-popover__activate inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-brand-primary px-3 py-1.5 text-brand-primary-foreground hover:bg-brand-primary/90 active:bg-brand-primary/80"
+              class="offre-cashback-popover__activate action inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-brand-primary px-3 py-1.5 text-brand-primary-foreground transition-[color,background-color] hover:bg-brand-primary/90 active:bg-brand-primary/80"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -97,27 +97,6 @@ useEventListener("scroll", () => {
 </template>
 
 <style scoped lang="scss">
-.offre-cashback-popover {
-  transition: filter 0.15s ease;
-}
-
-.offre-cashback-popover__content {
-  box-shadow: var(--brand-shadow-popover);
-}
-
-.offre-cashback-popover__list {
-  font-size: var(--brand-text-meta);
-}
-
-.offre-cashback-popover__row {
-  border-color: var(--brand-border-popover-row);
-}
-
-.offre-cashback-popover__description,
-.offre-cashback-popover__activate {
-  transition: color 0.15s ease, background-color 0.15s ease;
-}
-
 .offre-cashback-popover__row {
   @media (min-width: 768px) and (max-width: 1279px) {
     align-content: start;

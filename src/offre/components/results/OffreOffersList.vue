@@ -31,7 +31,7 @@ const normalizedProducts = computed(() => {
 </script>
 
 <template>
-  <section class="offre-offers-list grid grid-cols-1 gap-4">
+  <section class="offre-offers-list offers-list grid grid-cols-1 gap-4">
     <OffreOfferCard
       v-for="entry in normalizedProducts"
       :key="entry.key"
@@ -43,7 +43,7 @@ const normalizedProducts = computed(() => {
       :hotel-runtime-entry="entry.hotelRuntimeEntry"
       :brand-key="brandKey"
       :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
-      class="offre-offers-list__item"
+      class="offre-offers-list__item min-w-0"
       @update:tour-type="emit('update-tour-type', String(entry.product.hotel?.id ?? ''), $event)"
     />
   </section>
@@ -54,9 +54,5 @@ const normalizedProducts = computed(() => {
   @media (min-width: 768px) and (max-width: 1023px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.offre-offers-list__item {
-  min-width: 0;
 }
 </style>

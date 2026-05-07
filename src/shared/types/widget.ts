@@ -22,7 +22,6 @@ export interface WidgetHotelDescriptor {
     timeframe?: WidgetTimeframeConfig;
     nights?: number | number[];
     usps?: string[];
-    roomCriterias?: B2CRoomCriteria[];
 
     [key: string]: unknown;
 }

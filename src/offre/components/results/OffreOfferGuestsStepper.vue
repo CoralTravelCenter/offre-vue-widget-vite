@@ -1,64 +1,67 @@
 <script setup lang="ts">
-import { MinusIcon, PlusIcon } from "lucide-vue-next";
-import { Button } from "ui/button";
+import {MinusIcon, PlusIcon} from "lucide-vue-next";
+import {Button} from "ui/button";
 
 interface Props {
-  label: string;
-  modelValue: number;
-  decrementDisabled?: boolean;
-  incrementDisabled?: boolean;
+	label: string;
+	modelValue: number;
+	decrementDisabled?: boolean;
+	incrementDisabled?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  decrementDisabled: false,
-  incrementDisabled: false
+	decrementDisabled: false,
+	incrementDisabled: false
 });
 
 const emit = defineEmits<{
-  "update:modelValue": [value: number];
+	"update:modelValue": [value: number];
 }>();
 
 function decrement() {
-  emit("update:modelValue", -1);
+	emit("update:modelValue", -1);
 }
 
 function increment() {
-  emit("update:modelValue", 1);
+	emit("update:modelValue", 1);
 }
 </script>
 
 <template>
-  <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-    <span class="text-[12px] font-normal leading-[1.2] text-brand-foreground/80">
+	<div class="offre-offer-guests-stepper grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+    <span
+				class="offre-offer-guests-stepper__label text-(length:--brand-text-body) font-normal leading-(--brand-leading-control) text-brand-foreground/80">
       {{ label }}
     </span>
 
-    <div class="inline-flex items-center gap-[12px]">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        :disabled="decrementDisabled"
-        class="size-6 cursor-pointer rounded-[8px] bg-brand-muted p-0 text-brand-foreground transition-colors hover:bg-brand-primary hover:text-brand-primary-foreground"
-        @click="decrement"
-      >
-        <MinusIcon class="size-2.5" />
-      </Button>
+		<div class="offre-offer-guests-stepper__controls inline-flex items-center gap-(--brand-stepper-gap)">
+			<Button
+					type="button"
+					variant="ghost"
+					size="icon"
+					:disabled="decrementDisabled"
+					class="offre-offer-guests-stepper__button h-6 w-6 rounded-(--brand-stepper-button-radius) bg-(--brand-stepper-button-background) p-0 text-(--brand-stepper-button-foreground) transition-colors hover:bg-(--brand-stepper-button-background) hover:text-brand-primary disabled:bg-(--brand-stepper-button-background) disabled:text-[color-mix(in_srgb,var(--brand-stepper-button-foreground)_40%,transparent)]"
+					@click="decrement"
+			>
+				<MinusIcon
+						class="offre-offer-guests-stepper__icon h-(--brand-stepper-icon-size) w-(--brand-stepper-icon-size)"/>
+			</Button>
 
-      <span class="min-w-5 text-center text-[12px] font-normal leading-none text-brand-foreground">
+			<span
+					class="offre-offer-guests-stepper__value min-w-(--brand-stepper-value-min-width) text-center font-normal text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-foreground tabular-nums">
         {{ modelValue }}
       </span>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        :disabled="incrementDisabled"
-        class="size-6 cursor-pointer rounded-[8px] bg-brand-muted p-0 text-brand-foreground transition-colors hover:bg-brand-primary hover:text-brand-primary-foreground"
-        @click="increment"
-      >
-        <PlusIcon class="size-2.5" />
-      </Button>
-    </div>
-  </div>
+			<Button
+					type="button"
+					variant="ghost"
+					size="icon-lg"
+					:disabled="incrementDisabled"
+					class="offre-offer-guests-stepper__button h-6 w-6 rounded-(--brand-stepper-button-radius) bg-(--brand-stepper-button-background) p-0 text-(--brand-stepper-button-foreground) transition-colors hover:bg-(--brand-stepper-button-background) hover:text-brand-primary disabled:bg-(--brand-stepper-button-background) disabled:text-[color-mix(in_srgb,var(--brand-stepper-button-foreground)_40%,transparent)]"
+					@click="increment"
+			>
+				<PlusIcon class="offre-offer-guests-stepper__icon h-(--brand-stepper-icon-size) w-(--brand-stepper-icon-size)"/>
+			</Button>
+		</div>
+	</div>
 </template>
