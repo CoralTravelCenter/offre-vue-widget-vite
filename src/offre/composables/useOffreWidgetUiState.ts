@@ -1,6 +1,6 @@
 import { computed, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
-import type { B2CRoomCriteria } from "offre/api/types";
 import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
+import type {WidgetRoomCriteria} from "shared/types/widget";
 
 const GUESTS_STORAGE_PREFIX = "offre-widget:guests";
 const MAX_ADULTS_COUNT = 6;
@@ -100,7 +100,7 @@ function writePersistedGuestsState(key: string | null | undefined, value: OffreW
   window.sessionStorage.setItem(storageKey, JSON.stringify(normalizeGuestsState(value)));
 }
 
-function resolveInitialGuestsState(roomCriterias: B2CRoomCriteria[] | undefined): OffreWidgetGuestsState {
+function resolveInitialGuestsState(roomCriterias: WidgetRoomCriteria[] | undefined): OffreWidgetGuestsState {
   const passengers = roomCriterias?.[0]?.passengers ?? [
     { age: 20, passengerType: 0 },
     { age: 20, passengerType: 0 }
@@ -139,7 +139,7 @@ export function useOffreWidgetUiState(params: {
     { deep: true }
   );
 
-  const selectedRoomCriterias = computed<B2CRoomCriteria[]>(() => {
+  const selectedRoomCriterias = computed<WidgetRoomCriteria[]>(() => {
     return [{
       passengers: [
         ...Array.from({ length: selectedGuests.value.adultsCount }, () => ({

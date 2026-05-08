@@ -16,8 +16,12 @@ import {useOffreWidgetUiState} from "offre/composables/useOffreWidgetUiState";
 import {useOffreWidgetListState} from "offre/composables/useOffreWidgetListState";
 import {buildMapViewKey, buildWidgetPersistenceKey, shouldActivateMapView} from "offre/lib/offre-widget-root";
 import {resolveProductsListState} from "offre/lib/offre-widget-view";
-import {getWidgetHotelId} from "offre/lib/payload";
-import type {OffreWidgetRootProps} from "shared/types/widget";
+import {
+	getWidgetHotelId,
+	type NormalizedOffreWidgetOptions,
+	type NormalizedWidgetHotelDescriptor
+} from "offre/lib/payload";
+import type {BrandDefinition, BrandKey} from "shared/types/brand";
 import {
 	Pagination,
 	PaginationContent,
@@ -39,10 +43,14 @@ const MOBILE_TOP_OFFSET = 74;
 const PAGINATION_DESKTOP_BREAKPOINT = "(min-width: 768px)";
 const PRODUCTS_PAGE_SIZE = 5;
 
-const props = withDefaults(defineProps<OffreWidgetRootProps>(), {
-	options: () => ({}),
-	hotelsList: () => []
-});
+interface OffreWidgetRootProps {
+	brandKey: BrandKey;
+	brandDefinition: BrandDefinition;
+	options: NormalizedOffreWidgetOptions;
+	hotelsList: NormalizedWidgetHotelDescriptor[];
+}
+
+const props = defineProps<OffreWidgetRootProps>();
 
 const {
 	activeRegionId,
@@ -239,7 +247,7 @@ function getPaginationItemClass(value: number) {
 				v-fixed="navigationFixedOptions"
 		>
 			<div
-					class="offre-widget__navigation grid grid-flow-row grid-cols-[1fr_min-content] gap-2 rounded-[var(--brand-radius-chip)] bg-brand-card py-2 [grid-template-areas:'nav_nav''inputs_switcher'] transition-shadow lg:grid-flow-col lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center lg:[grid-template-areas:'nav_inputs_switcher']"
+					class="offre-widget__navigation grid grid-flow-row grid-cols-[1fr_min-content] gap-2 rounded-[var(--brand-radius-chip)] bg-[var(--brand-navigation-surface,var(--brand-card))] py-2 [grid-template-areas:'nav_nav''inputs_switcher'] transition-shadow lg:grid-flow-col lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center lg:[grid-template-areas:'nav_inputs_switcher']"
 					:class="{ sticked: navigationFloating }"
 			>
 				<RegionTabsNav
@@ -269,19 +277,6 @@ function getPaginationItemClass(value: number) {
 				v-show="viewMode === 'list'"
 				class="offre-widget__results offre-widget__results--list product-grid mt-4 overflow-visible"
 		>
-			<div class="offre-widget__debug-states mb-4 grid gap-4">
-				<OffreResultsStateNotice
-						title="Упс! Что-то пошло не так."
-						description="Но мы это исправим, попробуйте зайти позже"
-						variant="error"
-				/>
-				<OffreResultsStateNotice
-						title="Увы, подходящих вариантов нет"
-						description="Попробуйте изменить месяц, регион вылета или состав туристов"
-						variant="warning"
-				/>
-			</div>
-
 			<div
 					v-if="requestState === 'loading'"
 					:class="['offre-widget__state', productsListState.modifierClass]"
@@ -338,7 +333,7 @@ function getPaginationItemClass(value: number) {
 				>
 					<Pagination
 							class="offre-widget__pagination pager !w-fit mx-auto flex justify-center"
-							:class="paginationFloating ? 'sticked bg-white p-2 rounded-[16px]' : ''"
+							:class="paginationFloating ? 'sticked bg-[var(--brand-pagination-surface,var(--brand-card))] p-2 rounded-[16px]' : ''"
 							v-model:page="currentPage"
 							:items-per-page="PRODUCTS_PAGE_SIZE"
 							:sibling-count="paginationSiblingCount"
@@ -351,7 +346,7 @@ function getPaginationItemClass(value: number) {
 						>
 								<PaginationPrevious
 										size="icon-lg"
-										class="offre-widget__pagination-control offre-widget__pagination-control--previous h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-brand-border bg-[var(--colorBgContainer,#fff)] !p-0 text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-foreground hover:bg-[var(--colorBgContainer,#fff)] hover:border-brand-primary hover:text-brand-primary"
+										class="offre-widget__pagination-control offre-widget__pagination-control--previous h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-[var(--brand-pagination-item-border,var(--brand-border))] bg-[var(--brand-pagination-surface,var(--brand-card))] !p-0 text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] text-[var(--brand-pagination-item-foreground,var(--brand-foreground))] hover:bg-[var(--brand-pagination-surface,var(--brand-card))] hover:border-brand-primary hover:text-brand-primary"
 								>
 									<ChevronLeftIcon class="offre-widget__pagination-icon size-4"/>
 								</PaginationPrevious>
@@ -366,7 +361,7 @@ function getPaginationItemClass(value: number) {
 											size="brand"
 											:value="item.value"
 											:class="[
-												'h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-brand-border bg-[var(--colorBgContainer,#fff)] p-0 text-(length:--brand-text-body) leading-(--brand-leading-control)',
+												'h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-[var(--brand-pagination-item-border,var(--brand-border))] bg-[var(--brand-pagination-surface,var(--brand-card))] p-0 text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)]',
 												getPaginationItemClass(item.value)
 											]"
 									>
@@ -375,13 +370,13 @@ function getPaginationItemClass(value: number) {
 
 								<PaginationEllipsis
 										v-else
-										class="offre-widget__pagination-ellipsis size-10 text-brand-foreground"
+										class="offre-widget__pagination-ellipsis size-10 text-[var(--brand-pagination-item-foreground,var(--brand-foreground))]"
 								/>
 							</template>
 
 								<PaginationNext
 										size="icon-lg"
-										class="offre-widget__pagination-control offre-widget__pagination-control--next h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-brand-border bg-[var(--colorBgContainer,#fff)] !p-0 text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-foreground hover:bg-[var(--colorBgContainer,#fff)] hover:border-brand-primary hover:text-brand-primary"
+										class="offre-widget__pagination-control offre-widget__pagination-control--next h-10 w-10 rounded-[var(--margin-marginXS,8px)] border border-[var(--brand-pagination-item-border,var(--brand-border))] bg-[var(--brand-pagination-surface,var(--brand-card))] !p-0 text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] text-[var(--brand-pagination-item-foreground,var(--brand-foreground))] hover:bg-[var(--brand-pagination-surface,var(--brand-card))] hover:border-brand-primary hover:text-brand-primary"
 								>
 									<ChevronRightIcon class="offre-widget__pagination-icon size-4"/>
 								</PaginationNext>
@@ -403,7 +398,7 @@ function getPaginationItemClass(value: number) {
 			<OffreMapView
 					v-else
 					:key="mapViewKey"
-					:products="productsList"
+					:visible-products="productsList"
 					:pricing-mode="effectiveSearchOptions.pricing"
 					:search-options="effectiveSearchOptions"
 					:product-reference="productReference"
@@ -433,7 +428,8 @@ function getPaginationItemClass(value: number) {
 }
 
 .offre-widget__pagination-item--inactive {
-	color: var(--brand-foreground);
+	border-color: var(--brand-pagination-item-border, var(--brand-border));
+	color: var(--brand-pagination-item-foreground, var(--brand-foreground));
 }
 
 .offre-widget__pagination-item--inactive:hover {

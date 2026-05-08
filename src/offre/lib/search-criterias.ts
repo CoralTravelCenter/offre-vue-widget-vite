@@ -41,6 +41,10 @@ function resolveRoomCriterias(
 }
 
 export interface OffreProductQueryDescriptor {
+  hotels: Array<{
+    hotelId: string;
+    arrivalLocation: B2CArrivalLocationCriteria;
+  }>;
   onlyhotel: boolean;
   searchCriterias: B2CPriceSearchCriterias;
 }
@@ -112,6 +116,15 @@ export function buildOffreProductQueries(params: {
         existingDescriptor.searchCriterias.arrivalLocations.push(arrivalLocation);
       }
 
+      const hasHotel = existingDescriptor.hotels.some((entry) => entry.hotelId === String(hotel.id));
+
+      if (!hasHotel) {
+        existingDescriptor.hotels.push({
+          hotelId: String(hotel.id),
+          arrivalLocation
+        });
+      }
+
       continue;
     }
 
@@ -120,6 +133,10 @@ export function buildOffreProductQueries(params: {
 
     if (hotel.onlyhotel) {
       groupedQueries.set(groupKey, {
+        hotels: [{
+          hotelId: String(hotel.id),
+          arrivalLocation
+        }],
         onlyhotel: true,
         searchCriterias: {
           ...HOTEL_COMMON_SEARCH_CRITERIAS,
@@ -143,6 +160,10 @@ export function buildOffreProductQueries(params: {
     }
 
     groupedQueries.set(groupKey, {
+      hotels: [{
+        hotelId: String(hotel.id),
+        arrivalLocation
+      }],
       onlyhotel: false,
       searchCriterias: {
         ...PACKAGE_COMMON_SEARCH_CRITERIAS,

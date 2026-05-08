@@ -21,8 +21,8 @@ import {
 } from "offre/lib/filter-state";
 import {
   getWidgetHotelIds,
-  normalizeWidgetHotels,
-  normalizeWidgetOptions
+  type NormalizedOffreWidgetOptions,
+  type NormalizedWidgetHotelDescriptor
 } from "offre/lib/payload";
 import { offreQueryConfig } from "offre/query/config";
 import { offreQueryKeys } from "offre/query/keys";
@@ -33,15 +33,13 @@ import type {
   OffreRegionOption,
   RegionTabItem
 } from "offre/types";
-import type { WidgetHotelEntry, WidgetOptions } from "shared/types/widget";
-
 export function useOffreFiltersQueryState(
-  optionsSource: MaybeRefOrGetter<WidgetOptions | undefined>,
-  hotelsListSource: MaybeRefOrGetter<WidgetHotelEntry[] | undefined>
+  optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>,
+  hotelsListSource: MaybeRefOrGetter<NormalizedWidgetHotelDescriptor[]>
 ) {
-  const options = computed(() => normalizeWidgetOptions(toValue(optionsSource)));
-  const normalizedHotels = computed(() => normalizeWidgetHotels(toValue(hotelsListSource), options.value));
-  const hotelIds = computed(() => getWidgetHotelIds(toValue(hotelsListSource)));
+  const options = computed(() => toValue(optionsSource));
+  const normalizedHotels = computed(() => toValue(hotelsListSource));
+  const hotelIds = computed(() => getWidgetHotelIds(normalizedHotels.value));
   const hotelsDirectory = computed<OffreHotelRuntimeEntry[]>(() => {
     return buildHotelsDirectory(normalizedHotels.value, options.value);
   });

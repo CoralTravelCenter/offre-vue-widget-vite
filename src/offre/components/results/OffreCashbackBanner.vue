@@ -11,21 +11,21 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-	<div class="offre-cashback-banner rounded-(--brand-cashback-banner-radius) bg-(--brand-cashback-banner-background) p-2">
+	<div class="offre-cashback-banner rounded-[var(--brand-cashback-banner-radius)] bg-[var(--brand-cashback-banner-background)] p-2">
 		<div class="offre-cashback-banner__content flex items-center justify-between gap-3">
 			<div class="offre-cashback-banner__card card-visual shrink-0">
 				<img
 						src="https://b2ccdn.coral.ru/content/cb-card-offre-vue.png"
 						alt="CoralBonus"
-						class="offre-cashback-banner__card-image block h-auto w-(--brand-cashback-card-width) object-contain"
+						class="offre-cashback-banner__card-image block h-auto w-[var(--brand-cashback-card-width)] object-contain"
 				>
 			</div>
 			<div class="offre-cashback-banner__title info flex flex-col mr-auto">
-				<span class="offre-cashback-banner__amount up-to text-(length:--brand-text-body) leading-4 font-bold text-brand-foreground">Кешбэк до {{
+				<span class="offre-cashback-banner__amount up-to text-[length:var(--brand-text-body)] leading-4 font-bold text-black">Кешбэк до {{
 						amountLabel
 					}}</span>
 				<span
-						class="offre-cashback-banner__subtitle-text to-coral-bonus-card text-(length:--brand-text-meta) leading-(--brand-leading-meta)">на карту CoralBonus</span>
+						class="offre-cashback-banner__subtitle-text to-coral-bonus-card text-[length:var(--brand-text-meta)] leading-[var(--brand-leading-meta)]">на карту CoralBonus</span>
 			</div>
 			<CashbackHintIcon class="offre-cashback-banner__hint h-5 w-5 shrink-0"/>
 		</div>

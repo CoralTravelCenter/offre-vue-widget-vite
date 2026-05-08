@@ -84,3 +84,39 @@
     --brand-stepper-icon-size: 10px;
     --brand-stepper-value-min-width: 20px;
 }
+
+.offre-theme--coral-elite {
+    --brand-primary: #B6985B;
+    --brand-primary-foreground: #ffffff;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+    --brand-cta-primary: #000000;
+    --brand-cta-primary-foreground: #ffffff;
+    --brand-selected-surface: #3c68dc42;
+    --brand-navigation-surface: #3c3735;
+    --brand-pagination-surface: #3c3735;
+    --brand-pagination-item-border: rgba(0, 0, 0, 0.15);
+    --brand-pagination-item-foreground: #ffffff;
+}
+
+.offre-widget-host.offre-theme--coral-dark {
+    --brand-primary: #1668dc;
+    --brand-foreground: #fff;
+    --brand-muted: #333;
+    --brand-muted-foreground: #fff;
+    --brand-card: #24242c;
+    --brand-popover: #24242c;
+    --brand-popover-foreground: #fff;
+    --brand-accent: #333;
+    --brand-accent-foreground: #fff;
+    --brand-selected-surface: #3c68dc42;
+    --brand-control-border: rgba(0,0,0,.15);
+    --brand-map-search-surface: transparent;
+    --brand-select-trigger-foreground: #fff;
+    --brand-guest-age-toggle-background: #333;
+    --brand-guest-age-option-foreground: #fff;
+    --brand-stepper-button-background: #333;
+    --brand-stepper-button-foreground: #fff;
+    --brand-elite-label-background: #333;
+    --brand-elite-label-foreground: #fff;
+}

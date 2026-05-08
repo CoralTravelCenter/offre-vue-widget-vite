@@ -1,7 +1,8 @@
 import "styles/style.css";
 import type {MountedOffreWidget as CoreMountedOffreWidget} from "app/create-offre-widget-app";
 import {mountOffreWidget} from "app/create-offre-widget-app";
-import type {WidgetHotelEntry, WidgetOptions, WidgetPayload} from "shared/types/widget";
+import {sanitizeWidgetPayload} from "offre/lib/payload";
+import type {WidgetPayload} from "shared/types/widget";
 
 const WIDGET_SELECTOR = 'script[type="application/json"][data-offre-vue-test]';
 const WIDGET_ROOT_ATTR = "data-offre-widget-root";
@@ -40,26 +41,14 @@ function errorWidget(message: string, details?: unknown) {
     console.error(`OffreWidget: ${message}`, details);
 }
 
-function normalizeWidgetOptions(value: unknown): WidgetOptions {
-    return isRecord(value) ? (value as WidgetOptions) : {};
-}
-
-function normalizeWidgetHotels(value: unknown): WidgetHotelEntry[] {
-    return Array.isArray(value) ? value : [];
-}
-
 function normalizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
     if (!isRecord(rawPayload)) {
         warnWidget("widget payload must be a JSON object");
         return null;
     }
 
-    const payload: WidgetPayload = {};
-
     if (rawPayload.brand !== undefined) {
-        if (typeof rawPayload.brand === "string" && rawPayload.brand.trim()) {
-            payload.brand = rawPayload.brand.trim();
-        } else {
+        if (!(typeof rawPayload.brand === "string" && rawPayload.brand.trim())) {
             warnWidget("payload.brand must be a non-empty string, brand fallback will be used");
         }
     }
@@ -72,10 +61,7 @@ function normalizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
         warnWidget("payload.hotels must be an array, falling back to an empty list");
     }
 
-    payload.options = normalizeWidgetOptions(rawPayload.options);
-    payload.hotels = normalizeWidgetHotels(rawPayload.hotels);
-
-    return payload;
+    return sanitizeWidgetPayload(rawPayload);
 }
 
 function parseWidgetPayload(scriptElement: HTMLScriptElement): WidgetPayload | null {

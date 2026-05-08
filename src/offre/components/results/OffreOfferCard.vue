@@ -128,7 +128,7 @@ function getLabelClass(kind: "elite" | "family") {
 	return [
 		"offre-offer-card__label inline-grid h-6 place-content-center rounded-[var(--brand-radius-segment)] border-transparent px-3 text-[length:var(--brand-text-meta)] font-normal leading-none uppercase",
 		kind === "elite"
-			? "offre-offer-card__label--elite bg-brand-foreground text-brand-card"
+			? "offre-offer-card__label--elite bg-[var(--brand-elite-label-background,var(--brand-foreground))] text-[var(--brand-elite-label-foreground,var(--brand-card))]"
 			: "offre-offer-card__label--family bg-brand-accent text-brand-accent-foreground"
 	];
 }
@@ -246,15 +246,14 @@ function getLabelClass(kind: "elite" | "family") {
 
 			<ul
 					v-if="hasUsps"
-					class="offre-offer-card__usp-list mt-2 grid max-h-[137px] list-none grid-flow-col grid-rows-[repeat(auto-fill,minmax(16px,min-content))] gap-x-4 gap-y-1 border-t border-brand-border pt-2 pl-0 text-[length:var(--brand-text-body)] text-[color-mix(in_srgb,var(--brand-foreground)_80%,transparent)] lg:mt-0 lg:border-t-0 lg:pt-0 lg:pl-2"
+					class="offre-offer-card__usp-list mt-2 list-disc border-t border-brand-border pt-2 pl-5 text-[length:var(--brand-text-body)] text-[color-mix(in_srgb,var(--brand-foreground)_80%,transparent)] lg:mt-0 lg:border-t-0 lg:pt-0 lg:pl-6"
 			>
 				<li
 						v-for="usp in hotelUsps"
 						:key="usp"
-						class="offre-offer-card__usp-item flex"
+						class="offre-offer-card__usp-item"
 				>
-					<span class="offre-offer-card__usp-bullet mr-1.5 text-brand-primary">•</span>
-					<span class="offre-offer-card__usp-text">{{ usp }}</span>
+					{{ usp }}
 				</li>
 			</ul>
 		</div>
@@ -275,3 +274,13 @@ function getLabelClass(kind: "elite" | "family") {
 		/>
 	</article>
 </template>
+
+<style scoped>
+.offre-offer-card__usp-item {
+  margin-bottom: 0.25rem;
+}
+
+.offre-offer-card__usp-item::marker {
+  color: var(--colorPrimary, var(--brand-primary));
+}
+</style>

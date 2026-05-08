@@ -1,7 +1,12 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @import "../brands/coral/theme.css";
 @import "../brands/sunmar/theme.css";
 
 @import "tailwindcss";
+
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -124,6 +129,7 @@
     --radius-panel: var(--brand-radius-panel);
     --radius-control: var(--brand-radius-control);
     --radius-chip: var(--brand-radius-chip);
+    --font-heading: var(--font-sans);
 }
 
 .offre-theme--coral,
@@ -176,4 +182,13 @@
 
 .offre-scroll-snap-x > * {
     scroll-snap-align: start;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
 }

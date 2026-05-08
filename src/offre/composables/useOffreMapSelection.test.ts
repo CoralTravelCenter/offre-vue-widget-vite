@@ -18,8 +18,7 @@ function createPoint(hotelId: string): OffreMapSearchPoint {
     currentPriceValue: 0,
     currentPriceLabel: "",
     priceSuffix: "",
-    offerHref: "",
-    searchIndex: `hotel ${hotelId}`
+    offerHref: ""
   };
 }
 

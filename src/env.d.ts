@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_MONKEY_MATCH?: string;
   readonly VITE_MONKEY_TARGET?: string;
   readonly VITE_MONKEY_BRAND?: "coral" | "sunmar";
+  readonly VITE_YMAPS_API_KEY?: string;
 }
 
 interface ImportMeta {

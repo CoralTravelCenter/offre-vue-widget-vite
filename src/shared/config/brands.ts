@@ -1,4 +1,5 @@
 import type { BrandDefinition, BrandKey } from "shared/types/brand";
+import type { WidgetOptions, WidgetTheme } from "shared/types/widget";
 import coralBrand from "brands/coral";
 import sunmarBrand from "brands/sunmar";
 
@@ -6,6 +7,11 @@ const brandRegistry: Record<BrandKey, BrandDefinition> = {
   coral: coralBrand,
   sunmar: sunmarBrand
 };
+const themeClasses = [
+  ...Object.values(brandRegistry).map((brand) => brand.themeClass),
+  "offre-theme--coral-elite",
+  "offre-theme--coral-dark"
+] as const;
 
 function isSupportedBrandKey(value: string | null | undefined): value is BrandKey {
   return value === "coral" || value === "sunmar";
@@ -56,4 +62,33 @@ export function resolveBrandDefinition(
 
 export function getSupportedBrands() {
   return Object.values(brandRegistry) as BrandDefinition[];
+}
+
+export function getSupportedThemeClasses() {
+  return [...themeClasses];
+}
+
+export function resolveWidgetTheme(value: WidgetOptions["theme"]): WidgetTheme {
+  if (value === "elite" || value === "dark") {
+    return value;
+  }
+
+  return "default";
+}
+
+export function resolveBrandThemeClass(params: {
+  brandDefinition: BrandDefinition;
+  theme?: WidgetOptions["theme"];
+}) {
+  const resolvedTheme = resolveWidgetTheme(params.theme);
+
+  if (params.brandDefinition.key === "coral" && resolvedTheme === "elite") {
+    return "offre-theme--coral-elite";
+  }
+
+  if (params.brandDefinition.key === "coral" && resolvedTheme === "dark") {
+    return "offre-theme--coral-dark";
+  }
+
+  return params.brandDefinition.themeClass;
 }

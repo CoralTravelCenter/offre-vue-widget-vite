@@ -32,8 +32,16 @@ const appliedChildrenAges = ref<number[]>([]);
 const draftAdultsCount = ref(2);
 const draftChildrenAges = ref<number[]>([]);
 
+const initialAdultsCount = computed(() => {
+	return Math.max(1, Number(props.adultsCount) || 2);
+});
+const initialChildrenAges = computed(() => {
+	return [...props.childrenAges];
+});
 const canReset = computed(() => {
-	return appliedAdultsCount.value !== 2 || appliedChildrenAges.value.length > 0;
+	return draftAdultsCount.value !== initialAdultsCount.value
+		|| draftChildrenAges.value.length !== initialChildrenAges.value.length
+		|| draftChildrenAges.value.some((age, index) => age !== initialChildrenAges.value[index]);
 });
 
 
@@ -149,7 +157,7 @@ function getChildAgeOptionClass(optionAge: number, currentAge: number) {
 		"offre-offer-guests-control__child-age-option h-[var(--brand-guest-age-option-size)] w-[var(--brand-guest-age-option-size)] rounded-lg text-[length:var(--brand-text-body)] transition-colors",
 		isSelected
 				? "offre-offer-guests-control__child-age-option--selected bg-brand-primary text-white"
-				: "offre-offer-guests-control__child-age-option--default bg-[var(--brand-guest-age-toggle-background)] text-black hover:bg-brand-primary hover:text-white"
+				: "offre-offer-guests-control__child-age-option--default bg-[var(--brand-guest-age-toggle-background)] text-[var(--brand-guest-age-option-foreground,var(--brand-foreground))] hover:bg-brand-primary hover:text-white"
 	];
 }
 
@@ -178,13 +186,13 @@ function resetToInitial() {
 					variant="outline"
 					size="brand"
 					:disabled="disabled"
-					class="offre-offer-guests-control__trigger flex h-(--brand-control-height) min-h-(--brand-control-height) min-w-(--brand-control-height) items-center justify-center rounded-(--brand-radius-button) border-brand-control-border bg-brand-card p-0 text-brand-foreground shadow-none transition-[border-color,color,background-color] hover:border-brand-primary hover:bg-brand-card hover:text-brand-primary lg:w-auto lg:min-w-0 lg:gap-2 lg:px-3"
+					class="offre-offer-guests-control__trigger flex h-[var(--brand-control-height)] min-h-[var(--brand-control-height)] min-w-[var(--brand-control-height)] items-center justify-center rounded-[var(--brand-radius-button)] border-brand-control-border bg-brand-card p-0 text-brand-foreground shadow-none transition-[border-color,color,background-color] hover:border-brand-primary hover:bg-brand-card hover:text-brand-primary lg:w-auto lg:min-w-0 lg:gap-2 lg:px-3"
 					aria-label="Изменить состав туристов"
 			>
 				<UsersIcon
 						class="offre-offer-guests-control__trigger-icon size-4 shrink-0 text-brand-foreground transition-colors lg:hidden"/>
 				<span
-						class="offre-offer-guests-control__trigger-label hidden text-(length:--brand-text-control) leading-(--brand-leading-control) lg:inline">Состав туристов</span>
+						class="offre-offer-guests-control__trigger-label hidden text-[length:var(--brand-text-control)] leading-[var(--brand-leading-control)] lg:inline">Состав туристов</span>
 			</Button>
 		</PopoverTrigger>
 
@@ -193,18 +201,18 @@ function resetToInitial() {
 				side="top"
 				align="end"
 				:side-offset="12"
-				class="offre-offer-guests-control__content w-auto min-w-(--brand-guest-popover-min-width) max-w-[calc(100vw-24px)] rounded-(--brand-radius-panel) border border-brand-border bg-brand-card p-4 shadow-brand-popover"
+				class="offre-offer-guests-control__content w-auto min-w-[var(--brand-guest-popover-min-width)] max-w-[calc(100vw-24px)] rounded-[var(--brand-radius-panel)] border border-brand-border bg-brand-card p-4 shadow-brand-popover"
 		>
 			<div class="offre-offer-guests-control__body grid gap-3">
 				<div class="offre-offer-guests-control__header flex items-center justify-between gap-3">
 					<div
-							class="offre-offer-guests-control__title text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-foreground font-bold">
+							class="offre-offer-guests-control__title text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] text-brand-foreground font-bold">
 						Состав туристов
 					</div>
 
 					<button
 							type="button"
-							class="offre-offer-guests-control__reset text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-primary transition-colors hover:text-brand-primary/80 disabled:pointer-events-none disabled:opacity-40"
+							class="offre-offer-guests-control__reset text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] text-brand-primary transition-colors hover:text-brand-primary/80 disabled:pointer-events-none disabled:opacity-40"
 							:disabled="!canReset"
 							@click="resetToInitial"
 					>
@@ -238,7 +246,7 @@ function resetToInitial() {
 							class="offre-offer-guests-control__children offre-offer-guests-control__children--with-items grid gap-3"
 					>
 						<div
-								class="offre-offer-guests-control__children-title text-(length:--brand-text-body) leading-(--brand-leading-control) font-bold text-brand-foreground">
+								class="offre-offer-guests-control__children-title text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] font-bold text-brand-foreground">
 							Возраст детей
 						</div>
 
@@ -249,7 +257,7 @@ function resetToInitial() {
 						>
 							<div class="offre-offer-guests-control__child-row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
 								<div
-										class="offre-offer-guests-control__child-label text-(length:--brand-text-body) leading-(--brand-leading-control) text-brand-foreground/80">
+										class="offre-offer-guests-control__child-label text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)] text-brand-foreground/80">
 									Ребенок {{ index + 1 }}
 								</div>
 
@@ -264,7 +272,7 @@ function resetToInitial() {
 
 							<div
 									v-if="activeChildAgeGridIndex === index"
-									class="offre-offer-guests-control__child-age-grid grid grid-cols-6 gap-(--brand-guest-age-grid-gap) rounded-(--brand-radius-badge) bg-brand-card p-0"
+									class="offre-offer-guests-control__child-age-grid grid grid-cols-6 gap-[var(--brand-guest-age-grid-gap)] rounded-[var(--brand-radius-badge)] bg-brand-card p-0"
 							>
 								<button
 										v-for="childAge in CHILD_AGE_OPTIONS"
@@ -285,7 +293,7 @@ function resetToInitial() {
 				<Button
 						type="button"
 						size="brand"
-						class="offre-offer-guests-control__apply h-(--brand-control-height-compact) rounded-(--brand-radius-button) px-4 py-0 text-(length:--brand-text-body) leading-(--brand-leading-control)"
+						class="offre-offer-guests-control__apply h-[var(--brand-control-height-compact)] rounded-[var(--brand-radius-button)] px-4 py-0 text-[length:var(--brand-text-body)] leading-[var(--brand-leading-control)]"
 						@click="applyDraft"
 				>
 					Применить

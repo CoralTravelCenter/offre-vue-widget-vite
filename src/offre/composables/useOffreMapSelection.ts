@@ -41,20 +41,20 @@ export function useOffreMapSelection(params: {
       ?? mapPointsByHotelId.value.get(hotelId);
 
     if (!point) {
-      return;
+      return null;
     }
 
     activeHotelId.value = point.hotelId;
 
-    if (!map.value) {
-      return;
+    if (map.value) {
+      params.setLastAutoLocationKey(`focus:${hotelId}`);
+      map.value.setLocation({
+        center: [point.longitude, point.latitude],
+        duration: 500
+      });
     }
 
-    params.setLastAutoLocationKey(`focus:${hotelId}`);
-    map.value.setLocation({
-      center: [point.longitude, point.latitude],
-      duration: 500
-    });
+    return point;
   }
 
   async function openPopupForHotel(hotelId: string) {
@@ -72,6 +72,16 @@ export function useOffreMapSelection(params: {
     popupHotelId.value = hotelId;
   }
 
+  async function selectPoint(hotelId: string) {
+    const point = focusPoint(hotelId);
+
+    if (!point) {
+      return;
+    }
+
+    await openPopupForHotel(hotelId);
+  }
+
   function handleMarkerToggle(hotelId: string) {
     if (activeHotelId.value === hotelId) {
       popupHotelId.value = null;
@@ -79,8 +89,7 @@ export function useOffreMapSelection(params: {
       return;
     }
 
-    focusPoint(hotelId);
-    void openPopupForHotel(hotelId);
+    void selectPoint(hotelId);
   }
 
   function closeOverlay() {
@@ -93,6 +102,7 @@ export function useOffreMapSelection(params: {
     popupHotelId,
     activeMapPoint,
     focusPoint,
+    selectPoint,
     handleMarkerToggle,
     closeOverlay
   };

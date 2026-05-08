@@ -1,17 +1,21 @@
 import type {
   WidgetGroupBy,
+  WidgetPayload,
   WidgetHotelDescriptor,
   WidgetHotelEntry,
   WidgetOptions,
+  WidgetRoomCriteria,
   WidgetPricingMode,
   WidgetSortBy,
+  WidgetTheme,
   WidgetTimeframeConfig
 } from "shared/types/widget";
-import type { B2CRoomCriteria } from "offre/api/types";
+import type {BrandKey} from "shared/types/brand";
 
 const DEFAULT_GROUP_BY: WidgetGroupBy = "countries";
 const DEFAULT_PRICING: WidgetPricingMode = "default";
 const DEFAULT_SORT_BY: WidgetSortBy = "price";
+const DEFAULT_THEME: WidgetTheme = "default";
 const DEFAULT_NIGHTS = [7];
 const DEFAULT_TIMEFRAME: WidgetTimeframeConfig = {
   fluid: ["P14D", "P115D"],
@@ -22,11 +26,12 @@ export interface NormalizedOffreWidgetOptions extends Omit<WidgetOptions, "group
   groupBy: WidgetGroupBy;
   chartersOnly: boolean;
   pricing: WidgetPricingMode;
+  theme: WidgetTheme;
   timeframe: WidgetTimeframeConfig;
   nights: number[];
   regionsOrder: string[];
   sortBy: WidgetSortBy;
-  roomCriterias?: B2CRoomCriteria[];
+  roomCriterias?: WidgetRoomCriteria[];
   wildcardOption?: string;
   preferRegion?: string;
   departureCity?: string;
@@ -39,6 +44,12 @@ export interface NormalizedWidgetHotelDescriptor extends Omit<WidgetHotelDescrip
   timeframe?: WidgetTimeframeConfig;
   nights?: number[];
   usps: string[];
+}
+
+export interface NormalizedWidgetPayload {
+  brand?: BrandKey | string;
+  options: NormalizedOffreWidgetOptions;
+  hotels: NormalizedWidgetHotelDescriptor[];
 }
 
 function isPassenger(value: unknown): value is { passengerType: number; age: number } {
@@ -73,6 +84,27 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+export function sanitizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
+  if (!isPlainObject(rawPayload)) {
+    return null;
+  }
+
+  const payload: WidgetPayload = {};
+
+  if (typeof rawPayload.brand === "string" && rawPayload.brand.trim()) {
+    payload.brand = rawPayload.brand.trim();
+  }
+
+  payload.options = isPlainObject(rawPayload.options)
+    ? (rawPayload.options as WidgetOptions)
+    : {};
+  payload.hotels = Array.isArray(rawPayload.hotels)
+    ? rawPayload.hotels
+    : [];
+
+  return payload;
+}
+
 function normalizeGroupBy(value: WidgetOptions["groupBy"]): WidgetGroupBy {
   if (value === "countries" || value === "regions" || value === "areas" || value === "places") {
     return value;
@@ -87,6 +119,14 @@ function normalizePricing(value: WidgetOptions["pricing"]): WidgetPricingMode {
   }
 
   return DEFAULT_PRICING;
+}
+
+function normalizeTheme(value: WidgetOptions["theme"]): WidgetTheme {
+  if (value === "elite" || value === "dark" || value === "default") {
+    return value;
+  }
+
+  return DEFAULT_THEME;
 }
 
 function normalizeSortBy(value: WidgetOptions["sortBy"]): WidgetSortBy {
@@ -179,6 +219,7 @@ export function normalizeWidgetOptions(options: WidgetOptions | undefined): Norm
     groupBy: normalizeGroupBy(source.groupBy),
     chartersOnly: Boolean(source.chartersOnly),
     pricing: normalizePricing(source.pricing),
+    theme: normalizeTheme(source.theme),
     timeframe: normalizeTimeframe(source.timeframe),
     nights: normalizeNights(source.nights),
     roomCriterias: normalizeRoomCriterias(source.roomCriterias),
@@ -233,7 +274,21 @@ export function normalizeWidgetHotels(
     .filter((hotelEntry): hotelEntry is NormalizedWidgetHotelDescriptor => hotelEntry !== null);
 }
 
-export function getWidgetHotelIds(hotelsList: WidgetHotelEntry[] | undefined) {
+export function normalizeRuntimeWidgetPayload(payload: WidgetPayload | undefined): NormalizedWidgetPayload {
+  const brand = typeof payload?.brand === "string" && payload.brand.trim()
+    ? payload.brand.trim()
+    : undefined;
+  const options = normalizeWidgetOptions(payload?.options);
+  const hotels = normalizeWidgetHotels(payload?.hotels, options);
+
+  return {
+    brand,
+    options,
+    hotels
+  };
+}
+
+export function getWidgetHotelIds(hotelsList: Array<WidgetHotelEntry | NormalizedWidgetHotelDescriptor> | undefined) {
   const uniqueHotelIds = new Set<string>();
 
   return (Array.isArray(hotelsList) ? hotelsList : [])

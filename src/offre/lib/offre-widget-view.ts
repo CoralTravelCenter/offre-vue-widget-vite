@@ -17,11 +17,11 @@ export function resolveProductsListState(params: {
 
   if (params.productsError) {
     return {
-      title: "Упс! Что-то пошло не так, но мы это исправим, попробуйте зайти позже.",
-      description: "",
+      title: "Упс! Что-то пошло не так.",
+      description: "Но мы это исправим, попробуйте зайти позже",
       modifierClass: "offre-widget__state--error",
       partialMessage: "",
-      showRetry: true
+      showRetry: false
     };
   }
 

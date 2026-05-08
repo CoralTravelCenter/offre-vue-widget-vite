@@ -24,7 +24,7 @@ withDefaults(defineProps<Props>(), {
 			<div
 					class="offre-results-state-notice__icon flex h-12 w-12 shrink-0 items-center justify-center"
 					:class="variant === 'error' ? 'text-[#dc2626]' : 'text-[#d4a017]'"
-			     aria-hidden="true">
+					aria-hidden="true">
 				<TriangleAlertIcon class="size-12"/>
 			</div>
 			<div class="offre-results-state-notice__copy min-w-0">
@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
 				</p>
 				<p
 						v-if="description"
-						class="offre-results-state-notice__description mt-2 m-0 text-[14px] leading-[1.45] text-[#4b5563] md:text-[16px]"
+						class="offre-results-state-notice__description mt-1 m-0 text-[14px] leading-[1.45] text-[#4b5563] md:text-[16px]"
 				>
 					{{ description }}
 				</p>

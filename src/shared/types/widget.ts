@@ -1,9 +1,18 @@
-import type {BrandDefinition, BrandKey} from "shared/types/brand";
-import type { B2CPassenger, B2CRoomCriteria } from "offre/api/types";
+import type {BrandKey} from "shared/types/brand";
 
 export type WidgetGroupBy = "countries" | "regions" | "areas" | "places";
 export type WidgetPricingMode = "default" | "per-person" | "per-night";
 export type WidgetSortBy = "price" | "source";
+export type WidgetTheme = "default" | "elite" | "dark";
+
+export interface WidgetPassenger {
+    passengerType: number;
+    age: number;
+}
+
+export interface WidgetRoomCriteria {
+    passengers: WidgetPassenger[];
+}
 
 export interface WidgetFixedTimeframeOption {
     key: string;
@@ -29,6 +38,7 @@ export interface WidgetHotelDescriptor {
 export interface WidgetOptions {
     groupBy?: WidgetGroupBy | string;
     chartersOnly?: boolean;
+    theme?: WidgetTheme | string;
     wildcardOption?: string;
     pricing?: WidgetPricingMode | string;
     timeframe?: WidgetTimeframeConfig;
@@ -39,8 +49,8 @@ export interface WidgetOptions {
     sortBy?: WidgetSortBy | string;
     departureCity?: string;
     blackList?: string[];
-    passengers?: B2CPassenger;
-    roomCriterias?: B2CRoomCriteria[];
+    passengers?: WidgetPassenger;
+    roomCriterias?: WidgetRoomCriteria[];
 
     [key: string]: unknown;
 }
@@ -51,11 +61,4 @@ export interface WidgetPayload<TOptions extends WidgetOptions = WidgetOptions> {
     brand?: BrandKey | string;
     options?: TOptions;
     hotels?: WidgetHotelEntry[];
-}
-
-export interface OffreWidgetRootProps {
-    brandKey: BrandKey;
-    brandDefinition: BrandDefinition;
-    options?: WidgetOptions;
-    hotelsList?: WidgetHotelEntry[];
 }

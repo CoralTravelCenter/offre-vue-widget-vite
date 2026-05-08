@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Tabs, TabsList, TabsTrigger} from "@/shared/components/ui/tabs";
+import {Tabs, TabsList, TabsTrigger} from "ui/tabs";
 import RegionTabsNavSkeleton from "offre/components/RegionTabsNavSkeleton.vue";
 import type {RegionTabItem} from "offre/types";
 import {computed, nextTick, ref, watch} from "vue";

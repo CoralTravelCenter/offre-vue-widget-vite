@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {Skeleton} from "@/shared/components/ui/skeleton";
+import {Skeleton} from "ui/skeleton";
 
 interface Props {
   items?: number;

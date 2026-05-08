@@ -20,7 +20,7 @@ const aliasMap = {
     offre: fileURLToPath(new URL("./src/offre", import.meta.url)),
     shared: fileURLToPath(new URL("./src/shared", import.meta.url)),
     styles: fileURLToPath(new URL("./src/styles", import.meta.url)),
-    ui: fileURLToPath(new URL("./src/shared/components/ui", import.meta.url)),
+    ui: fileURLToPath(new URL("./src/components/ui", import.meta.url)),
     widget: fileURLToPath(new URL("./src/widget", import.meta.url)),
 };
 

@@ -4,10 +4,16 @@ import { createWidgetQueryClient } from "app/create-widget-query-client";
 import citySpelling from "app/plugins/city-spelling";
 import fixedDirective from "directives/fixed";
 import OffreWidgetRoot from "offre/components/OffreWidgetRoot.vue";
+import {normalizeRuntimeWidgetPayload} from "offre/lib/payload";
 import { gcOffreQueryPersisters } from "offre/query/persister";
-import { getSupportedBrands, resolveBrandDefinition } from "shared/config/brands";
+import {
+  resolveBrandDefinition,
+  resolveBrandThemeClass,
+  resolveWidgetTheme,
+  getSupportedThemeClasses
+} from "shared/config/brands";
 import type { BrandDefinition } from "shared/types/brand";
-import type { WidgetHotelEntry, WidgetOptions, WidgetPayload } from "shared/types/widget";
+import type { WidgetOptions, WidgetPayload } from "shared/types/widget";
 
 interface CreateOffreWidgetAppParams {
   container: Element;
@@ -139,18 +145,22 @@ const ROOT_THEME_VARIABLES = [
   "--brand-stepper-value-min-width"
 ] as const;
 
-function getWidgetOptions(payload: WidgetPayload): WidgetOptions {
-  return (payload.options ?? {}) as WidgetOptions;
-}
+function applyBrandTheme(container: Element, brandDefinition: BrandDefinition, options: WidgetOptions) {
+  const variantThemeClass = resolveBrandThemeClass({
+    brandDefinition,
+    theme: options.theme
+  });
+  const resolvedTheme = resolveWidgetTheme(options.theme);
 
-function getWidgetHotels(payload: WidgetPayload): WidgetHotelEntry[] {
-  return Array.isArray(payload.hotels) ? payload.hotels : [];
-}
-
-function applyBrandTheme(container: Element, brandDefinition: BrandDefinition) {
-  container.classList.remove(...getSupportedBrands().map((brand) => brand.themeClass));
+  container.classList.remove(...getSupportedThemeClasses());
   container.classList.add("offre-widget-host", brandDefinition.themeClass);
+
+  if (variantThemeClass !== brandDefinition.themeClass) {
+    container.classList.add(variantThemeClass);
+  }
+
   container.setAttribute("data-offre-brand", brandDefinition.key);
+  container.setAttribute("data-offre-theme", resolvedTheme);
 
   if (typeof document === "undefined") {
     return;
@@ -171,17 +181,19 @@ function applyBrandTheme(container: Element, brandDefinition: BrandDefinition) {
 }
 
 export function createOffreWidgetApp({ container, payload }: CreateOffreWidgetAppParams): CreateOffreWidgetAppResult {
-  const brandDefinition = resolveBrandDefinition(payload?.brand);
+  const normalizedPayload = normalizeRuntimeWidgetPayload(payload);
+  const brandDefinition = resolveBrandDefinition(normalizedPayload.brand);
+  const widgetOptions = normalizedPayload.options;
   const queryClient = createWidgetQueryClient();
 
   void gcOffreQueryPersisters();
-  applyBrandTheme(container, brandDefinition);
+  applyBrandTheme(container, brandDefinition, widgetOptions);
 
   const app = createApp(OffreWidgetRoot, {
     brandKey: brandDefinition.key,
     brandDefinition,
-    options: getWidgetOptions(payload),
-    hotelsList: getWidgetHotels(payload)
+    options: widgetOptions,
+    hotelsList: normalizedPayload.hotels
   });
 
   app.use(VueQueryPlugin, { queryClient });

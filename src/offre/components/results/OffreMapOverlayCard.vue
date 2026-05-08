@@ -9,7 +9,7 @@ interface Props {
 	mobile?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
 	mobile: false
 });
 
@@ -52,9 +52,9 @@ function getActionClass(mobile: boolean) {
 </script>
 
 <template>
-	<div
-			:class="getRootClass(mobile)"
-	>
+		<div
+				:class="getRootClass(props.mobile)"
+		>
 		<button
 				type="button"
 				class="offre-map-overlay-card__close absolute right-2 top-2 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border border-brand-control-border bg-brand-card p-0 text-[14px]"
@@ -64,8 +64,8 @@ function getActionClass(mobile: boolean) {
 			×
 		</button>
 
-		<div
-				:class="getContentClass(mobile)">
+			<div
+					:class="getContentClass(props.mobile)">
 			<div
 					v-if="model.point.imageUrl"
 					class="offre-map-overlay-card__media overflow-hidden rounded-[10px]"
@@ -89,7 +89,7 @@ function getActionClass(mobile: boolean) {
 					/>
 				</div>
 
-				<div class="offre-map-overlay-card__title pr-5 text-[14px] font-normal leading-[1.2] text-brand-foreground">
+				<div class="offre-map-overlay-card__title pr-5 text-[14px] font-semibold leading-[1.2] text-brand-foreground">
 					{{ model.point.hotelName }}
 				</div>
 
@@ -98,12 +98,12 @@ function getActionClass(mobile: boolean) {
 						:terms="model.terms"
 				/>
 
-				<div
-						:class="getFooterClass(mobile)">
+					<div
+							:class="getFooterClass(props.mobile)">
 					<div class="offre-map-overlay-card__pricing grid min-w-0 gap-0">
 						<div
 								v-if="model.point.currentPriceLabel"
-								class="offre-map-overlay-card__price text-[18px] font-normal leading-[22px] text-brand-primary"
+								class="offre-map-overlay-card__price text-[18px] font-semibold leading-[22px] text-brand-primary"
 						>
 							{{ model.point.currentPriceLabel }}
 						</div>
@@ -115,21 +115,21 @@ function getActionClass(mobile: boolean) {
 						</div>
 					</div>
 
-					<Button
-							v-if="model.point.offerHref && model.point.offerHref !== '#'"
-							as="a"
-							:href="model.point.offerHref"
-							target="_blank"
-							rel="noopener noreferrer"
-							:class="getActionClass(mobile)"
-					>
+						<Button
+								v-if="model.point.offerHref && model.point.offerHref !== '#'"
+								as="a"
+								:href="model.point.offerHref"
+								target="_blank"
+								rel="noopener noreferrer"
+								:class="getActionClass(props.mobile)"
+						>
 						Выбрать
 					</Button>
-					<Button
-							v-else
-							:class="getActionClass(mobile)"
-							disabled
-					>
+						<Button
+								v-else
+								:class="getActionClass(props.mobile)"
+								disabled
+						>
 						Недоступно
 					</Button>
 				</div>

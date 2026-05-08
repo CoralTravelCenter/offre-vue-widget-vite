@@ -46,7 +46,7 @@
         "src/styles/*"
       ],
       "ui/*": [
-        "src/shared/components/ui/*"
+        "src/components/ui/*"
       ],
       "widget/*": [
         "src/widget/*"

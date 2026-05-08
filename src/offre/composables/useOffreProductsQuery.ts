@@ -8,7 +8,10 @@ import type {
 } from "offre/api/types";
 import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
 import { aggregateProductsBatch } from "offre/lib/products-batch";
-import { buildOffreProductQueries } from "offre/lib/search-criterias";
+import {
+  buildOffreProductQueries,
+  type OffreProductQueryDescriptor
+} from "offre/lib/search-criterias";
 import { offreQueryConfig } from "offre/query/config";
 import { offreQueryKeys } from "offre/query/keys";
 import { offreQueryPersisters } from "offre/query/persister";
@@ -19,6 +22,51 @@ const PRODUCTS_QUERY_CONCURRENCY = 6;
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function getReturnedHotelIds(result: B2CPriceSearchResult) {
+  return new Set(
+    (Array.isArray(result.products) ? result.products : [])
+      .map((product) => String(product.hotel?.id ?? ""))
+      .filter(Boolean)
+  );
+}
+
+export function buildFallbackQueryDescriptors(params: {
+  descriptors: OffreProductQueryDescriptor[];
+  responses: Array<PromiseSettledResult<{ result: B2CPriceSearchResult }>>;
+}) {
+  const fallbackDescriptors: OffreProductQueryDescriptor[] = [];
+
+  for (const [index, descriptor] of params.descriptors.entries()) {
+    const response = params.responses[index];
+
+    if (response?.status !== "fulfilled" || descriptor.hotels.length <= 1) {
+      continue;
+    }
+
+    const returnedHotelIds = getReturnedHotelIds(response.value.result);
+    const missingHotels = descriptor.hotels.filter((hotel) => {
+      return !returnedHotelIds.has(hotel.hotelId);
+    });
+
+    for (const hotel of missingHotels) {
+      fallbackDescriptors.push({
+        hotels: [hotel],
+        onlyhotel: descriptor.onlyhotel,
+        searchCriterias: {
+          ...descriptor.searchCriterias,
+          arrivalLocations: [hotel.arrivalLocation],
+          paging: {
+            ...descriptor.searchCriterias.paging,
+            pageSize: 1
+          }
+        }
+      });
+    }
+  }
+
+  return fallbackDescriptors;
 }
 
 export function useOffreProductsQuery(params: {
@@ -51,14 +99,35 @@ export function useOffreProductsQuery(params: {
     gcTime: offreQueryConfig.productsBatch.gcTime,
     persister: offreQueryPersisters.productsBatch.persisterFn,
     queryFn: async ({ signal }) => {
-      const tasks = productQueryDescriptors.value.map((descriptor) => {
+      const primaryTasks = productQueryDescriptors.value.map((descriptor) => {
         return () => descriptor.onlyhotel
           ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
           : packagePriceSearchList(descriptor.searchCriterias, { signal });
       });
-      const responses = await runConcurrentSettledTasks(tasks, PRODUCTS_QUERY_CONCURRENCY);
+      const primaryResponses = await runConcurrentSettledTasks(primaryTasks, PRODUCTS_QUERY_CONCURRENCY);
 
-      for (const response of responses) {
+      for (const response of primaryResponses) {
+        if (response.status === "rejected") {
+          if (isAbortError(response.reason)) {
+            throw response.reason;
+          }
+        }
+      }
+
+      const fallbackQueryDescriptors = buildFallbackQueryDescriptors({
+        descriptors: productQueryDescriptors.value,
+        responses: primaryResponses
+      });
+      const fallbackTasks = fallbackQueryDescriptors.map((descriptor) => {
+        return () => descriptor.onlyhotel
+          ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
+          : packagePriceSearchList(descriptor.searchCriterias, { signal });
+      });
+      const fallbackResponses = fallbackTasks.length > 0
+        ? await runConcurrentSettledTasks(fallbackTasks, PRODUCTS_QUERY_CONCURRENCY)
+        : [];
+
+      for (const response of fallbackResponses) {
         if (response.status === "rejected") {
           if (isAbortError(response.reason)) {
             throw response.reason;
@@ -67,7 +136,7 @@ export function useOffreProductsQuery(params: {
       }
 
       return aggregateProductsBatch({
-        responses,
+        responses: [...primaryResponses, ...fallbackResponses],
         options: toValue(params.optionsSource),
         hotelOrderById: toValue(params.hotelOrderByIdSource)
       });

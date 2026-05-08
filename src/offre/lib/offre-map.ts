@@ -85,9 +85,7 @@ export interface OffreMapBasePoint {
   isEliteHotel: boolean;
 }
 
-export interface OffreMapSearchPoint extends OffreMapDisplayPoint {
-  searchIndex: string;
-}
+export type OffreMapSearchPoint = OffreMapDisplayPoint;
 
 export function buildBaseMapPoints(products: B2CProduct[]) {
   return products
@@ -146,7 +144,6 @@ export function buildMapSearchPoints(params: {
       currentPriceValue,
       currentPriceLabel: formatCurrencySafe(currentPriceValue),
       priceSuffix: resolveOfferPartySuffix(params.pricingMode, effectiveOffer?.rooms?.[0]?.passengers),
-      searchIndex: normalizeMapSearchValue(`${point.hotelName} ${point.locationLabel}`),
       offerHref: resolveOfferHref({
         redirectionUrl: effectiveOffer?.link?.redirectionUrl,
         queryParam: effectiveOffer?.link?.queryParam,

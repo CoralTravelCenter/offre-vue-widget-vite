@@ -3,6 +3,7 @@ import { computed } from "vue";
 import mapMarkerDefault from "./icons/map-marker-default.svg";
 import mapMarkerElite from "./icons/map-marker-elite.svg";
 import mapMarkerFamily from "./icons/map-marker-family.svg";
+import { Skeleton } from "ui/skeleton";
 
 interface Props {
   hotelId: string;
@@ -10,6 +11,7 @@ interface Props {
   isFamilyClub?: boolean;
   isEliteHotel?: boolean;
   isOpen?: boolean;
+  isLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -17,7 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
   priceLabel: "",
   isFamilyClub: false,
   isEliteHotel: false,
-  isOpen: false
+  isOpen: false,
+  isLoading: false
 });
 
 const markerIconSrc = computed(() => {
@@ -32,7 +35,8 @@ const markerIconSrc = computed(() => {
   return mapMarkerDefault;
 });
 
-const hasPriceLabel = computed(() => Boolean(props.priceLabel && !props.isOpen));
+const hasPriceLabel = computed(() => Boolean(props.priceLabel && !props.isOpen && !props.isLoading));
+const showPriceSkeleton = computed(() => Boolean(!props.isOpen && props.isLoading));
 </script>
 
 <template>
@@ -52,5 +56,10 @@ const hasPriceLabel = computed(() => Boolean(props.priceLabel && !props.isOpen))
     >
       {{ priceLabel }}
     </div>
+
+    <Skeleton
+      v-else-if="showPriceSkeleton"
+      class="pointer-events-none absolute left-[24px] top-0 h-[22px] w-[54px] rounded-full bg-brand-card/85 shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+    />
   </div>
 </template>

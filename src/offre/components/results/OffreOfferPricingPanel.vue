@@ -38,8 +38,8 @@ function getActionClass(state: "default" | "loading" | "disabled") {
 	return [
 		"offre-offer-pricing-panel__action do-choose h-12 w-full rounded-[var(--brand-radius-button)] px-4 py-3 text-[length:var(--brand-text-button)] leading-[var(--brand-leading-button)]",
 		state === "default"
-			? "offre-offer-pricing-panel__action--default bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90"
-			: "offre-offer-pricing-panel__action--disabled bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 disabled:bg-brand-primary disabled:text-brand-primary-foreground"
+			? "offre-offer-pricing-panel__action--default bg-[var(--brand-cta-primary,var(--primary))] text-[var(--brand-cta-primary-foreground,var(--primary-foreground))] hover:bg-[color-mix(in_srgb,var(--brand-cta-primary,var(--primary))_90%,transparent)]"
+			: "offre-offer-pricing-panel__action--disabled bg-[var(--brand-cta-primary,var(--primary))] text-[var(--brand-cta-primary-foreground,var(--primary-foreground))] hover:bg-[color-mix(in_srgb,var(--brand-cta-primary,var(--primary))_90%,transparent)] disabled:bg-[var(--brand-cta-primary,var(--primary))] disabled:text-[var(--brand-cta-primary-foreground,var(--primary-foreground))]"
 	];
 }
 </script>
