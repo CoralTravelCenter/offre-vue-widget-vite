@@ -21,12 +21,12 @@ Embeddable Vue-виджет для подборки офферов Coral/Sunmar.
 
 ## Быстрый старт
 
-- `npm install`
-- `npm run dev` — локальный playground
-- `npm run dev:monkey` — запуск userscript на живом сайте
-- `npm run build` — production build виджета
-- `npm run typecheck` — проверка TypeScript
-- `npm run test` — Vitest
+- `pnpm install`
+- `pnpm run dev` — локальный playground
+- `pnpm run dev:monkey` — запуск userscript на живом сайте
+- `pnpm run build` — production build виджета
+- `pnpm run typecheck` — проверка TypeScript
+- `pnpm run test` — Vitest
 
 ## Переменные окружения
 

@@ -4,7 +4,8 @@ import { hotelPriceSearchList, packagePriceSearchList } from "offre/api/client";
 import type {
   B2CHotelInfo,
   B2CLocation,
-  B2CPriceSearchResult
+  B2CPriceSearchResult,
+  OffreProductsBatchResult
 } from "offre/api/types";
 import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
 import { aggregateProductsBatch } from "offre/lib/products-batch";
@@ -92,7 +93,7 @@ export function useOffreProductsQuery(params: {
     );
   });
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<OffreProductsBatchResult>({
     queryKey: productQueryKey,
     enabled: computed(() => productQueryDescriptors.value.length > 0),
     staleTime: offreQueryConfig.productsBatch.staleTime,

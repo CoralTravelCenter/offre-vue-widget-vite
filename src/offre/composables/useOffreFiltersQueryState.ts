@@ -5,7 +5,12 @@ import {
   type MaybeRefOrGetter
 } from "vue";
 import { listDepartureLocations, listHotelsInfo } from "offre/api/client";
-import type { B2CHotelInfo, B2CLocation } from "offre/api/types";
+import type {
+  B2CHotelInfo,
+  B2CHotelsInfoResult,
+  B2CListDepartureLocationsResult,
+  B2CLocation
+} from "offre/api/types";
 import { useResolvedSelection } from "offre/composables/useResolvedSelection";
 import {
   buildDepartureOptions,
@@ -46,7 +51,7 @@ export function useOffreFiltersQueryState(
   const hotelInfoQueryKey = computed(() => offreQueryKeys.hotelsInfo(hotelIds.value));
   const departureQueryKey = computed(() => offreQueryKeys.departures());
 
-  const hotelsInfoQuery = useQuery({
+  const hotelsInfoQuery = useQuery<B2CHotelsInfoResult>({
     queryKey: hotelInfoQueryKey,
     enabled: computed(() => hotelIds.value.length > 0),
     staleTime: offreQueryConfig.hotelsInfo.staleTime,
@@ -58,7 +63,7 @@ export function useOffreFiltersQueryState(
     }
   });
 
-  const departuresQuery = useQuery({
+  const departuresQuery = useQuery<B2CListDepartureLocationsResult>({
     queryKey: departureQueryKey,
     staleTime: offreQueryConfig.departures.staleTime,
     gcTime: offreQueryConfig.departures.gcTime,
