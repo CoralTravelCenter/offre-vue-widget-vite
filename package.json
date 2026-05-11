@@ -12,6 +12,11 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.app.json",
     "test": "vitest run"
   },
+  "pnpm": {
+    "overrides": {
+      "postcss-url>minimatch": "^3.1.5"
+    }
+  },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/query-persist-client-core": "^5.92.1",
