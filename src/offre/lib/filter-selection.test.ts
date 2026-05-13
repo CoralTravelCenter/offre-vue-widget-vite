@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { resolveSelectedValue } from "offre/lib/filter-selection";
-import { resolvePreferredDepartureId, resolvePreferredRegionId, WILDCARD_REGION_ID } from "offre/lib/filter-state";
+import { resolveSelectedValue } from "@/offre/lib/filter-selection";
+import { resolvePreferredDepartureId, resolvePreferredRegionId, WILDCARD_REGION_ID } from "@/offre/lib/filter-state";
 
 describe("resolveSelectedValue", () => {
   it("keeps current value when it is still present", () => {

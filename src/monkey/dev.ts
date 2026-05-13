@@ -1,8 +1,8 @@
-import type { BrandKey } from "shared/types/brand";
-import type { WidgetPayload } from "shared/types/widget";
-import { getDevOffrePayload } from "dev/fixtures/offre-payloads";
-import { hostReactAppReady } from "monkey/utils/host-react-app-ready";
-import { bootstrapOffreWidgets } from "widget/entry";
+import type { BrandKey } from "@/brands/types";
+import type { WidgetPayload } from "@/widget/types";
+import { getDevOffrePayload } from "@/dev/offre-payloads";
+import { hostReactAppReady } from "./host-react-app-ready";
+import { bootstrapOffreWidgets } from "@/widget/entry";
 
 const MONKEY_ROOT_ID = "monkey-app";
 const MONKEY_WIDGET_WIDTH = "min(420px, calc(100vw - 32px))";

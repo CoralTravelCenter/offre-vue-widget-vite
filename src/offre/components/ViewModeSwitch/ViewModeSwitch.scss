@@ -1,0 +1,22 @@
+.offre-view-mode-switch {
+	margin-right: 8px;
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	border: 1px solid var(--brand-control-border);
+	border-radius: var(--brand-radius-button);
+	background: var(--brand-card);
+	color: var(--brand-foreground);
+	transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.offre-view-mode-switch:hover {
+	border-color: var(--brand-primary);
+	background: var(--brand-card);
+	color: var(--brand-primary);
+}
+
+.offre-view-mode-switch__icon {
+	width: 16px;
+	height: 16px;
+}

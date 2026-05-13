@@ -11,6 +11,8 @@ node_modules
 .vite
 dist
 dist-ssr
+.env
+.pnpm-store
 *.local
 
 # Editor directories and files

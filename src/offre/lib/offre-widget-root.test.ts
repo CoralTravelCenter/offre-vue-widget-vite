@@ -3,7 +3,7 @@ import {
   buildMapViewKey,
   buildWidgetPersistenceKey,
   shouldActivateMapView
-} from "offre/lib/offre-widget-root";
+} from "@/offre/lib/offre-widget-root";
 
 describe("offre-widget-root helpers", () => {
   it("builds stable persistence keys with optional mode", () => {

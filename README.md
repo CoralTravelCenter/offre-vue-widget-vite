@@ -15,9 +15,8 @@ Embeddable Vue-виджет для подборки офферов Coral/Sunmar.
 - `src/widget` — embed/runtime boundary: поиск JSON payload, mount/unmount, работа с DOM-хостом.
 - `src/app` — composition root: создание Vue app, plugins, query client, theme/runtime wiring.
 - `src/offre` — вся feature- и domain-логика виджета.
-- `src/shared` — только реально shared low-level код, типы и конфиг.
-- `src/components/ui` — canonical UI root для shadcn и всех базовых UI-примитивов.
-- `src/shared/components/ui` — legacy compatibility layer; новых реализаций туда больше не добавляем.
+- `src/lib` — низкоуровневые общие утилиты без доменной привязки.
+- `src/components/ui` — canonical UI root для shadcn и всех базовых UI-примитивов; импорты идут через `@/components/ui/...`.
 
 ## Быстрый старт
 
@@ -62,25 +61,21 @@ Bootstrap, санитизация payload и mount/unmount лежат в [src/wi
 
 ### Входные данные
 
-- [src/shared/types/widget.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/shared/types/widget.ts) — контракт payload виджета.
+- [src/widget/types.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/types.ts) — контракт payload виджета.
 - [src/offre/lib/payload.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/payload.ts) — sanitize/normalize helpers для payload, `options` и `hotels`, плюс сборка runtime payload.
-- [src/dev/fixtures/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/fixtures/offre-payloads.ts) — основной мок payload для dev-режима; здесь лежат данные, из которых собирается JSON-скрипт виджета.
+- [src/dev/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/offre-payloads.ts) — основной мок payload для dev-режима; здесь лежат данные, из которых собирается JSON-скрипт виджета.
 - [src/dev/main.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/main.ts) — вставляет моковый `script[type="application/json"]` в локальном playground.
 - [src/monkey/dev.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/monkey/dev.ts) — вставляет тот же моковый JSON-скрипт в userscript-режиме на живом сайте.
 
 ### UI слой
 
 - `src/components/ui/*` — source of truth для всех UI primitives и shadcn-компонентов.
-- `src/shared/components/ui/*` — только bridge-реэкспорты для legacy-совместимости.
-- В feature-коде предпочтительны импорты через `ui/*` или `@/components/ui/*`.
+- В feature-коде используем путь shadcn-конфига: `@/components/ui/*`.
 
 ### Данные и API
 
-- [src/offre/api/client.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/api/client.ts) — HTTP-клиент для B2C API.
-- [src/offre/api/types.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/api/types.ts) — типы API-ответов и search criterias.
-- [src/offre/query/keys.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/query/keys.ts) — query keys.
-- [src/offre/query/config.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/query/config.ts) — TTL и query config.
-- [src/offre/query/persister.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/query/persister.ts) — persistence query-кэша.
+- [src/offre/api.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/api.ts) — HTTP-клиент, типы API-ответов и search criterias B2C API.
+- [src/offre/query.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/query.ts) — query keys, TTL config и persistence query-кэша.
 
 ### Фильтры и список
 
@@ -112,10 +107,10 @@ Bootstrap, санитизация payload и mount/unmount лежат в [src/wi
 ### Навигация и controls
 
 - [src/offre/components/RegionTabsNav.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/RegionTabsNav.vue) — tabs регионов.
-- [src/offre/components/controls/OffreControls.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/controls/OffreControls.vue) — строка controls в navigation.
-- [src/offre/components/controls/CitySelect.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/controls/CitySelect.vue) — выбор города вылета.
-- [src/offre/components/controls/MonthSelect.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/controls/MonthSelect.vue) — выбор месяца.
-- [src/offre/components/controls/ViewModeSwitch.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/controls/ViewModeSwitch.vue) — переключение список/карта.
+- [src/offre/components/OffreControls.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/OffreControls.vue) — строка controls в navigation.
+- [src/offre/components/CitySelect.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/CitySelect.vue) — выбор города вылета.
+- [src/offre/components/MonthSelect.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/MonthSelect.vue) — выбор месяца.
+- [src/offre/components/ViewModeSwitch.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/ViewModeSwitch.vue) — переключение список/карта.
 - [src/offre/components/results/OffreOfferGuestsControl.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/results/OffreOfferGuestsControl.vue) — глобальный control выбора туристов в navigation.
 
 ### Skeleton / loading UI
@@ -127,8 +122,8 @@ Bootstrap, санитизация payload и mount/unmount лежат в [src/wi
 ### Темы и стили
 
 - [src/styles/style.css](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/styles/style.css) — глобальные переменные, theme tokens и offre-specific tokens.
-- [src/brands/coral/theme.css](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/brands/coral/theme.css) — тема Coral.
-- [src/brands/sunmar/theme.css](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/brands/sunmar/theme.css) — тема Sunmar.
+- [src/brands/coral.css](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/brands/coral.css) — тема Coral.
+- [src/brands/sunmar.css](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/brands/sunmar.css) — тема Sunmar.
 
 ## Production build
 
@@ -141,7 +136,7 @@ Bootstrap, санитизация payload и mount/unmount лежат в [src/wi
 
 ## Замечания для разработки
 
-- Если меняется payload-контракт, сначала смотреть [src/shared/types/widget.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/shared/types/widget.ts), [src/widget/entry.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/entry.ts) и [src/offre/lib/payload.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/payload.ts).
+- Если меняется payload-контракт, сначала смотреть [src/widget/types.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/types.ts), [src/widget/entry.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/entry.ts) и [src/offre/lib/payload.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/payload.ts).
 - Если меняется логика запросов, сначала смотреть [src/offre/lib/search-criterias.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/search-criterias.ts), [src/offre/composables/useOffreProductsQuery.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/composables/useOffreProductsQuery.ts) и [src/offre/composables/useHotelOfferQuery.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/composables/useHotelOfferQuery.ts).
 - Если меняется UI карточки, входные точки — [src/offre/components/results/OffreOfferCard.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/results/OffreOfferCard.vue) и [src/offre/composables/useOffreOfferCard.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/composables/useOffreOfferCard.ts).
-- Если меняется navigation/filter UX, входные точки — [src/offre/components/OffreWidgetRoot.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/OffreWidgetRoot.vue), [src/offre/components/controls/OffreControls.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/controls/OffreControls.vue) и [src/offre/composables/useOffreFiltersQueryState.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/composables/useOffreFiltersQueryState.ts).
+- Если меняется navigation/filter UX, входные точки — [src/offre/components/OffreWidgetRoot.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/OffreWidgetRoot.vue), [src/offre/components/OffreControls.vue](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/components/OffreControls.vue) и [src/offre/composables/useOffreFiltersQueryState.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/composables/useOffreFiltersQueryState.ts).

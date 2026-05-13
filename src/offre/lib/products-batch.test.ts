@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aggregateProductsBatch, resolveProductsRequestState } from "offre/lib/products-batch";
+import { aggregateProductsBatch, resolveProductsRequestState } from "@/offre/lib/products-batch";
 
 describe("resolveProductsRequestState", () => {
   it("returns partial when some batched requests fail", () => {

@@ -6,7 +6,7 @@ const { mountOffreWidgetMock } = vi.hoisted(() => ({
   mountOffreWidgetMock: vi.fn()
 }));
 
-vi.mock("app/create-offre-widget-app", () => ({
+vi.mock("@/app/create-offre-widget-app", () => ({
   mountOffreWidget: mountOffreWidgetMock
 }));
 
@@ -24,6 +24,7 @@ function createMountResult(container: Element) {
       description: "Test brand"
     },
     container,
+    instanceId: "test-widget-instance",
     queryClient: {
       clear: vi.fn()
     }
@@ -63,6 +64,7 @@ describe("widget entry lifecycle", () => {
     expect(host?.contains(preservedNode)).toBe(true);
     expect(scriptElement?.nextElementSibling).toBe(widget?.rootElement);
     expect(widget?.container).toBe(widget?.rootElement);
+    expect(widget?.instanceId).toBe("test-widget-instance");
     expect(mountOffreWidgetMock).toHaveBeenCalledTimes(1);
   });
 

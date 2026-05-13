@@ -1,8 +1,8 @@
-import "styles/style.css";
-import type {MountedOffreWidget as CoreMountedOffreWidget} from "app/create-offre-widget-app";
-import {mountOffreWidget} from "app/create-offre-widget-app";
-import {sanitizeWidgetPayload} from "offre/lib/payload";
-import type {WidgetPayload} from "shared/types/widget";
+import "@/styles/style.css";
+import type {MountedOffreWidget as CoreMountedOffreWidget} from "@/app/create-offre-widget-app";
+import {mountOffreWidget} from "@/app/create-offre-widget-app";
+import {sanitizeWidgetPayload} from "@/offre/lib/payload";
+import type {WidgetPayload} from "@/widget/types";
 
 const WIDGET_SELECTOR = 'script[type="application/json"][data-offre-vue-test]';
 const WIDGET_ROOT_ATTR = "data-offre-widget-root";

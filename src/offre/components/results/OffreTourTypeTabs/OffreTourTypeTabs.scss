@@ -1,0 +1,73 @@
+.offre-tour-type-tabs {
+  width: 100%;
+}
+
+.offre-tour-type-tabs__list {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: transparent;
+  padding: 0;
+}
+
+.offre-tour-type-tabs__trigger {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--brand-control-border);
+  background: transparent;
+  padding: var(--brand-control-padding-y) var(--brand-control-padding-x);
+  white-space: normal;
+  text-align: center;
+  font-size: var(--brand-text-control);
+  font-weight: 400;
+  line-height: var(--brand-leading-control);
+  color: var(--brand-foreground);
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.offre-tour-type-tabs__trigger:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.offre-tour-type-tabs__trigger[data-state="active"] {
+  z-index: 10;
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--brand-primary-foreground);
+}
+
+.offre-tour-type-tabs__trigger--package {
+  border-top-left-radius: var(--brand-radius-segment);
+  border-bottom-left-radius: var(--brand-radius-segment);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.offre-tour-type-tabs__trigger--hotel {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.offre-tour-type-tabs__trigger--single {
+  grid-column: span 2 / span 2;
+  border-radius: var(--brand-radius-segment);
+}
+
+.offre-tour-type-tabs__trigger--paired {
+  margin-left: -1px;
+  border-top-right-radius: var(--brand-radius-segment);
+  border-bottom-right-radius: var(--brand-radius-segment);
+}
+
+.offre-tour-type-tabs__trigger--default {
+}
+
+.offre-tour-type-tabs__trigger--compact {
+  height: var(--brand-control-height-compact);
+  padding: var(--brand-control-padding-y-compact) var(--brand-control-padding-x-compact);
+  font-size: var(--brand-text-control-compact);
+  line-height: var(--brand-leading-control-compact);
+}

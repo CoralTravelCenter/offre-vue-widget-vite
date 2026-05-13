@@ -1,0 +1,45 @@
+.offre-map-marker {
+	position: relative;
+	width: 22px;
+	height: 29px;
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+	transform: translate(-50%, -100%);
+}
+
+.offre-map-marker__icon {
+	display: block;
+	width: 22px;
+	height: 29px;
+	pointer-events: none;
+	filter: drop-shadow(0 3px 7px rgba(15, 23, 42, 0.16));
+}
+
+.offre-map-marker__label {
+	position: absolute;
+	top: 0;
+	left: 24px;
+	padding: 4px 6px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--brand-card) 90%, transparent);
+	color: var(--brand-foreground);
+	font-size: 11px;
+	line-height: 1;
+	white-space: nowrap;
+	pointer-events: none;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+	backdrop-filter: blur(4px);
+}
+
+.offre-map-marker__skeleton {
+	position: absolute;
+	top: 0;
+	left: 24px;
+	width: 54px;
+	height: 22px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--brand-card) 85%, transparent);
+	pointer-events: none;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}

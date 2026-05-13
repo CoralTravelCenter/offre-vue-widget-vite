@@ -20,36 +20,6 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "app/*": [
-        "src/app/*"
-      ],
-      "brands/*": [
-        "src/brands/*"
-      ],
-      "dev/*": [
-        "src/dev/*"
-      ],
-      "directives/*": [
-        "src/directives/*"
-      ],
-      "monkey/*": [
-        "src/monkey/*"
-      ],
-      "offre/*": [
-        "src/offre/*"
-      ],
-      "shared/*": [
-        "src/shared/*"
-      ],
-      "styles/*": [
-        "src/styles/*"
-      ],
-      "ui/*": [
-        "src/components/ui/*"
-      ],
-      "widget/*": [
-        "src/widget/*"
       ]
     },
     "types": [

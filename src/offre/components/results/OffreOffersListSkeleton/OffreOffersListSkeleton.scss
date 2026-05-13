@@ -1,0 +1,17 @@
+.offre-offers-list-skeleton {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 16px;
+	margin-right: -16px;
+	padding-right: 16px;
+}
+
+.offre-offers-list-skeleton__item {
+	overflow: hidden;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+	.offre-offers-list-skeleton {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}

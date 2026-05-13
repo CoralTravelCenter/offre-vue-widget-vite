@@ -1,8 +1,8 @@
 import { computed, shallowRef, toValue, watch, type MaybeRefOrGetter } from "vue";
-import type { B2COffer, B2CProductHotel } from "offre/api/types";
-import { calculateCoralBonus, type CoralBonusInfo } from "offre/lib/coral-bonus";
-import type { OffreTourType } from "offre/types";
-import type { BrandKey } from "shared/types/brand";
+import type { B2COffer, B2CProductHotel } from "@/offre/api";
+import { calculateCoralBonus, type CoralBonusInfo } from "@/offre/lib/coral-bonus";
+import type { OffreTourType } from "@/offre/types";
+import type { BrandKey } from "@/brands/types";
 
 export function useCoralBonus(params: {
   brandKey: MaybeRefOrGetter<BrandKey>;

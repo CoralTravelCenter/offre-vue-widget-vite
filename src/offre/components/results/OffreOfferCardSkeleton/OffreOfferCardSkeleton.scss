@@ -1,0 +1,375 @@
+.offre-offer-card-skeleton {
+	--offre-skeleton-fill: var(--brand-skeleton-base, color-mix(in srgb, var(--brand-foreground) 10%, transparent));
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: visible;
+	border: 1px solid var(--brand-border);
+	border-radius: var(--brand-radius-card);
+	background: var(--brand-card);
+	padding: 8px;
+
+	&__media {
+		position: relative;
+		overflow: hidden;
+		border-radius: var(--brand-radius-media);
+	}
+
+	&__image {
+		display: block;
+		width: 100%;
+		height: var(--brand-offer-card-media-height);
+		border-radius: inherit;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__badges {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	&__badge {
+		width: 92px;
+		height: 24px;
+		border-radius: var(--brand-radius-badge);
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__badge--wide {
+		width: 118px;
+	}
+
+	&__body {
+		min-width: 0;
+		padding: 8px 0;
+	}
+
+	&__location {
+		width: 52%;
+		height: 12px;
+		margin-bottom: 8px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__title {
+		width: 100%;
+		height: 20px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__title + &__title {
+		margin-top: 6px;
+	}
+
+	&__title--primary {
+		width: 84%;
+	}
+
+	&__title--secondary {
+		width: 62%;
+	}
+
+	&__stars {
+		display: flex;
+		gap: 6px;
+		margin-top: 12px;
+	}
+
+	&__star {
+		width: 18px;
+		height: 18px;
+		border-radius: 999px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__terms {
+		display: grid;
+		gap: 8px;
+		margin-top: 14px;
+	}
+
+	&__term {
+		width: 68%;
+		height: 16px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__term:nth-child(1) {
+		width: 54%;
+	}
+
+	&__term:nth-child(2) {
+		width: 48%;
+	}
+
+	&__term:nth-child(3) {
+		width: 36%;
+	}
+
+	&__term:nth-child(4) {
+		width: 44%;
+	}
+
+	&__usp-list {
+		display: grid;
+		gap: 8px;
+		margin-top: 12px;
+		padding-top: 10px;
+		border-top: 1px solid var(--brand-border);
+	}
+
+	&__usp {
+		width: 74%;
+		height: 16px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__usp--wide {
+		width: 88%;
+	}
+
+	&__usp--narrow {
+		width: 58%;
+	}
+
+	&__aside {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		width: 100%;
+		margin-top: auto;
+		padding-top: 6px;
+	}
+
+	&__tour-info {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	&__tour-type {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0;
+		width: 100%;
+	}
+
+	&__tour-type-item {
+		width: 100%;
+		height: 32px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__tour-type-item:first-child {
+		border-radius: var(--brand-radius-segment) 0 0 var(--brand-radius-segment);
+	}
+
+	&__tour-type-item:last-child {
+		margin-left: -1px;
+		border-radius: 0 var(--brand-radius-segment) var(--brand-radius-segment) 0;
+	}
+
+	&__pricing {
+		position: relative;
+		width: 100%;
+		min-height: 76px;
+		padding-right: 104px;
+	}
+
+	&__caption {
+		width: 52px;
+		height: 10px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__old-price {
+		width: 72px;
+		height: 12px;
+		margin-top: 8px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__current-price {
+		width: 68%;
+		height: 28px;
+		margin-top: 8px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__price-note {
+		width: 44%;
+		height: 12px;
+		margin-top: 2px;
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__discount {
+		position: absolute;
+		top: 50%;
+		right: -17px;
+		width: 88px;
+		height: 24px;
+		border-radius: 4px 4px 0 4px;
+		background-color: var(--offre-skeleton-fill);
+		transform: translateY(-50%);
+	}
+
+	&__cashback {
+		width: 100%;
+		height: 50px;
+		border-radius: var(--brand-cashback-banner-radius);
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	&__button {
+		width: 100%;
+		height: 48px;
+		border-radius: var(--brand-radius-button);
+		background-color: var(--offre-skeleton-fill);
+	}
+
+	@media (min-width: 768px) and (max-width: 1023px) {
+		&__badge {
+			height: 24px;
+		}
+
+		&__body {
+			padding: 10px 0 8px;
+		}
+
+		&__terms {
+			gap: 6px;
+			margin-top: 12px;
+		}
+
+		&__term:nth-child(1) {
+			width: 58%;
+		}
+
+		&__term:nth-child(2) {
+			width: 52%;
+		}
+
+		&__term:nth-child(3) {
+			width: 40%;
+		}
+
+		&__term:nth-child(4) {
+			width: 48%;
+		}
+
+		&__usp-list {
+			gap: 7px;
+		}
+
+		&__pricing {
+			min-height: 76px;
+			padding-right: 92px;
+		}
+
+		&__old-price {
+			width: 72px;
+		}
+
+		&__current-price {
+			width: 72%;
+		}
+
+		&__price-note {
+			width: 54%;
+		}
+
+		&__discount {
+			width: 74px;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		display: grid;
+		grid-template-columns: 240px minmax(0, 1fr) 320px;
+		align-items: start;
+		gap: 16px;
+
+		&__body {
+			padding: 0;
+		}
+
+		&__media,
+		&__image {
+			height: 100%;
+			min-height: var(--brand-offer-card-media-height-lg);
+		}
+
+		&__aside {
+			align-self: stretch;
+			justify-content: space-between;
+			min-height: 100%;
+			width: 100%;
+			padding-top: 0;
+			padding-left: 12px;
+			border-left: 1px solid var(--brand-border);
+		}
+
+		&__tour-type {
+			gap: 0;
+		}
+
+		&__tour-type-item {
+			height: 32px;
+		}
+
+		&__pricing {
+			width: 100%;
+			min-height: 76px;
+			padding-right: 104px;
+		}
+
+		&__tour-info {
+			justify-content: flex-end;
+		}
+
+		&__old-price {
+			width: 72px;
+		}
+
+		&__current-price {
+			width: 70%;
+			height: 28px;
+			margin-top: 8px;
+		}
+
+		&__price-note {
+			width: 34%;
+			margin-top: 2px;
+		}
+
+		&__discount {
+			right: -17px;
+			width: 88px;
+			height: 24px;
+		}
+
+		&__cashback {
+			height: 50px;
+		}
+
+		&__button {
+			height: 48px;
+		}
+	}
+
+	@media (min-width: 1280px) {
+		grid-template-columns: 300px minmax(0, 1fr) 300px;
+
+		&__media,
+		&__image {
+			min-height: var(--brand-offer-card-media-height-xl);
+		}
+	}
+}

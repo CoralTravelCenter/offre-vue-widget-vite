@@ -1,13 +1,12 @@
 import { useQueryClient } from "@tanstack/vue-query";
 import { computed, ref, shallowRef, toValue, type MaybeRefOrGetter, watch } from "vue";
-import { hotelPriceSearchList } from "offre/api/client";
-import type { B2COffer, B2CProduct } from "offre/api/types";
-import { buildHotelOfferSearchCriterias } from "offre/lib/hotel-offer";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import { getPrimaryMapOffer } from "offre/lib/offre-map";
-import { offreQueryConfig } from "offre/query/config";
-import { offreQueryKeys } from "offre/query/keys";
-import { runConcurrentTasks } from "shared/lib/concurrency";
+import { hotelPriceSearchList } from "@/offre/api";
+import type { B2COffer, B2CProduct } from "@/offre/api";
+import { buildHotelOfferSearchCriterias } from "@/offre/lib/hotel-offer";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
+import { getPrimaryMapOffer } from "@/offre/lib/offre-map";
+import { offreQueryConfig, offreQueryKeys } from "@/offre/query";
+import { runConcurrentTasks } from "@/lib/concurrency";
 
 const MAP_HOTEL_OFFERS_CONCURRENCY = 6;
 

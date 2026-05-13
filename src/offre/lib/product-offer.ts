@@ -1,5 +1,5 @@
-import type { B2CHotelImage, B2COfferRoomPassenger } from "offre/api/types";
-import { useOffreRussianNumerals } from "offre/composables/useOffreRussianNumerals";
+import type { B2CHotelImage, B2COfferRoomPassenger } from "@/offre/api";
+import { useOffreRussianNumerals } from "@/offre/composables/useOffreRussianNumerals";
 
 const PRICE_SUFFIX_MAP = {
   "per-person": "за 1 взрослого",

@@ -1,5 +1,5 @@
 import { computed, ref, toValue, type MaybeRefOrGetter, type Ref, watch } from "vue";
-import { buildMapPointsLocationKey } from "offre/lib/offre-map";
+import { buildMapPointsLocationKey } from "@/offre/lib/offre-map";
 import { getBoundsFromCoords, getLocationFromBounds } from "vue-yandex-maps";
 
 interface MapLocationPoint {

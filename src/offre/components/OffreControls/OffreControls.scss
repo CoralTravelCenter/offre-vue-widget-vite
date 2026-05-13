@@ -1,0 +1,14 @@
+.offre-controls {
+	display: flex;
+	grid-area: inputs;
+	gap: 8px;
+	padding-left: 8px;
+}
+
+.offre-controls__control {
+	min-width: 0;
+}
+
+.offre-controls__guests {
+	flex: none;
+}

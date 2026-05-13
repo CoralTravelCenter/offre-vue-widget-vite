@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { resolveProductsRequestState } from "offre/lib/products-batch";
-import { buildFallbackQueryDescriptors } from "offre/composables/useOffreProductsQuery";
+import { resolveProductsRequestState } from "@/offre/lib/products-batch";
+import { buildFallbackQueryDescriptors } from "@/offre/composables/useOffreProductsQuery";
 
 describe("resolveProductsRequestState", () => {
   it("returns partial when some batched requests fail", () => {

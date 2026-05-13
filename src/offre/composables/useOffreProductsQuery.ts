@@ -1,23 +1,21 @@
 import { useQuery } from "@tanstack/vue-query";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { hotelPriceSearchList, packagePriceSearchList } from "offre/api/client";
+import { hotelPriceSearchList, packagePriceSearchList } from "@/offre/api";
 import type {
   B2CHotelInfo,
   B2CLocation,
   B2CPriceSearchResult,
   OffreProductsBatchResult
-} from "offre/api/types";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import { aggregateProductsBatch } from "offre/lib/products-batch";
+} from "@/offre/api";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
+import { aggregateProductsBatch } from "@/offre/lib/products-batch";
 import {
   buildOffreProductQueries,
   type OffreProductQueryDescriptor
-} from "offre/lib/search-criterias";
-import { offreQueryConfig } from "offre/query/config";
-import { offreQueryKeys } from "offre/query/keys";
-import { offreQueryPersisters } from "offre/query/persister";
-import type { OffreHotelRuntimeEntry } from "offre/types";
-import { runConcurrentSettledTasks } from "shared/lib/concurrency";
+} from "@/offre/lib/search-criterias";
+import { offreQueryConfig, offreQueryKeys, offreQueryPersisters } from "@/offre/query";
+import type { OffreHotelRuntimeEntry } from "@/offre/types";
+import { runConcurrentSettledTasks } from "@/lib/concurrency";
 
 const PRODUCTS_QUERY_CONCURRENCY = 6;
 

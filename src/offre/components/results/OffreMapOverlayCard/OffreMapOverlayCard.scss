@@ -1,0 +1,145 @@
+.offre-map-overlay-card {
+	position: relative;
+	display: grid;
+	padding: 6px;
+	border: 1px solid var(--brand-border);
+	border-radius: 12px;
+	background: var(--brand-card);
+	box-shadow: var(--brand-shadow-popover);
+	pointer-events: auto;
+}
+
+.offre-map-overlay-card--mobile {
+	width: min(360px, 100%);
+	max-width: calc(100% - 16px);
+}
+
+.offre-map-overlay-card--desktop {
+	width: max-content;
+	max-width: calc(100vw - 32px);
+}
+
+.offre-map-overlay-card__close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 1px solid var(--brand-control-border);
+	border-radius: 6px;
+	background: var(--brand-card);
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.offre-map-overlay-card__content {
+	display: grid;
+	gap: 10px;
+}
+
+.offre-map-overlay-card__content--mobile {
+	grid-template-columns: 112px minmax(0, 1fr);
+}
+
+.offre-map-overlay-card__content--desktop {
+	grid-template-columns: 112px minmax(220px, 1fr);
+}
+
+.offre-map-overlay-card__media {
+	overflow: hidden;
+	border-radius: 10px;
+}
+
+.offre-map-overlay-card__image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.offre-map-overlay-card__body {
+	display: grid;
+	min-width: 0;
+	gap: 6px;
+}
+
+.offre-map-overlay-card__stars {
+	display: flex;
+	gap: 2px;
+	line-height: 1;
+	color: var(--brand-star);
+}
+
+.offre-map-overlay-card__star {
+	width: 16px;
+	height: 16px;
+}
+
+.offre-map-overlay-card__star--filled {
+	fill: currentColor;
+	color: var(--brand-star);
+}
+
+.offre-map-overlay-card__star--empty {
+	color: var(--brand-border);
+}
+
+.offre-map-overlay-card__title {
+	padding-right: 20px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	color: var(--brand-foreground);
+}
+
+.offre-map-overlay-card__footer {
+	display: grid;
+	gap: 8px;
+}
+
+.offre-map-overlay-card__footer--mobile {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.offre-map-overlay-card__footer--desktop {
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+}
+
+.offre-map-overlay-card__pricing {
+	display: grid;
+	min-width: 0;
+	gap: 0;
+}
+
+.offre-map-overlay-card__price {
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 22px;
+	color: var(--brand-primary);
+}
+
+.offre-map-overlay-card__price-suffix {
+	font-size: 12px;
+	line-height: 16px;
+	color: var(--brand-primary);
+}
+
+.offre-map-overlay-card__action {
+	height: 34px;
+	padding: 0 14px;
+	border-radius: 8px;
+	font-size: 13px;
+}
+
+.offre-map-overlay-card__action--mobile {
+	width: 100%;
+}
+
+.offre-map-overlay-card__action--desktop {
+	min-width: 96px;
+}

@@ -1,5 +1,5 @@
-import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "offre/api/types";
-import type { OffreMapDisplayPoint } from "offre/components/results/offre-map.types";
+import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "@/offre/api";
+import type { OffreOfferCardTerm } from "@/offre/types";
 import {
   formatCurrencySafe,
   resolveHotelImageUrl,
@@ -7,8 +7,8 @@ import {
   resolveOfferPartySuffix,
   resolveOfferPriceValue,
   stripEnglishBracketFragments
-} from "offre/lib/product-offer";
-import { getReferenceValue } from "offre/lib/reference";
+} from "@/offre/lib/product-offer";
+import { getReferenceValue } from "@/offre/lib/reference";
 
 export function normalizeMapCoordinate(value: number | string | undefined) {
   const normalizedValue = Number(value);
@@ -85,7 +85,21 @@ export interface OffreMapBasePoint {
   isEliteHotel: boolean;
 }
 
+export interface OffreMapDisplayPoint extends OffreMapBasePoint {
+  effectiveOffer: B2COffer | null;
+  currentPriceValue: number;
+  currentPriceLabel: string;
+  priceSuffix: string;
+  offerHref: string;
+}
+
 export type OffreMapSearchPoint = OffreMapDisplayPoint;
+
+export interface OffreMapOverlayModel {
+  point: OffreMapDisplayPoint;
+  terms: OffreOfferCardTerm[];
+  starItems: boolean[];
+}
 
 export function buildBaseMapPoints(products: B2CProduct[]) {
   return products

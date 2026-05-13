@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import minMax from "dayjs/plugin/minMax";
 import "dayjs/locale/ru";
-import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "offre/lib/payload";
-import type { WidgetTimeframeConfig } from "shared/types/widget";
+import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "@/offre/lib/payload";
+import type { WidgetTimeframeConfig } from "@/widget/types";
 
 dayjs.extend(duration);
 dayjs.extend(minMax);

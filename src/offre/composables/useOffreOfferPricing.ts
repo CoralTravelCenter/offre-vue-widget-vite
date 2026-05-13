@@ -1,10 +1,10 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import type { B2COffer } from "offre/api/types";
+import type { B2COffer } from "@/offre/api";
 import {
   formatCurrencySafe,
   resolveOfferPriceValue,
   resolveOfferPartySuffix
-} from "offre/lib/product-offer";
+} from "@/offre/lib/product-offer";
 
 export function useOffreOfferPricing(params: {
   offer: MaybeRefOrGetter<B2COffer | null>;

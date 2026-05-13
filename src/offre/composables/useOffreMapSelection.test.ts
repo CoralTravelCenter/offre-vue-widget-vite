@@ -1,7 +1,7 @@
 import { computed, ref, nextTick } from "vue";
 import { describe, expect, it } from "vitest";
-import { useOffreMapSelection } from "offre/composables/useOffreMapSelection";
-import type { OffreMapSearchPoint } from "offre/components/results/offre-map.types";
+import { useOffreMapSelection } from "@/offre/composables/useOffreMapSelection";
+import type { OffreMapSearchPoint } from "@/offre/lib/offre-map";
 
 function createPoint(hotelId: string): OffreMapSearchPoint {
   return {
@@ -12,6 +12,7 @@ function createPoint(hotelId: string): OffreMapSearchPoint {
     imageUrl: "",
     latitude: 27.2,
     longitude: 33.8,
+    packageOffer: null,
     isFamilyClub: false,
     isEliteHotel: false,
     effectiveOffer: null,

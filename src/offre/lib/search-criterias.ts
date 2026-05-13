@@ -3,11 +3,11 @@ import type {
   B2CArrivalLocationCriteria,
   B2CLocation,
   B2CPriceSearchCriterias
-} from "offre/api/types";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import type { B2CHotelInfo } from "offre/api/types";
-import type { OffreHotelRuntimeEntry } from "offre/types";
-import { stableStringify } from "shared/lib/stable-stringify";
+} from "@/offre/api";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
+import type { B2CHotelInfo } from "@/offre/api";
+import type { OffreHotelRuntimeEntry } from "@/offre/types";
+import { stableStringify } from "@/lib/stable-stringify";
 
 const PACKAGE_COMMON_SEARCH_CRITERIAS = {
   datePickerMode: 0,

@@ -3,7 +3,7 @@ import {
   normalizeRuntimeWidgetPayload,
   normalizeWidgetHotels,
   normalizeWidgetOptions
-} from "offre/lib/payload";
+} from "@/offre/lib/payload";
 
 describe("normalizeWidgetHotels", () => {
   it("drops per-hotel room criterias and keeps shared options room criterias", () => {

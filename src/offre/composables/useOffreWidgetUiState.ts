@@ -1,6 +1,6 @@
 import { computed, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import type {WidgetRoomCriteria} from "shared/types/widget";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
+import type {WidgetRoomCriteria} from "@/widget/types";
 
 const GUESTS_STORAGE_PREFIX = "offre-widget:guests";
 const MAX_ADULTS_COUNT = 6;

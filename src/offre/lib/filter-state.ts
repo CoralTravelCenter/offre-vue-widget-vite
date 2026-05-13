@@ -1,14 +1,14 @@
-import { getCityCorrectName } from "app/plugins/city-spelling";
-import type { B2CHotelInfo, B2CLocation, B2CLocationDirectory } from "offre/api/types";
-import { cleanOffreRegionLabel, normalizeOffreRegionLabelForCompare } from "offre/lib/region-labels";
-import { buildHotelTimeframes } from "offre/lib/timeframes";
-import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "offre/lib/payload";
+import { getCityCorrectName } from "@/app/city-spelling";
+import type { B2CHotelInfo, B2CLocation, B2CLocationDirectory } from "@/offre/api";
+import { cleanOffreRegionLabel, normalizeOffreRegionLabelForCompare } from "@/offre/lib/region-labels";
+import { buildHotelTimeframes } from "@/offre/lib/timeframes";
+import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "@/offre/lib/payload";
 import type {
   OffreDepartureOption,
   OffreHotelRuntimeEntry,
   OffreRegionOption,
   RegionTabItem
-} from "offre/types";
+} from "@/offre/types";
 
 export const WILDCARD_REGION_ID = "*";
 

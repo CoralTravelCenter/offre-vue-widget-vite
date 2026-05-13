@@ -4,14 +4,14 @@ import {
   toValue,
   type MaybeRefOrGetter
 } from "vue";
-import { listDepartureLocations, listHotelsInfo } from "offre/api/client";
+import { listDepartureLocations, listHotelsInfo } from "@/offre/api";
 import type {
   B2CHotelInfo,
   B2CHotelsInfoResult,
   B2CListDepartureLocationsResult,
   B2CLocation
-} from "offre/api/types";
-import { useResolvedSelection } from "offre/composables/useResolvedSelection";
+} from "@/offre/api";
+import { useResolvedSelection } from "@/offre/composables/useResolvedSelection";
 import {
   buildDepartureOptions,
   buildHotelsDirectory,
@@ -23,21 +23,19 @@ import {
   getDepartureLocationsById,
   resolvePreferredDepartureId,
   resolvePreferredRegionId
-} from "offre/lib/filter-state";
+} from "@/offre/lib/filter-state";
 import {
   getWidgetHotelIds,
   type NormalizedOffreWidgetOptions,
   type NormalizedWidgetHotelDescriptor
-} from "offre/lib/payload";
-import { offreQueryConfig } from "offre/query/config";
-import { offreQueryKeys } from "offre/query/keys";
-import { offreQueryPersisters } from "offre/query/persister";
+} from "@/offre/lib/payload";
+import { offreQueryConfig, offreQueryKeys, offreQueryPersisters } from "@/offre/query";
 import type {
   OffreDepartureOption,
   OffreHotelRuntimeEntry,
   OffreRegionOption,
   RegionTabItem
-} from "offre/types";
+} from "@/offre/types";
 export function useOffreFiltersQueryState(
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>,
   hotelsListSource: MaybeRefOrGetter<NormalizedWidgetHotelDescriptor[]>

@@ -3,8 +3,8 @@ import type {
   B2COffer,
   B2CHotelSearchCriterias,
   B2CProductHotel
-} from "offre/api/types";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
+} from "@/offre/api";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 
 export const DEFAULT_HOTEL_OFFER_ROOM_CRITERIAS = [{
   passengers: [

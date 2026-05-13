@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveProductsListState } from "offre/lib/offre-widget-view";
+import { resolveProductsListState } from "@/offre/lib/offre-widget-view";
 
 describe("resolveProductsListState", () => {
   it("returns loading state metadata while products are fetching", () => {

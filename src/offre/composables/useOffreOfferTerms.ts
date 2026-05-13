@@ -1,9 +1,9 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { getCityGenitiveCase } from "app/plugins/city-spelling";
-import type { B2COffer, B2CPriceSearchReference } from "offre/api/types";
-import { formatOfferDate, pluralizeNights } from "offre/lib/product-offer";
-import { getReferenceValue } from "offre/lib/reference";
-import type { OffreOfferCardTerm } from "offre/types/offer-card";
+import { getCityGenitiveCase } from "@/app/city-spelling";
+import type { B2COffer, B2CPriceSearchReference } from "@/offre/api";
+import { formatOfferDate, pluralizeNights } from "@/offre/lib/product-offer";
+import { getReferenceValue } from "@/offre/lib/reference";
+import type { OffreOfferCardTerm } from "@/offre/types";
 
 interface OffreOfferCardReferenceValue {
   name?: string;

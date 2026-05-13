@@ -1,6 +1,6 @@
 import { ref, watch, type MaybeRefOrGetter, type Ref } from "vue";
 import { toValue } from "vue";
-import { resolveSelectedValue } from "offre/lib/filter-selection";
+import { resolveSelectedValue } from "@/offre/lib/filter-selection";
 
 export function useResolvedSelection<TItem>(params: {
   itemsSource: MaybeRefOrGetter<TItem[]>;

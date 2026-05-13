@@ -1,14 +1,14 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "offre/api/types";
+import type { B2COffer, B2CPriceSearchReference, B2CProduct } from "@/offre/api";
 import {
   stripEnglishBracketFragments,
   resolveHotelImageUrl,
   resolveOfferHref
-} from "offre/lib/product-offer";
-import { getReferenceValue } from "offre/lib/reference";
-import { useOffreOfferPricing } from "offre/composables/useOffreOfferPricing";
-import { useOffreOfferTerms } from "offre/composables/useOffreOfferTerms";
-import type { OffreHotelRuntimeEntry, OffreTourType } from "offre/types";
+} from "@/offre/lib/product-offer";
+import { getReferenceValue } from "@/offre/lib/reference";
+import { useOffreOfferPricing } from "@/offre/composables/useOffreOfferPricing";
+import { useOffreOfferTerms } from "@/offre/composables/useOffreOfferTerms";
+import type { OffreHotelRuntimeEntry, OffreTourType } from "@/offre/types";
 
 interface OffreOfferCardHotelCategory {
   name?: string;

@@ -10,20 +10,6 @@ const widgetEntry = fileURLToPath(
 const monkeyEntry = fileURLToPath(
     new URL("./src/monkey/dev.ts", import.meta.url),
 );
-const aliasMap = {
-    "@": fileURLToPath(new URL("./src", import.meta.url)),
-    app: fileURLToPath(new URL("./src/app", import.meta.url)),
-    brands: fileURLToPath(new URL("./src/brands", import.meta.url)),
-    dev: fileURLToPath(new URL("./src/dev", import.meta.url)),
-    directives: fileURLToPath(new URL("./src/directives", import.meta.url)),
-    monkey: fileURLToPath(new URL("./src/monkey", import.meta.url)),
-    offre: fileURLToPath(new URL("./src/offre", import.meta.url)),
-    shared: fileURLToPath(new URL("./src/shared", import.meta.url)),
-    styles: fileURLToPath(new URL("./src/styles", import.meta.url)),
-    ui: fileURLToPath(new URL("./src/components/ui", import.meta.url)),
-    widget: fileURLToPath(new URL("./src/widget", import.meta.url)),
-};
-
 function resolveMonkeyMatches(rawValue: string | undefined) {
     return (rawValue ?? "https://www.coral.ru/monkey/*,https://www.sunmar.ru/monkey/*")
         .split(",")
@@ -54,7 +40,9 @@ export default defineConfig(({mode}) => {
     return {
         plugins,
         resolve: {
-            alias: aliasMap,
+            alias: {
+                "@": fileURLToPath(new URL("./src", import.meta.url)),
+            },
         },
         build: {
             target: "esnext",

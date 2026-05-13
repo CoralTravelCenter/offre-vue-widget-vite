@@ -1,0 +1,77 @@
+.offre-cashback-banner {
+	border-radius: var(--brand-cashback-banner-radius);
+	background: var(--brand-cashback-banner-background);
+	padding: 8px;
+}
+
+.offre-cashback-banner__content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.offre-cashback-banner__card {
+	flex-shrink: 0;
+}
+
+.offre-cashback-banner__card-image {
+	display: block;
+	width: var(--brand-cashback-card-width);
+	height: auto;
+	object-fit: contain;
+	animation: offre-cashback-card-pulse 10s ease-in-out infinite;
+	transform-origin: center;
+	will-change: transform, filter;
+}
+
+.offre-cashback-banner__title {
+	display: flex;
+	flex-direction: column;
+	margin-right: auto;
+}
+
+.offre-cashback-banner__amount {
+	color: #000000;
+	font-size: var(--brand-text-body);
+	font-weight: 700;
+	line-height: 16px;
+}
+
+.offre-cashback-banner__subtitle-text {
+	font-size: var(--brand-text-meta);
+	line-height: var(--brand-leading-meta);
+}
+
+.offre-cashback-banner__hint {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+@keyframes offre-cashback-card-pulse {
+	0%, 86%, 100% {
+		transform: scale(1);
+		filter: none;
+	}
+
+	88% {
+		transform: scale(1.04);
+		filter: drop-shadow(0 0 6px var(--brand-glow-bonus-strong));
+	}
+
+	90% {
+		transform: scale(1);
+		filter: none;
+	}
+
+	92% {
+		transform: scale(1.03);
+		filter: drop-shadow(0 0 5px var(--brand-glow-bonus-soft));
+	}
+
+	94% {
+		transform: scale(1);
+		filter: none;
+	}
+}

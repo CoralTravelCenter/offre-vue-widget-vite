@@ -1,4 +1,4 @@
-import type { B2CPriceSearchReference } from "offre/api/types";
+import type { B2CPriceSearchReference } from "@/offre/api";
 
 export function getReferenceRecord<TValue extends object>(
   reference: B2CPriceSearchReference,

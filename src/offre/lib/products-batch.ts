@@ -3,8 +3,8 @@ import type {
   B2CPriceSearchResult,
   B2CProduct,
   OffreProductsBatchResult
-} from "offre/api/types";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
+} from "@/offre/api";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 
 export function resolveProductsRequestState(failedQueries: number, queryCount: number) {
   if (queryCount === 0) {

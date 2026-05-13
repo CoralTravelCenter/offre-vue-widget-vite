@@ -9,8 +9,8 @@ import type {
   WidgetSortBy,
   WidgetTheme,
   WidgetTimeframeConfig
-} from "shared/types/widget";
-import type {BrandKey} from "shared/types/brand";
+} from "@/widget/types";
+import type {BrandKey} from "@/brands/types";
 
 const DEFAULT_GROUP_BY: WidgetGroupBy = "countries";
 const DEFAULT_PRICING: WidgetPricingMode = "default";

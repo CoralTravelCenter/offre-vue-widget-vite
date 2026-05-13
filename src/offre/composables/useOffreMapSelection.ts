@@ -1,5 +1,5 @@
 import { computed, nextTick, ref, toValue, type MaybeRefOrGetter, watch } from "vue";
-import type { OffreMapSearchPoint } from "offre/components/results/offre-map.types";
+import type { OffreMapSearchPoint } from "@/offre/lib/offre-map";
 
 export function useOffreMapSelection(params: {
   map: MaybeRefOrGetter<any>;
@@ -50,6 +50,7 @@ export function useOffreMapSelection(params: {
       params.setLastAutoLocationKey(`focus:${hotelId}`);
       map.value.setLocation({
         center: [point.longitude, point.latitude],
+        zoom: 12,
         duration: 500
       });
     }

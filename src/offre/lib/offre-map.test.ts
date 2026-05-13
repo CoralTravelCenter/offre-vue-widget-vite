@@ -4,7 +4,7 @@ import {
   buildHotelIdSet,
   buildMapSearchPoints,
   buildPointsByHotelId
-} from "offre/lib/offre-map";
+} from "@/offre/lib/offre-map";
 
 describe("offre-map helpers", () => {
   it("builds base map points only for hotels with coordinates", () => {

@@ -1,6 +1,6 @@
 import { computed, nextTick, ref } from "vue";
 import { describe, expect, it } from "vitest";
-import { useResolvedSelection } from "offre/composables/useResolvedSelection";
+import { useResolvedSelection } from "@/offre/composables/useResolvedSelection";
 
 describe("useResolvedSelection", () => {
   it("keeps selected value while it remains available", async () => {

@@ -1,6 +1,6 @@
 import { computed, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
-import type { B2CProduct } from "offre/api/types";
-import type { OffreTourType, OffreViewMode } from "offre/types";
+import type { B2CProduct } from "@/offre/api";
+import type { OffreTourType, OffreViewMode } from "@/offre/types";
 
 const VIEW_MODE_STORAGE_PREFIX = "offre-widget:view-mode";
 

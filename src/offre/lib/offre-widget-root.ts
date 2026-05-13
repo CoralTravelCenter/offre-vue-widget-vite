@@ -1,4 +1,4 @@
-import { stableStringify } from "shared/lib/stable-stringify";
+import { stableStringify } from "@/lib/stable-stringify";
 
 export function buildWidgetPersistenceKey(params: {
   brandKey: string;

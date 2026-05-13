@@ -1,0 +1,26 @@
+.offre-offer-terms {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--brand-text-meta);
+	line-height: var(--brand-leading-meta);
+	color: var(--brand-muted-foreground);
+}
+
+.offre-offer-terms__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.offre-offer-terms__icon {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	object-fit: contain;
+	color: var(--brand-muted-foreground);
+}

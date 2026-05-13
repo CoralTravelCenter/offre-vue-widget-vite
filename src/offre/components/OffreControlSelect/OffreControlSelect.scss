@@ -1,0 +1,81 @@
+.offre-control-select {
+	flex: 1 1 0%;
+}
+
+@media (min-width: 1024px) {
+	.offre-control-select {
+		width: 150px;
+		flex: none;
+	}
+}
+
+@media (min-width: 1280px) {
+	.offre-control-select {
+		width: 180px;
+	}
+}
+
+.offre-control-select__trigger {
+	width: 100%;
+	height: var(--brand-control-height);
+	border: 1px solid var(--brand-control-border);
+	border-radius: var(--brand-radius-button);
+	background: var(--brand-card);
+	padding-inline: 16px;
+	padding-block: 0;
+	text-transform: capitalize;
+	text-align: left;
+	font-size: var(--brand-text-control);
+	line-height: var(--brand-leading-control);
+	color: var(--brand-select-trigger-foreground, var(--brand-foreground));
+}
+
+.offre-control-select__trigger:hover {
+	border-color: var(--brand-primary);
+	background: var(--brand-card);
+	color: var(--brand-primary);
+}
+
+.offre-control-select__trigger[data-state="open"] {
+	background: var(--brand-card);
+}
+
+.offre-control-select__trigger :deep(svg) {
+	color: var(--brand-select-trigger-foreground, var(--brand-foreground));
+	transition: color 0.2s ease;
+}
+
+.offre-control-select__trigger:hover :deep(svg) {
+	color: var(--brand-primary);
+}
+
+:global(.offre-control-select__content) {
+	overflow: hidden;
+	border-color: var(--brand-border);
+	border-radius: var(--brand-radius-media);
+	box-shadow: var(--shadow-brand-popover);
+}
+
+:global(.offre-control-select__item) {
+	cursor: pointer;
+	border-radius: 8px;
+	padding: 5px 32px 5px 12px;
+	font-size: var(--brand-text-control);
+	line-height: var(--brand-leading-control);
+	color: var(--brand-foreground);
+	text-transform: capitalize;
+}
+
+:global(.offre-control-select__item:hover),
+:global(.offre-control-select__item[data-highlighted]) {
+	color: var(--brand-primary);
+}
+
+:global(.offre-control-select__item[data-highlighted]) {
+	background: transparent;
+}
+
+:global(.offre-control-select__item[data-state="checked"]) {
+	background: var(--brand-selected-surface);
+	color: var(--brand-primary);
+}

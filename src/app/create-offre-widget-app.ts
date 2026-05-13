@@ -1,19 +1,19 @@
 import { VueQueryPlugin, type QueryClient } from "@tanstack/vue-query";
 import { createApp, type App, type ComponentPublicInstance } from "vue";
-import { createWidgetQueryClient } from "app/create-widget-query-client";
-import citySpelling from "app/plugins/city-spelling";
-import fixedDirective from "directives/fixed";
-import OffreWidgetRoot from "offre/components/OffreWidgetRoot.vue";
-import {normalizeRuntimeWidgetPayload} from "offre/lib/payload";
-import { gcOffreQueryPersisters } from "offre/query/persister";
+import {createWidgetInstanceId} from "@/app/create-widget-instance-id";
+import { createWidgetQueryClient } from "@/app/create-widget-query-client";
+import fixedDirective from "@/app/fixed-directive";
+import OffreWidgetRoot from "@/offre/components/OffreWidgetRoot/OffreWidgetRoot.vue";
+import {normalizeRuntimeWidgetPayload} from "@/offre/lib/payload";
+import { gcOffreQueryPersisters } from "@/offre/query";
 import {
   resolveBrandDefinition,
   resolveBrandThemeClass,
   resolveWidgetTheme,
   getSupportedThemeClasses
-} from "shared/config/brands";
-import type { BrandDefinition } from "shared/types/brand";
-import type { WidgetOptions, WidgetPayload } from "shared/types/widget";
+} from "@/brands/registry";
+import type { BrandDefinition } from "@/brands/types";
+import type { WidgetOptions, WidgetPayload } from "@/widget/types";
 
 interface CreateOffreWidgetAppParams {
   container: Element;
@@ -25,6 +25,7 @@ interface CreateOffreWidgetAppResult {
   brandDefinition: BrandDefinition;
   container: Element;
   queryClient: QueryClient;
+  instanceId: string;
 }
 
 export interface MountedOffreWidget {
@@ -33,6 +34,7 @@ export interface MountedOffreWidget {
   brandDefinition: BrandDefinition;
   container: Element;
   queryClient: QueryClient;
+  instanceId: string;
 }
 
 const ROOT_THEME_VARIABLES = [
@@ -185,11 +187,14 @@ export function createOffreWidgetApp({ container, payload }: CreateOffreWidgetAp
   const brandDefinition = resolveBrandDefinition(normalizedPayload.brand);
   const widgetOptions = normalizedPayload.options;
   const queryClient = createWidgetQueryClient();
+  const instanceId = createWidgetInstanceId();
 
   void gcOffreQueryPersisters();
   applyBrandTheme(container, brandDefinition, widgetOptions);
+  container.setAttribute("data-offre-widget-instance", instanceId);
 
   const app = createApp(OffreWidgetRoot, {
+    instanceId,
     brandKey: brandDefinition.key,
     brandDefinition,
     options: widgetOptions,
@@ -197,15 +202,13 @@ export function createOffreWidgetApp({ container, payload }: CreateOffreWidgetAp
   });
 
   app.use(VueQueryPlugin, { queryClient });
-  app.use(citySpelling);
   app.directive("fixed", fixedDirective);
-  app.config.globalProperties.$offreBrand = brandDefinition.key;
 
-  return { app, brandDefinition, container, queryClient };
+  return { app, brandDefinition, container, queryClient, instanceId };
 }
 
 export function mountOffreWidget({ container, payload }: CreateOffreWidgetAppParams): MountedOffreWidget {
-  const { app, brandDefinition, queryClient } = createOffreWidgetApp({ container, payload });
+  const { app, brandDefinition, queryClient, instanceId } = createOffreWidgetApp({ container, payload });
   const instance = app.mount(container) as ComponentPublicInstance;
 
   return {
@@ -213,6 +216,7 @@ export function mountOffreWidget({ container, payload }: CreateOffreWidgetAppPar
     instance,
     brandDefinition,
     container,
-    queryClient
+    queryClient,
+    instanceId
   };
 }

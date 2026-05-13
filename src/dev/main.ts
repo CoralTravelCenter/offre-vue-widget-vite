@@ -1,5 +1,5 @@
-import { getDevOffrePayload } from "dev/fixtures/offre-payloads";
-import { bootstrapOffreWidgets } from "widget/entry";
+import { getDevOffrePayload } from "@/dev/offre-payloads";
+import { bootstrapOffreWidgets } from "@/widget/entry";
 
 function ensureDevPayloadSlots() {
   const slots = Array.from(document.querySelectorAll<HTMLElement>("[data-offre-dev-slot]"));

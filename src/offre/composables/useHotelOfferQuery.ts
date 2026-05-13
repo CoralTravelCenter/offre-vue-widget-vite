@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/vue-query";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { hotelPriceSearchList } from "offre/api/client";
-import type { B2COffer, B2CProductHotel } from "offre/api/types";
-import { buildHotelOfferSearchCriterias } from "offre/lib/hotel-offer";
-import type { NormalizedOffreWidgetOptions } from "offre/lib/payload";
-import { offreQueryConfig } from "offre/query/config";
-import { offreQueryKeys } from "offre/query/keys";
-import { offreQueryPersisters } from "offre/query/persister";
+import { hotelPriceSearchList } from "@/offre/api";
+import type { B2COffer, B2CProductHotel } from "@/offre/api";
+import { buildHotelOfferSearchCriterias } from "@/offre/lib/hotel-offer";
+import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
+import { offreQueryConfig, offreQueryKeys, offreQueryPersisters } from "@/offre/query";
 
 export function useHotelOfferQuery(params: {
   hotelSource: MaybeRefOrGetter<B2CProductHotel | undefined>;
