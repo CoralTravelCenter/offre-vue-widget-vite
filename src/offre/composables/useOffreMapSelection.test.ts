@@ -1,5 +1,5 @@
 import { computed, ref, nextTick } from "vue";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useOffreMapSelection } from "@/offre/composables/useOffreMapSelection";
 import type { OffreMapSearchPoint } from "@/offre/lib/offre-map";
 
@@ -66,5 +66,31 @@ describe("useOffreMapSelection", () => {
 
     expect(selection.activeHotelId.value).toBeNull();
     expect(selection.popupHotelId.value).toBeNull();
+  });
+
+  it("focuses selected hotel with explicit zoom and updates auto-location key", () => {
+    const point = createPoint("10");
+    const setLocation = vi.fn();
+    const filteredHotelIds = ref(new Set(["10"]));
+    const lastAutoLocationKey = ref("");
+    const selection = useOffreMapSelection({
+      map: ref({ setLocation }),
+      mapPointsByHotelId: computed(() => new Map([["10", point]])),
+      filteredMapPointsByHotelId: computed(() => new Map([["10", point]])),
+      filteredHotelIds,
+      setLastAutoLocationKey(value) {
+        lastAutoLocationKey.value = value;
+      }
+    });
+
+    selection.focusPoint("10");
+
+    expect(selection.activeHotelId.value).toBe("10");
+    expect(lastAutoLocationKey.value).toBe("focus:10");
+    expect(setLocation).toHaveBeenCalledWith({
+      center: [point.longitude, point.latitude],
+      zoom: 12,
+      duration: 500
+    });
   });
 });

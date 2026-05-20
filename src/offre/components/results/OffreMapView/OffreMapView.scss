@@ -5,9 +5,9 @@
 }
 
 .offre-map-view__state {
-	padding: 48px 16px;
-	font-size: 14px;
-	line-height: 22px;
+	padding: 48px var(--offre-space-5);
+	font-size: var(--offre-text-sm);
+	line-height: var(--offre-leading-sm);
 	color: var(--brand-muted-foreground);
 	text-align: center;
 }
@@ -25,7 +25,7 @@
 
 .offre-map-view__bottom-overlay {
 	position: absolute;
-	inset: 0 0 8px;
+	inset: 0 0 var(--offre-space-2);
 	z-index: 60;
 	display: flex;
 	align-items: flex-end;
@@ -50,7 +50,7 @@
 
 :global(.__ymap_overlay .offre-map-overlay-card) {
 	width: fit-content !important;
-	transform: translate(8px, calc(-100% - 30px));
+	transform: translate(var(--offre-space-2), calc(-100% - 30px));
 	pointer-events: auto;
 }
 

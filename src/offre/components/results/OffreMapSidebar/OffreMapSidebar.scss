@@ -1,14 +1,14 @@
 .offre-map-sidebar {
 	position: absolute;
-	top: 16px;
+	top: var(--offre-space-5);
 	right: auto;
-	bottom: 16px;
-	left: 16px;
+	bottom: var(--offre-space-5);
+	left: var(--offre-space-5);
 	z-index: 20;
 	display: none;
 	width: 300px;
 	overflow: hidden;
-	padding: 16px 16px 0;
+	padding: var(--offre-space-5) var(--offre-space-5) 0;
 	border: 1px solid var(--brand-border);
 	border-radius: 14px;
 	background: color-mix(in srgb, var(--brand-card) 95%, transparent);
@@ -18,20 +18,20 @@
 
 .offre-map-sidebar__top {
 	display: grid;
-	gap: 10px;
-	margin-bottom: 10px;
+	gap: var(--offre-space-3);
+	margin-bottom: var(--offre-space-3);
 }
 
 .offre-map-sidebar__header {
 	display: grid;
-	gap: 10px;
+	gap: var(--offre-space-3);
 }
 
 .offre-map-sidebar__header-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
+	gap: var(--offre-space-4);
 }
 
 .offre-map-sidebar__title {
@@ -42,11 +42,11 @@
 }
 
 .offre-map-sidebar__count {
-	padding: 1px 8px;
+	padding: 1px var(--offre-space-2);
 	border: 1px solid var(--brand-border);
-	border-radius: 999px;
+	border-radius: var(--offre-radius-pill);
 	background: var(--brand-muted);
-	font-size: 12px;
+	font-size: var(--offre-text-xs);
 	line-height: 18px;
 	color: var(--brand-muted-foreground);
 }
@@ -59,9 +59,9 @@
 	display: flex;
 	align-items: center;
 	height: 36px;
-	padding: 0 10px;
+	padding: 0 var(--offre-space-3);
 	border: 1px solid var(--brand-border);
-	border-radius: 8px;
+	border-radius: var(--offre-radius-sm);
 	background: var(--brand-map-search-surface, var(--brand-muted));
 	transition: border-color 0.15s ease, background-color 0.15s ease;
 }
@@ -99,20 +99,20 @@
 	flex-direction: column;
 	align-items: stretch;
 	width: 100%;
-	gap: 8px;
+	gap: var(--offre-space-2);
 }
 
 .offre-map-sidebar__skeleton-item,
 .offre-map-sidebar__item {
 	display: grid;
 	grid-template-columns: 56px minmax(0, 1fr);
-	gap: 8px;
+	gap: var(--offre-space-2);
 	width: 100%;
 	min-width: 0;
 	align-self: stretch;
 	padding: 6px;
 	border: 1px solid var(--brand-border);
-	border-radius: 10px;
+	border-radius: var(--offre-radius-md);
 	background: color-mix(in srgb, var(--brand-card) 90%, transparent);
 }
 
@@ -132,7 +132,7 @@
 .offre-map-sidebar__skeleton-media {
 	width: 56px;
 	height: 56px;
-	border-radius: 8px;
+	border-radius: var(--offre-radius-sm);
 	background: var(--brand-skeleton-base);
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SelectContentEmits, SelectContentProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
+import { inject } from "vue"
 import { reactiveOmit } from "@vueuse/core"
 import {
   SelectContent,
@@ -8,6 +9,7 @@ import {
   SelectViewport,
   useForwardPropsEmits,
 } from "reka-ui"
+import { offrePortalTargetKey } from "@/app/offre-portal-target";
 import { cn } from '@/lib/utils'
 import { SelectScrollDownButton, SelectScrollUpButton } from "."
 
@@ -26,10 +28,11 @@ const emits = defineEmits<SelectContentEmits>()
 const delegatedProps = reactiveOmit(props, "class")
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const portalTarget = inject(offrePortalTargetKey, null)
 </script>
 
 <template>
-  <SelectPortal>
+  <SelectPortal :to="portalTarget ?? 'body'">
     <SelectContent
       data-slot="select-content"
       v-bind="{ ...$attrs, ...forwarded }"

@@ -149,6 +149,22 @@
     --input: var(--brand-input, rgba(0, 0, 0, 0.15));
     --ring: var(--brand-ring, color-mix(in srgb, #0092d0 35%, transparent));
     --radius: var(--brand-radius-button, 0.5rem);
+
+    --offre-space-1: 4px;
+    --offre-space-2: 8px;
+    --offre-space-3: 10px;
+    --offre-space-4: 12px;
+    --offre-space-5: 16px;
+
+    --offre-radius-sm: 8px;
+    --offre-radius-md: 10px;
+    --offre-radius-lg: 12px;
+    --offre-radius-pill: 999px;
+
+    --offre-text-xs: 12px;
+    --offre-text-sm: 14px;
+    --offre-leading-xs: 16px;
+    --offre-leading-sm: 22px;
 }
 
 @layer base {

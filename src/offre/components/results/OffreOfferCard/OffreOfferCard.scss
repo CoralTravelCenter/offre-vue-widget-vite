@@ -6,7 +6,7 @@
   border: 1px solid var(--brand-border);
   border-radius: var(--brand-radius-card);
   background: var(--brand-card);
-  padding: 8px;
+  padding: var(--offre-space-2);
 }
 
 @media (min-width: 1024px) {
@@ -14,7 +14,7 @@
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr) 320px;
     align-items: stretch;
-    gap: 16px;
+    gap: var(--offre-space-5);
   }
 }
 
@@ -72,12 +72,12 @@
   top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--offre-space-2);
 }
 
 .offre-offer-card__body {
   min-width: 0;
-  padding-block: 8px;
+  padding-block: var(--offre-space-2);
 }
 
 @media (min-width: 1024px) {
@@ -123,7 +123,7 @@
 
 @media (min-width: 1024px) {
   .offre-offer-card__title-link {
-    margin-bottom: 8px;
+    margin-bottom: var(--offre-space-2);
   }
 }
 
@@ -144,8 +144,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--offre-space-2);
+  margin-bottom: var(--offre-space-2);
 }
 
 .offre-offer-card__stars {
@@ -169,7 +169,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--offre-space-2);
 }
 
 .offre-offer-card__badge {
@@ -217,7 +217,7 @@
 .offre-offer-card__terms-skeleton {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--offre-space-2);
 }
 
 .offre-offer-card__terms-skeleton-item {
@@ -242,9 +242,9 @@
 }
 
 .offre-offer-card__usp-list {
-  margin-top: 8px;
+  margin-top: var(--offre-space-2);
   border-top: 1px solid var(--brand-border);
-  padding-top: 8px;
+  padding-top: var(--offre-space-2);
   padding-left: 20px;
   list-style: disc;
   font-size: var(--brand-text-body);

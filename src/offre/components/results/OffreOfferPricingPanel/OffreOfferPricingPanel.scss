@@ -3,10 +3,10 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--offre-space-2);
   overflow: visible;
   border-top: 1px solid var(--brand-border);
-  padding-top: 8px;
+  padding-top: var(--offre-space-2);
 }
 
 @media (min-width: 1024px) {
@@ -34,7 +34,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--offre-space-3);
 }
 
 @media (min-width: 1024px) {
@@ -67,7 +67,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--offre-space-1);
   line-height: var(--brand-leading-title);
 }
 
@@ -140,14 +140,14 @@
 }
 
 .offre-offer-pricing-panel__loading-old-price {
-  margin-top: 8px;
+  margin-top: var(--offre-space-2);
   width: 72px;
   height: 12px;
   background: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
 }
 
 .offre-offer-pricing-panel__loading-current-price {
-  margin-top: 8px;
+  margin-top: var(--offre-space-2);
   width: 68%;
   height: 28px;
   background: color-mix(in srgb, var(--brand-foreground) 10%, transparent);

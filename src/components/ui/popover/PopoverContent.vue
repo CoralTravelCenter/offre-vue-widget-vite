@@ -2,7 +2,9 @@
 import type {PopoverContentEmits, PopoverContentProps} from "reka-ui"
 import {PopoverContent, PopoverPortal, useForwardPropsEmits,} from "reka-ui"
 import type {HTMLAttributes} from "vue"
+import {inject} from "vue"
 import {reactiveOmit} from "@vueuse/core"
+import {offrePortalTargetKey} from "@/app/offre-portal-target";
 import {cn} from '@/lib/utils'
 
 defineOptions({
@@ -22,10 +24,11 @@ const emits = defineEmits<PopoverContentEmits>()
 const delegatedProps = reactiveOmit(props, "class")
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const portalTarget = inject(offrePortalTargetKey, null)
 </script>
 
 <template>
-	<PopoverPortal>
+	<PopoverPortal :to="portalTarget ?? 'body'">
 		<PopoverContent
 				data-slot="popover-content"
 				v-bind="{ ...$attrs, ...forwarded }"

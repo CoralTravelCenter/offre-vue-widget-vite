@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import { computed, watch } from "vue";
 import OffreControlSelect from "@/offre/components/OffreControlSelect/OffreControlSelect.vue";
-import type {OffreDepartureOption} from "@/offre/types";
+import type { OffreDepartureOption } from "@/offre/types";
 
 interface Props {
 	options: OffreDepartureOption[];
@@ -9,14 +9,14 @@ interface Props {
 	placeholder?: string;
 }
 
-const modelValue = defineModel<string>({required: true});
+const modelValue = defineModel<string>({ required: true });
 
 const props = defineProps<Props>();
 
 const normalizedOptions = computed(() => {
 	return props.options.map((option) => ({
 		value: option.id,
-		label: option.label
+		label: option.label,
 	}));
 });
 </script>
