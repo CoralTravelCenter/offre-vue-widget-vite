@@ -1,4 +1,4 @@
-import { computed, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
+import { computed, ref, toValue, watch, type MaybeRefOrGetter, type Ref } from "vue";
 import type { B2CProduct } from "@/offre/api";
 import type { OffreTourType, OffreViewMode } from "@/offre/types";
 
@@ -49,21 +49,40 @@ export function useOffreWidgetListState(params: {
   selectedTimeframeSource: MaybeRefOrGetter<string>;
   guestsFilterKeySource?: MaybeRefOrGetter<string>;
   storageKeySource?: MaybeRefOrGetter<string | null | undefined>;
+  totalItemsSource?: MaybeRefOrGetter<number>;
+  prePaginatedSource?: MaybeRefOrGetter<boolean>;
+  viewModeRef?: Ref<OffreViewMode>;
+  currentPageRef?: Ref<number>;
   pageSize?: number;
 }) {
   const pageSize = params.pageSize ?? 5;
-  const viewMode = ref<OffreViewMode>("list");
+  const viewMode = params.viewModeRef ?? ref<OffreViewMode>("list");
   const tourTypeByHotelId = ref<Record<string, OffreTourType>>({});
-  const currentPage = ref(1);
+  const currentPage = params.currentPageRef ?? ref(1);
 
   const products = computed(() => toValue(params.productsSource));
+  const totalItems = computed(() => {
+    const explicitTotal = Number(toValue(params.totalItemsSource));
+
+    if (Number.isFinite(explicitTotal) && explicitTotal >= 0) {
+      return explicitTotal;
+    }
+
+    return products.value.length;
+  });
+  const prePaginated = computed(() => Boolean(toValue(params.prePaginatedSource)));
   const viewModeStorageKey = computed(() => resolveViewModeStorageKey(toValue(params.storageKeySource)));
-  const totalProducts = computed(() => products.value.length);
+  const totalProducts = computed(() => totalItems.value);
   const totalPages = computed(() => {
     return Math.max(1, Math.ceil(totalProducts.value / pageSize));
   });
   const hasPagination = computed(() => totalProducts.value > pageSize);
+  const canLoadMore = computed(() => currentPage.value < totalPages.value);
   const paginatedProducts = computed(() => {
+    if (prePaginated.value) {
+      return products.value;
+    }
+
     const startIndex = (currentPage.value - 1) * pageSize;
     return products.value.slice(startIndex, startIndex + pageSize);
   });
@@ -119,6 +138,7 @@ export function useOffreWidgetListState(params: {
     totalProducts,
     totalPages,
     hasPagination,
+    canLoadMore,
     paginatedProducts,
     tourTypeByHotelId,
     setHotelTourType

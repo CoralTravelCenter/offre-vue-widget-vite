@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/vue-query";
+import { keepPreviousData, useQuery } from "@tanstack/vue-query";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import { hotelPriceSearchList, packagePriceSearchList } from "@/offre/api";
 import type {
   B2CHotelInfo,
   B2CLocation,
-  B2CPriceSearchResult,
   OffreProductsBatchResult
 } from "@/offre/api";
+import { shouldDebugOffreRequests } from "@/offre/api";
 import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 import { aggregateProductsBatch } from "@/offre/lib/products-batch";
 import {
@@ -23,49 +23,45 @@ function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-function getReturnedHotelIds(result: B2CPriceSearchResult) {
-  return new Set(
-    (Array.isArray(result.products) ? result.products : [])
-      .map((product) => String(product.hotel?.id ?? ""))
-      .filter(Boolean)
-  );
-}
-
-export function buildFallbackQueryDescriptors(params: {
-  descriptors: OffreProductQueryDescriptor[];
-  responses: Array<PromiseSettledResult<{ result: B2CPriceSearchResult }>>;
-}) {
-  const fallbackDescriptors: OffreProductQueryDescriptor[] = [];
-
-  for (const [index, descriptor] of params.descriptors.entries()) {
-    const response = params.responses[index];
-
-    if (response?.status !== "fulfilled" || descriptor.hotels.length <= 1) {
-      continue;
-    }
-
-    const returnedHotelIds = getReturnedHotelIds(response.value.result);
-    const missingHotels = descriptor.hotels.filter((hotel) => {
-      return !returnedHotelIds.has(hotel.hotelId);
-    });
-
-    for (const hotel of missingHotels) {
-      fallbackDescriptors.push({
-        hotels: [hotel],
-        onlyhotel: descriptor.onlyhotel,
-        searchCriterias: {
-          ...descriptor.searchCriterias,
-          arrivalLocations: [hotel.arrivalLocation],
-          paging: {
-            ...descriptor.searchCriterias.paging,
-            pageSize: 1
-          }
-        }
-      });
-    }
+function getNow() {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
   }
 
-  return fallbackDescriptors;
+  return Date.now();
+}
+
+function logProductsQueryDebug(message: string, details: Record<string, unknown>) {
+  if (!shouldDebugOffreRequests()) {
+    return;
+  }
+
+  console.info(`OffreWidget: ${message} ${JSON.stringify(details)}`);
+}
+
+function summarizeDescriptor(descriptor: OffreProductQueryDescriptor) {
+  return {
+    onlyhotel: descriptor.onlyhotel,
+    hotelCount: descriptor.hotels.length,
+    hotelIds: descriptor.hotels.map((hotel) => hotel.hotelId),
+    arrivalLocationCount: descriptor.searchCriterias.arrivalLocations.length,
+    beginDates: descriptor.searchCriterias.beginDates,
+    nights: descriptor.searchCriterias.nights.map((night) => night.value)
+  };
+}
+
+function getEffectiveHotels(params: {
+  hotels: OffreHotelRuntimeEntry[];
+  pageSize: number;
+  currentPage: number;
+  serverPageMode: boolean;
+}) {
+  if (!params.serverPageMode) {
+    return params.hotels;
+  }
+
+  const visibleHotelsCount = params.currentPage * params.pageSize;
+  return params.hotels.slice(0, visibleHotelsCount);
 }
 
 export function useOffreProductsQuery(params: {
@@ -75,10 +71,33 @@ export function useOffreProductsQuery(params: {
   selectedTimeframeSource: MaybeRefOrGetter<string>;
   selectedDepartureSource: MaybeRefOrGetter<B2CLocation | null>;
   hotelOrderByIdSource: MaybeRefOrGetter<Map<string, number>>;
+  currentPageSource?: MaybeRefOrGetter<number>;
+  pageSizeSource?: MaybeRefOrGetter<number>;
+  serverPageModeSource?: MaybeRefOrGetter<boolean>;
 }) {
+  const queryMode = computed(() => {
+    const hotels = toValue(params.hotelsSource);
+    const pageSize = Math.max(1, Number(toValue(params.pageSizeSource)) || hotels.length || 1);
+    const currentPage = Math.max(1, Number(toValue(params.currentPageSource)) || 1);
+    const serverPageMode = Boolean(toValue(params.serverPageModeSource));
+    const effectiveHotels = getEffectiveHotels({
+      hotels,
+      pageSize,
+      currentPage,
+      serverPageMode
+    });
+
+    return {
+      pageSize,
+      currentPage,
+      serverPageMode,
+      totalHotels: hotels.length,
+      effectiveHotels
+    };
+  });
   const productQueryDescriptors = computed(() => {
     return buildOffreProductQueries({
-      hotels: toValue(params.hotelsSource),
+      hotels: queryMode.value.effectiveHotels,
       hotelInfoById: toValue(params.hotelInfoByIdSource),
       selectedTimeframe: toValue(params.selectedTimeframeSource),
       selectedDeparture: toValue(params.selectedDepartureSource),
@@ -97,13 +116,17 @@ export function useOffreProductsQuery(params: {
     staleTime: offreQueryConfig.productsBatch.staleTime,
     gcTime: offreQueryConfig.productsBatch.gcTime,
     persister: offreQueryPersisters.productsBatch.persisterFn,
+    placeholderData: keepPreviousData,
     queryFn: async ({ signal }) => {
+      const totalStartedAt = getNow();
       const primaryTasks = productQueryDescriptors.value.map((descriptor) => {
         return () => descriptor.onlyhotel
           ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
           : packagePriceSearchList(descriptor.searchCriterias, { signal });
       });
+      const primaryStartedAt = getNow();
       const primaryResponses = await runConcurrentSettledTasks(primaryTasks, PRODUCTS_QUERY_CONCURRENCY);
+      const primaryDurationMs = Math.round(getNow() - primaryStartedAt);
 
       for (const response of primaryResponses) {
         if (response.status === "rejected") {
@@ -113,32 +136,38 @@ export function useOffreProductsQuery(params: {
         }
       }
 
-      const fallbackQueryDescriptors = buildFallbackQueryDescriptors({
-        descriptors: productQueryDescriptors.value,
-        responses: primaryResponses
+      logProductsQueryDebug("products-query descriptors", {
+        serverPageMode: queryMode.value.serverPageMode,
+        currentPage: queryMode.value.currentPage,
+        pageSize: queryMode.value.pageSize,
+        totalHotels: queryMode.value.totalHotels,
+        effectiveHotelIds: queryMode.value.effectiveHotels.map((hotel) => String(hotel.id)),
+        primaryDescriptors: productQueryDescriptors.value.map(summarizeDescriptor)
       });
-      const fallbackTasks = fallbackQueryDescriptors.map((descriptor) => {
-        return () => descriptor.onlyhotel
-          ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
-          : packagePriceSearchList(descriptor.searchCriterias, { signal });
-      });
-      const fallbackResponses = fallbackTasks.length > 0
-        ? await runConcurrentSettledTasks(fallbackTasks, PRODUCTS_QUERY_CONCURRENCY)
-        : [];
 
-      for (const response of fallbackResponses) {
-        if (response.status === "rejected") {
-          if (isAbortError(response.reason)) {
-            throw response.reason;
-          }
-        }
-      }
-
-      return aggregateProductsBatch({
-        responses: [...primaryResponses, ...fallbackResponses],
+      const batchResult = aggregateProductsBatch({
+        responses: primaryResponses,
         options: toValue(params.optionsSource),
         hotelOrderById: toValue(params.hotelOrderByIdSource)
       });
+
+      logProductsQueryDebug("products-query timing", {
+        totalDurationMs: Math.round(getNow() - totalStartedAt),
+        primaryDurationMs,
+        fallbackDurationMs: 0,
+        serverPageMode: queryMode.value.serverPageMode,
+        currentPage: queryMode.value.currentPage,
+        pageSize: queryMode.value.pageSize,
+        totalHotels: queryMode.value.totalHotels,
+        primaryQueryCount: productQueryDescriptors.value.length,
+        fallbackQueryCount: 0,
+        primaryHotelCount: productQueryDescriptors.value.reduce((sum, descriptor) => sum + descriptor.hotels.length, 0),
+        fallbackHotelCount: 0,
+        requestState: batchResult.meta.requestState,
+        resultProducts: batchResult.payload.products.length
+      });
+
+      return batchResult;
     }
   });
 
@@ -147,12 +176,16 @@ export function useOffreProductsQuery(params: {
     refetchProducts: () => productsQuery.refetch(),
     productsList: computed(() => productsQuery.data.value?.payload.products ?? []),
     productReference: computed(() => productsQuery.data.value?.payload.reference ?? {}),
+    productsInitialLoading: computed(() => {
+      return productsQuery.isPending.value
+        && (productsQuery.data.value?.payload.products.length ?? 0) === 0;
+    }),
     requestState: computed(() => {
       if (!productQueryDescriptors.value.length) {
         return "idle";
       }
 
-      if (productsQuery.isPending.value) {
+      if (productsQuery.isPending.value && (productsQuery.data.value?.payload.products.length ?? 0) === 0) {
         return "loading";
       }
 

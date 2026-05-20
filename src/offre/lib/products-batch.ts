@@ -6,6 +6,18 @@ import type {
 } from "@/offre/api";
 import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 
+export function getPriceSearchProducts(result: B2CPriceSearchResult) {
+  if (Array.isArray(result.products) && result.products.length > 0) {
+    return result.products;
+  }
+
+  if (Array.isArray(result.topProducts) && result.topProducts.length > 0) {
+    return result.topProducts;
+  }
+
+  return [];
+}
+
 export function resolveProductsRequestState(failedQueries: number, queryCount: number) {
   if (queryCount === 0) {
     return "idle" as const;
@@ -51,13 +63,30 @@ function stripReferenceFields(result: B2CPriceSearchResult) {
   return reference as B2CPriceSearchReference;
 }
 
-function sortProductsByPrice(products: B2CProduct[]) {
-  return [...products].sort((left, right) => {
-    const leftPrice = Number(left?.offers?.[0]?.price?.amount) || Number.MAX_SAFE_INTEGER;
-    const rightPrice = Number(right?.offers?.[0]?.price?.amount) || Number.MAX_SAFE_INTEGER;
+function resolveProductPrice(product: B2CProduct) {
+  return Number(product?.offers?.[0]?.price?.amount) || Number.MAX_SAFE_INTEGER;
+}
 
-    return leftPrice - rightPrice;
-  });
+export function dedupeProductsByHotelId(products: B2CProduct[]) {
+  const productsByHotelId = new Map<string, B2CProduct>();
+  const productsWithoutHotelId: B2CProduct[] = [];
+
+  for (const product of products) {
+    const hotelId = String(product.hotel?.id ?? "").trim();
+
+    if (!hotelId) {
+      productsWithoutHotelId.push(product);
+      continue;
+    }
+
+    const existingProduct = productsByHotelId.get(hotelId);
+
+    if (!existingProduct || resolveProductPrice(product) < resolveProductPrice(existingProduct)) {
+      productsByHotelId.set(hotelId, product);
+    }
+  }
+
+  return [...productsByHotelId.values(), ...productsWithoutHotelId];
 }
 
 function sortProductsBySourceOrder(
@@ -90,14 +119,13 @@ export function aggregateProductsBatch(params: {
     const result = response.value.result;
     mergeReference(reference, stripReferenceFields(result));
 
-    if (Array.isArray(result.products) && result.products.length > 0) {
-      products.push(...result.products);
-    }
+    products.push(...getPriceSearchProducts(result));
   }
 
+  const dedupedProducts = dedupeProductsByHotelId(products);
   const sortedProducts = params.options.sortBy === "source"
-    ? sortProductsBySourceOrder(products, params.hotelOrderById)
-    : sortProductsByPrice(products);
+    ? sortProductsBySourceOrder(dedupedProducts, params.hotelOrderById)
+    : dedupedProducts;
 
   const batchResult: OffreProductsBatchResult = {
     payload: {

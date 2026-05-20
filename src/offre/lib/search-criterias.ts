@@ -190,7 +190,7 @@ export function buildOffreProductQueries(params: {
         ...descriptor.searchCriterias,
         paging: {
           ...descriptor.searchCriterias.paging,
-          pageSize: descriptor.searchCriterias.arrivalLocations.length
+          pageSize: descriptor.hotels.length
         }
       }
     };

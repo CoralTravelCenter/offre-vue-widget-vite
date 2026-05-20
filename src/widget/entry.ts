@@ -1,11 +1,14 @@
 import "@/styles/style.css";
 import type {MountedOffreWidget as CoreMountedOffreWidget} from "@/app/create-offre-widget-app";
 import {mountOffreWidget} from "@/app/create-offre-widget-app";
+import { shouldDebugOffreRequests } from "@/offre/api";
 import {sanitizeWidgetPayload} from "@/offre/lib/payload";
 import type {WidgetPayload} from "@/widget/types";
 
 const WIDGET_SELECTOR = 'script[type="application/json"][data-offre-vue-test]';
 const WIDGET_ROOT_ATTR = "data-offre-widget-root";
+const WIDGET_SCRIPT_MOUNTED_ATTR = "data-offre-widget-mounted";
+const WIDGET_SCRIPT_INSTANCE_ATTR = "data-offre-widget-instance-id";
 
 const mountedWidgetsByScript = new WeakMap<HTMLScriptElement, BootstrappedOffreWidget>();
 
@@ -39,6 +42,14 @@ function errorWidget(message: string, details?: unknown) {
     }
 
     console.error(`OffreWidget: ${message}`, details);
+}
+
+function logWidgetDebug(message: string, details: Record<string, unknown>) {
+    if (!shouldDebugOffreRequests()) {
+        return;
+    }
+
+    console.info(`OffreWidget: ${message} ${JSON.stringify(details)}`);
 }
 
 function normalizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
@@ -116,12 +127,36 @@ function resolveScriptElement(target: UnmountTarget) {
     return target instanceof HTMLScriptElement ? target : target.scriptElement;
 }
 
+function markScriptAsMounted(scriptElement: HTMLScriptElement, instanceId: string) {
+    scriptElement.setAttribute(WIDGET_SCRIPT_MOUNTED_ATTR, "true");
+    scriptElement.setAttribute(WIDGET_SCRIPT_INSTANCE_ATTR, instanceId);
+}
+
+function clearMountedScriptMarker(scriptElement: HTMLScriptElement) {
+    scriptElement.removeAttribute(WIDGET_SCRIPT_MOUNTED_ATTR);
+    scriptElement.removeAttribute(WIDGET_SCRIPT_INSTANCE_ATTR);
+}
+
+function describeScriptElement(scriptElement: HTMLScriptElement, index: number) {
+    return {
+        index,
+        mounted: scriptElement.getAttribute(WIDGET_SCRIPT_MOUNTED_ATTR) === "true",
+        instanceId: scriptElement.getAttribute(WIDGET_SCRIPT_INSTANCE_ATTR) ?? "",
+        textLength: scriptElement.textContent?.length ?? 0,
+        parentTag: scriptElement.parentElement?.tagName?.toLowerCase() ?? ""
+    };
+}
+
 export function mountOffreWidgetFromScript(
     scriptElement: HTMLScriptElement,
 ): BootstrappedOffreWidget | null {
     const existingWidget = getExistingMountedWidget(scriptElement);
 
     if (existingWidget) {
+        logWidgetDebug("reuse mounted widget", {
+            instanceId: existingWidget.instanceId,
+            scriptMountedAttr: scriptElement.getAttribute(WIDGET_SCRIPT_MOUNTED_ATTR) === "true"
+        });
         return existingWidget;
     }
 
@@ -144,6 +179,12 @@ export function mountOffreWidgetFromScript(
         };
 
         mountedWidgetsByScript.set(scriptElement, bootstrappedWidget);
+        markScriptAsMounted(scriptElement, bootstrappedWidget.instanceId);
+        logWidgetDebug("mount widget", {
+            instanceId: bootstrappedWidget.instanceId,
+            hotelCount: Array.isArray(payload.hotels) ? payload.hotels.length : 0,
+            scriptMountedAttr: true
+        });
 
         return bootstrappedWidget;
     } catch (error) {
@@ -155,6 +196,11 @@ export function mountOffreWidgetFromScript(
 
 export function bootstrapOffreWidgets(root: ParentNode = document): BootstrappedOffreWidget[] {
     const widgetScripts = Array.from(root.querySelectorAll<HTMLScriptElement>(WIDGET_SELECTOR));
+
+    logWidgetDebug("bootstrap widgets", {
+        scriptCount: widgetScripts.length,
+        scripts: widgetScripts.map((scriptElement, index) => describeScriptElement(scriptElement, index))
+    });
 
     return widgetScripts
         .map((scriptElement) => mountOffreWidgetFromScript(scriptElement))
@@ -173,6 +219,10 @@ export function unmountOffreWidget(target: UnmountTarget): boolean {
     mountedWidget.queryClient.clear();
     mountedWidget.rootElement.remove();
     mountedWidgetsByScript.delete(scriptElement);
+    clearMountedScriptMarker(scriptElement);
+    logWidgetDebug("unmount widget", {
+        instanceId: mountedWidget.instanceId
+    });
 
     return true;
 }

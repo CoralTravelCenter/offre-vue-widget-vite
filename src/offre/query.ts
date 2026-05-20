@@ -83,13 +83,13 @@ function createSessionStorageAdapter(): AsyncStorage<string> | undefined {
   };
 }
 
-function createOffreQueryPersister(prefix: string, maxAge: number) {
+function createOffreQueryPersister(prefix: string, maxAge: number, refetchOnRestore = true) {
   return experimental_createQueryPersister({
     storage: createSessionStorageAdapter(),
     buster: OFFRE_QUERY_PERSISTENCE_BUSTER,
     maxAge,
     prefix: `offre-widget:${prefix}`,
-    refetchOnRestore: true
+    refetchOnRestore
   });
 }
 
@@ -97,7 +97,7 @@ export const offreQueryPersisters = {
   hotelsInfo: createOffreQueryPersister("hotels-info", offreQueryConfig.hotelsInfo.persistMaxAge),
   departures: createOffreQueryPersister("departures", offreQueryConfig.departures.persistMaxAge),
   hotelOffer: createOffreQueryPersister("hotel-offer", offreQueryConfig.hotelOffer.persistMaxAge),
-  productsBatch: createOffreQueryPersister("products-batch", offreQueryConfig.productsBatch.persistMaxAge)
+  productsBatch: createOffreQueryPersister("products-batch", offreQueryConfig.productsBatch.persistMaxAge, false)
 } as const;
 
 export async function gcOffreQueryPersisters() {
