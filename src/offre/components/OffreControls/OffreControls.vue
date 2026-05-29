@@ -10,6 +10,8 @@ interface Props {
 	timeframeOptions: OffreControlOption[];
 	adultsCount?: number;
 	childrenAges?: number[];
+	defaultAdultsCount?: number;
+	defaultChildrenAges?: number[];
 	departuresLoading?: boolean;
 	timeframesLoading?: boolean;
 }
@@ -20,6 +22,8 @@ const selectedTimeframe = defineModel<string>("selectedTimeframe", {required: tr
 const props = withDefaults(defineProps<Props>(), {
 	adultsCount: 2,
 	childrenAges: () => [],
+	defaultAdultsCount: 2,
+	defaultChildrenAges: () => [],
 	departuresLoading: false,
 	timeframesLoading: false
 });
@@ -54,6 +58,8 @@ const isTimeframeDisabled = computed(() => {
 		<OffreOfferGuestsControl
 			:adults-count="adultsCount"
 			:children-ages="childrenAges"
+			:default-adults-count="defaultAdultsCount"
+			:default-children-ages="defaultChildrenAges"
 			class="offre-controls__control offre-controls__control--guests offre-controls__guests"
 			@apply="emit('apply-guests', $event)"
 			@reset="emit('reset-guests')"

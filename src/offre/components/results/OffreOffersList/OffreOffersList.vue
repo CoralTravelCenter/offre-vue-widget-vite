@@ -31,22 +31,25 @@ const normalizedProducts = computed(() => {
 </script>
 
 <template>
-  <section class="offre-offers-list offers-list">
-    <OffreOfferCard
+  <ul class="offre-offers-list offers-list">
+    <li
       v-for="entry in normalizedProducts"
       :key="entry.key"
-      :product="entry.product"
-      :product-reference="productReference"
-      :selected-departure-name="selectedDepartureName"
-      :pricing-mode="pricingMode"
-      :search-options="searchOptions"
-      :hotel-runtime-entry="entry.hotelRuntimeEntry"
-      :brand-key="brandKey"
-      :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
       class="offre-offers-list__item"
-      @update:tour-type="emit('update-tour-type', String(entry.product.hotel?.id ?? ''), $event)"
-    />
-  </section>
+    >
+      <OffreOfferCard
+        :product="entry.product"
+        :product-reference="productReference"
+        :selected-departure-name="selectedDepartureName"
+        :pricing-mode="pricingMode"
+        :search-options="searchOptions"
+        :hotel-runtime-entry="entry.hotelRuntimeEntry"
+        :brand-key="brandKey"
+        :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
+        @update:tour-type="emit('update-tour-type', String(entry.product.hotel?.id ?? ''), $event)"
+      />
+    </li>
+  </ul>
 </template>
 
 <style scoped src="./OffreOffersList.scss" lang="scss"></style>

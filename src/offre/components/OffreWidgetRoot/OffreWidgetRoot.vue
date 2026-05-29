@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import {useMediaQuery} from "@vueuse/core";
 import {LoaderCircle} from "lucide-vue-next";
-import {computed, ref, shallowRef, watch} from "vue";
-import type {B2CPriceSearchReference, B2CProduct} from "@/offre/api";
+import {computed, ref} from "vue";
 import OffreControls from "@/offre/components/OffreControls/OffreControls.vue";
 import ViewModeSwitch from "@/offre/components/ViewModeSwitch/ViewModeSwitch.vue";
 import RegionTabsNav from "@/offre/components/RegionTabsNav/RegionTabsNav.vue";
@@ -12,11 +10,15 @@ import OffreMapViewSkeleton from "@/offre/components/results/OffreMapViewSkeleto
 import OffreMapView from "@/offre/components/results/OffreMapView/OffreMapView.vue";
 import OffreResultsStateNotice from "@/offre/components/results/OffreResultsStateNotice/OffreResultsStateNotice.vue";
 import {useOffreFiltersQueryState} from "@/offre/composables/useOffreFiltersQueryState";
+import {useOffreLoadMoreState} from "@/offre/composables/useOffreLoadMoreState";
+import {useOffreProductsCacheState} from "@/offre/composables/useOffreProductsCacheState";
 import {useOffreProductsQuery} from "@/offre/composables/useOffreProductsQuery";
-import {useOffreWidgetUiState} from "@/offre/composables/useOffreWidgetUiState";
+import {useOffreRegionPagingState} from "@/offre/composables/useOffreRegionPagingState";
+import {useOffreWidgetLayoutState} from "@/offre/composables/useOffreWidgetLayoutState";
 import {useOffreWidgetListState} from "@/offre/composables/useOffreWidgetListState";
-import {buildMapViewKey, buildWidgetPersistenceKey, shouldActivateMapView} from "@/offre/lib/offre-widget-root";
-import {resolveProductsListState} from "@/offre/lib/offre-widget-view";
+import {useOffreWidgetResultsState} from "@/offre/composables/useOffreWidgetResultsState";
+import {useOffreWidgetSessionState} from "@/offre/composables/useOffreWidgetSessionState";
+import {useOffreWidgetUiState} from "@/offre/composables/useOffreWidgetUiState";
 import {Button} from "@/components/ui/button";
 import {
 	getWidgetHotelId,
@@ -26,15 +28,6 @@ import {
 import type {BrandDefinition, BrandKey} from "@/brands/types";
 import type {OffreViewMode} from "@/offre/types";
 
-const DESKTOP_LAYOUT_BREAKPOINT = "(min-width: 1024px)";
-const TABLET_LAYOUT_BREAKPOINT = "(min-width: 768px)";
-const STICKY_BOTTOM_OFFSET = 16;
-const CONTROLS_FIXED_Z_INDEX = 30;
-const LOAD_MORE_FIXED_Z_INDEX = 20;
-const MV_MODE_TOP_OFFSET = 76;
-const DESKTOP_TOP_OFFSET = 16;
-const TABLET_TOP_OFFSET = 57;
-const MOBILE_TOP_OFFSET = 74;
 const PRODUCTS_PAGE_SIZE = 5;
 
 interface OffreWidgetRootProps {
@@ -62,9 +55,10 @@ const {
 	timeframeOptions,
 	setActiveRegion
 } = useOffreFiltersQueryState(
-		() => props.options,
-		() => props.hotelsList
+	() => props.options,
+	() => props.hotelsList
 );
+
 const hotelOrderById = computed(() => {
 	return props.hotelsList.reduce<Map<string, number>>((accumulator, hotelEntry, index) => {
 		const hotelId = getWidgetHotelId(hotelEntry);
@@ -76,26 +70,25 @@ const hotelOrderById = computed(() => {
 		return accumulator;
 	}, new Map<string, number>());
 });
+
 const widgetHotelIds = computed(() => {
 	return props.hotelsList.map((hotelEntry) => getWidgetHotelId(hotelEntry));
 });
-const guestsPersistenceKey = computed(() => {
-	return buildWidgetPersistenceKey({
-		brandKey: props.brandKey,
-		hotelIds: widgetHotelIds.value,
-		options: props.options
-	});
-});
-const viewModePersistenceKey = computed(() => {
-	return buildWidgetPersistenceKey({
-		brandKey: props.brandKey,
-		hotelIds: widgetHotelIds.value,
-		options: props.options,
-		mode: "results-view"
-	});
+
+const {
+	guestsPersistenceKey
+} = useOffreWidgetSessionState({
+	brandKeySource: () => props.brandKey,
+	hotelIdsSource: widgetHotelIds,
+	optionsSource: () => props.options,
+	effectiveSearchOptionsSource: () => props.options,
+	selectedDepartureIdSource: () => "",
+	selectedTimeframeSource: () => "",
+	guestsFilterKeySource: () => ""
 });
 
 const {
+	defaultGuests,
 	selectedGuests,
 	effectiveSearchOptions,
 	guestsFilterKey,
@@ -106,72 +99,98 @@ const {
 	storageKeySource: guestsPersistenceKey
 });
 
-const isMvMode = computed(() => {
-	if (typeof window === "undefined") {
-		return false;
-	}
-
-	return new URLSearchParams(window.location.search).get("mv") === "true";
+const {
+	viewModePersistenceKey,
+	resetNonce
+} = useOffreWidgetSessionState({
+	brandKeySource: () => props.brandKey,
+	hotelIdsSource: widgetHotelIds,
+	optionsSource: () => props.options,
+	effectiveSearchOptionsSource: effectiveSearchOptions,
+	selectedDepartureIdSource: selectedDepartureId,
+	selectedTimeframeSource: selectedTimeframe,
+	guestsFilterKeySource: guestsFilterKey
 });
 
-const isLargeScreen = useMediaQuery(DESKTOP_LAYOUT_BREAKPOINT);
-const isTabletScreen = useMediaQuery(TABLET_LAYOUT_BREAKPOINT);
-const navigationFloating = ref(false);
-const loadMoreFloating = ref(false);
-
-function resolveNavigationTopOffset() {
-	if (isMvMode.value) {
-		return MV_MODE_TOP_OFFSET;
-	}
-
-	if (isLargeScreen.value) {
-		return DESKTOP_TOP_OFFSET;
-	}
-
-	if (isTabletScreen.value) {
-		return TABLET_TOP_OFFSET;
-	}
-
-	return MOBILE_TOP_OFFSET;
-}
-
-const navigationFixedOptions = computed(() => ({
-	top: resolveNavigationTopOffset(),
-	side: "top",
-	zIndex: CONTROLS_FIXED_Z_INDEX,
-	alignment: "stretch",
-	onStick: (fixedState: { fixed: boolean }) => {
-		navigationFloating.value = fixedState.fixed;
-	}
-}));
-
-const loadMoreFixedOptions = computed(() => ({
-	bottom: STICKY_BOTTOM_OFFSET,
-	side: "bottom",
-	zIndex: LOAD_MORE_FIXED_Z_INDEX,
-	alignment: "center",
-	onStick: (fixedState: { fixed: boolean }) => {
-		loadMoreFloating.value = fixedState.fixed;
-	}
-}));
-
 const departuresLoading = computed(() => departuresQuery.isPending.value);
-const hasActivatedMapView = ref(false);
 const viewMode = ref<OffreViewMode>("list");
-const currentPage = ref(1);
-const productsListSource = shallowRef<B2CProduct[]>([]);
-const productReferenceSource = shallowRef<B2CPriceSearchReference>({});
-const loadMoreIssueMessage = ref("");
-const isRollingBackLoadMore = ref(false);
+const currentProductsResetSignal = computed(() => resetNonce.value);
+const {currentPage} = useOffreRegionPagingState({
+	activeRegionIdSource: activeRegionId,
+	resetSignalSource: currentProductsResetSignal
+});
+
 const hotelRuntimeById = computed(() => {
 	return matchedHotelsDirectory.value.reduce<Map<string, typeof matchedHotelsDirectory.value[number]>>((accumulator, hotel) => {
 		accumulator.set(String(hotel.id), hotel);
 		return accumulator;
 	}, new Map<string, typeof matchedHotelsDirectory.value[number]>());
 });
+
 const isListPageMode = computed(() => {
 	return viewMode.value === "list";
 });
+
+const visibleMatchedHotels = computed(() => {
+	if (!isListPageMode.value) {
+		return matchedHotelsDirectory.value;
+	}
+
+	return matchedHotelsDirectory.value.slice(0, currentPage.value * PRODUCTS_PAGE_SIZE);
+});
+
+let productsQueryState: ReturnType<typeof useOffreProductsQuery> | null = null;
+
+const cacheState = useOffreProductsCacheState({
+	activeRegionIdSource: activeRegionId,
+	matchedHotelsSource: matchedHotelsDirectory,
+	visibleMatchedHotelsSource: visibleMatchedHotels,
+	productsListSource: () => productsQueryState?.productsList.value ?? [],
+	productReferenceSource: () => productsQueryState?.productReference.value ?? {},
+	requestStateSource: () => productsQueryState?.requestState.value ?? "idle",
+	productsErrorSource: () => productsQueryState?.productsError.value ?? false,
+	noMatchedProductsSource: () => productsQueryState?.noMatchedProducts.value ?? false,
+	queriedHotelIdsSource: () => productsQueryState?.queriedHotelIds.value ?? [],
+	productsFetchingSource: () => productsQueryState?.productsFetching.value ?? false,
+	isListPageModeSource: isListPageMode,
+	resetSignalSource: currentProductsResetSignal
+});
+
+productsQueryState = useOffreProductsQuery({
+	optionsSource: effectiveSearchOptions,
+	hotelsSource: matchedHotelsDirectory,
+	hotelInfoByIdSource: hotelInfoById,
+	selectedTimeframeSource: selectedTimeframe,
+	selectedDepartureSource: selectedDeparture,
+	hotelOrderByIdSource: hotelOrderById,
+	enabledSource: cacheState.shouldFetchRegionProducts,
+	currentPageSource: currentPage,
+	pageSizeSource: computed(() => PRODUCTS_PAGE_SIZE),
+	serverPageModeSource: isListPageMode
+});
+
+const {
+	noMatchedProducts,
+	productsPartial,
+	productsError,
+	productsFetching,
+	productsInitialLoading,
+	productsList,
+	productsRefetching,
+	productReference,
+	queriedHotelIds,
+	requestState
+} = productsQueryState;
+
+const {
+	regionProductsSource,
+	mapProductsSource,
+	productReferenceSource,
+	effectiveRequestState,
+	effectiveProductsError,
+	effectiveNoMatchedProducts,
+	shouldFetchRegionProducts
+} = cacheState;
 
 const {
 	totalProducts,
@@ -181,14 +200,15 @@ const {
 	tourTypeByHotelId,
 	setHotelTourType
 } = useOffreWidgetListState({
-	productsSource: productsListSource,
+	productsSource: regionProductsSource,
 	activeRegionIdSource: activeRegionId,
+	resetOnActiveRegionChange: false,
 	selectedDepartureIdSource: selectedDepartureId,
 	selectedTimeframeSource: selectedTimeframe,
 	guestsFilterKeySource: guestsFilterKey,
 	storageKeySource: viewModePersistenceKey,
 	totalItemsSource: computed(() => {
-		return isListPageMode.value ? matchedHotelsDirectory.value.length : productsListSource.value.length;
+		return isListPageMode.value ? matchedHotelsDirectory.value.length : regionProductsSource.value.length;
 	}),
 	prePaginatedSource: isListPageMode,
 	viewModeRef: viewMode,
@@ -197,119 +217,55 @@ const {
 });
 
 const {
-	noMatchedProducts,
-	productsPartial,
-	productsError,
-	productsInitialLoading,
-	productsList,
-	productsRefetching,
-	productReference,
-	requestState
-} = useOffreProductsQuery({
-	optionsSource: effectiveSearchOptions,
-	hotelsSource: matchedHotelsDirectory,
-	hotelInfoByIdSource: hotelInfoById,
+	loadMoreIssueMessage,
+	loadMoreSkeletonItems,
+	remainingProductsCount,
+	nextLoadCount,
+	loadMoreButtonLabel,
+	handleLoadMore
+} = useOffreLoadMoreState({
+	currentPageRef: currentPage,
+	canLoadMoreSource: canLoadMore,
+	totalProductsSource: totalProducts,
+	paginatedProductsLengthSource: computed(() => paginatedProducts.value.length),
+	productsRefetchingSource: productsRefetching,
+	productsErrorSource: productsError,
+	noMatchedProductsSource: noMatchedProducts,
+	resetSignalSource: currentProductsResetSignal,
+	pageSize: PRODUCTS_PAGE_SIZE
+});
+
+const {
+	navigationFixedOptions,
+	navigationFloating,
+	hasActivatedMapView,
+	mapViewKey
+} = useOffreWidgetLayoutState({
+	viewModeRef: viewMode,
+	activeRegionIdSource: activeRegionId,
+	selectedDepartureIdSource: selectedDepartureId,
 	selectedTimeframeSource: selectedTimeframe,
-	selectedDepartureSource: selectedDeparture,
-	hotelOrderByIdSource: hotelOrderById,
-	currentPageSource: currentPage,
-	pageSizeSource: computed(() => PRODUCTS_PAGE_SIZE),
-	serverPageModeSource: isListPageMode
+	guestsFilterKeySource: guestsFilterKey
 });
 
-watch(productsList, (nextProducts) => {
-	if (nextProducts.length > 0 || currentPage.value === 1) {
-		productsListSource.value = nextProducts;
-	}
-}, {immediate: true});
-
-watch(productReference, (nextReference) => {
-	if (productsList.value.length > 0 || currentPage.value === 1) {
-		productReferenceSource.value = nextReference;
-	}
-}, {immediate: true});
-
-watch([productsError, noMatchedProducts, productsRefetching], ([hasError, hasNoMatched, isRefetching]) => {
-	if (isRefetching || currentPage.value <= 1 || isRollingBackLoadMore.value) {
-		return;
-	}
-
-	if (!hasError && !hasNoMatched) {
-		loadMoreIssueMessage.value = "";
-		return;
-	}
-
-	isRollingBackLoadMore.value = true;
-	loadMoreIssueMessage.value = hasError
-			? "Не удалось загрузить дополнительные варианты. Уже найденные отели остаются на экране."
-			: "Для следующей порции подходящих вариантов не нашлось. Уже найденные отели остаются на экране.";
-	currentPage.value -= 1;
+const {
+	productsListState,
+	mapProductsState,
+	showRegionSkeleton,
+	showMapSkeleton
+} = useOffreWidgetResultsState({
+	effectiveRequestStateSource: effectiveRequestState,
+	effectiveProductsErrorSource: effectiveProductsError,
+	effectiveNoMatchedProductsSource: effectiveNoMatchedProducts,
+	productsPartialSource: productsPartial,
+	regionProductsCountSource: computed(() => regionProductsSource.value.length),
+	mapProductsCountSource: computed(() => mapProductsSource.value.length),
+	shouldFetchRegionProductsSource: shouldFetchRegionProducts,
+	productsInitialLoadingSource: productsInitialLoading,
+	productsRefetchingSource: productsRefetching,
+	productsFetchingSource: productsFetching,
+	isListPageModeSource: isListPageMode
 });
-
-watch(productsRefetching, (isRefetching) => {
-	if (!isRefetching) {
-		isRollingBackLoadMore.value = false;
-	}
-});
-
-watch(viewMode, (nextValue) => {
-	if (shouldActivateMapView(nextValue)) {
-		hasActivatedMapView.value = true;
-	}
-}, {immediate: true});
-
-const mapViewKey = computed(() => {
-	return buildMapViewKey({
-		activeRegionId: activeRegionId.value,
-		selectedDepartureId: selectedDepartureId.value,
-		selectedTimeframe: selectedTimeframe.value,
-		guestsFilterKey: guestsFilterKey.value
-	});
-});
-
-const productsListState = computed(() => {
-	return resolveProductsListState({
-		requestState: requestState.value,
-		productsError: productsError.value && productsListSource.value.length === 0,
-		productsPartial: productsPartial.value,
-		noMatchedProducts: noMatchedProducts.value && productsListSource.value.length === 0,
-		hasProducts: productsListSource.value.length > 0
-	});
-});
-
-const loadMoreSkeletonItems = computed(() => {
-	if (!productsRefetching.value || !canLoadMore.value) {
-		return 0;
-	}
-
-	const remainingItems = Math.max(0, totalProducts.value - paginatedProducts.value.length);
-	return Math.min(PRODUCTS_PAGE_SIZE, remainingItems);
-});
-
-const remainingProductsCount = computed(() => {
-	return Math.max(0, totalProducts.value - paginatedProducts.value.length);
-});
-
-const nextLoadCount = computed(() => {
-	return Math.min(PRODUCTS_PAGE_SIZE, remainingProductsCount.value);
-});
-
-const loadMoreButtonLabel = computed(() => {
-	if (productsRefetching.value) {
-		return "Загрузка...";
-	}
-
-	return "Показать ещё";
-});
-
-function handleLoadMore() {
-	if (!canLoadMore.value) {
-		return;
-	}
-
-	loadMoreIssueMessage.value = "";
-	currentPage.value += 1;
-}
 </script>
 
 <template>
@@ -332,9 +288,11 @@ function handleLoadMore() {
 				<OffreControls
 						v-model:selected-departure-id="selectedDepartureId"
 						v-model:selected-timeframe="selectedTimeframe"
-						:adults-count="selectedGuests.adultsCount"
-						:children-ages="selectedGuests.childrenAges"
-						:departures="departures"
+					:adults-count="selectedGuests.adultsCount"
+					:children-ages="selectedGuests.childrenAges"
+					:default-adults-count="defaultGuests.adultsCount"
+					:default-children-ages="defaultGuests.childrenAges"
+					:departures="departures"
 						:departures-loading="departuresLoading"
 						:timeframe-options="timeframeOptions"
 						:timeframes-loading="regionsLoading"
@@ -350,15 +308,15 @@ function handleLoadMore() {
 				class="offre-widget__results offre-widget__results--list"
 		>
 			<div
-					v-if="productsInitialLoading"
-					:class="['offre-widget__state', productsListState.modifierClass]"
+				v-if="showRegionSkeleton"
+				:class="['offre-widget__state', productsListState.modifierClass]"
 			>
 				<OffreOffersListSkeleton/>
 			</div>
 
 			<div
-					v-else-if="productsError && productsListSource.length === 0"
-					:class="['offre-widget__state', productsListState.modifierClass]"
+				v-else-if="effectiveProductsError && regionProductsSource.length === 0"
+				:class="['offre-widget__state', productsListState.modifierClass]"
 			>
 				<OffreResultsStateNotice
 						:title="productsListState.title"
@@ -368,8 +326,8 @@ function handleLoadMore() {
 			</div>
 
 			<div
-					v-else-if="noMatchedProducts && productsListSource.length === 0"
-					:class="['offre-widget__state', productsListState.modifierClass]"
+				v-else-if="effectiveNoMatchedProducts && regionProductsSource.length === 0"
+				:class="['offre-widget__state', productsListState.modifierClass]"
 			>
 				<OffreResultsStateNotice
 						:title="productsListState.title"
@@ -378,7 +336,7 @@ function handleLoadMore() {
 				/>
 			</div>
 
-			<template v-else-if="productsListSource.length > 0">
+			<template v-else-if="regionProductsSource.length > 0">
 				<div
 						v-if="productsListState.partialMessage"
 						class="offre-widget__state offre-widget__state--warning"
@@ -412,15 +370,11 @@ function handleLoadMore() {
 				/>
 
 				<div
-						v-if="hasPagination"
-						v-fixed="loadMoreFixedOptions"
-						class="offre-widget__load-more-shell"
+					v-if="hasPagination && canLoadMore"
+					class="offre-widget__load-more-shell"
 				>
 					<div
-							:class="[
-							'offre-widget__load-more-panel',
-							{ 'offre-widget__load-more-panel--floating': loadMoreFloating }
-						]"
+						class="offre-widget__load-more-panel"
 					>
 						<div class="offre-widget__load-more-meta">
 							Показано {{ paginatedProducts.length }} из {{ totalProducts }}
@@ -435,18 +389,12 @@ function handleLoadMore() {
 								:disabled="productsRefetching"
 								@click="handleLoadMore"
 						>
-							<LoaderCircle
-									v-if="productsRefetching"
-									class="offre-widget__load-more-spinner"
-							/>
-							{{ loadMoreButtonLabel }}
-						</Button>
-						<div
-								v-else
-								class="offre-widget__load-more-summary"
-						>
-							Показаны все {{ totalProducts }} отелей
-						</div>
+						<LoaderCircle
+							v-if="productsRefetching"
+							class="offre-widget__load-more-spinner"
+						/>
+						{{ loadMoreButtonLabel }}
+					</Button>
 					</div>
 				</div>
 			</template>
@@ -457,17 +405,53 @@ function handleLoadMore() {
 				v-show="viewMode === 'map'"
 				class="offre-widget__results offre-widget__results--map"
 		>
-			<OffreMapViewSkeleton v-if="requestState === 'loading'"/>
+			<div
+				v-if="showMapSkeleton"
+				:class="['offre-widget__state', mapProductsState.modifierClass]"
+			>
+				<OffreMapViewSkeleton/>
+			</div>
 
-			<OffreMapView
+			<div
+				v-else-if="effectiveProductsError && mapProductsSource.length === 0"
+				:class="['offre-widget__state', mapProductsState.modifierClass]"
+			>
+				<OffreResultsStateNotice
+					:title="mapProductsState.title"
+					:description="mapProductsState.description"
+					variant="error"
+				/>
+			</div>
+
+			<div
+				v-else-if="effectiveNoMatchedProducts && mapProductsSource.length === 0"
+				:class="['offre-widget__state', mapProductsState.modifierClass]"
+			>
+				<OffreResultsStateNotice
+					:title="mapProductsState.title"
+					:description="mapProductsState.description"
+					variant="warning"
+				/>
+			</div>
+
+			<template v-else>
+				<div
+					v-if="mapProductsState.partialMessage"
+					class="offre-widget__state offre-widget__state--warning"
+				>
+					{{ mapProductsState.partialMessage }}
+				</div>
+
+				<OffreMapView
 					v-else
 					:key="mapViewKey"
-					:visible-products="productsList"
+					:visible-products="mapProductsSource"
 					:pricing-mode="effectiveSearchOptions.pricing"
 					:search-options="effectiveSearchOptions"
-					:product-reference="productReference"
+					:product-reference="productReferenceSource"
 					:selected-departure-name="selectedDeparture?.name ?? ''"
-			/>
+				/>
+			</template>
 		</div>
 	</div>
 </template>

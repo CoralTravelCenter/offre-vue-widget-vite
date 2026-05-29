@@ -13,19 +13,6 @@ import type {
 } from "@/offre/api";
 import { useResolvedSelection } from "@/offre/composables/useResolvedSelection";
 import {
-  buildDepartureOptions,
-  buildHotelsDirectory,
-  buildHotelInfoById,
-  buildRegionOptions,
-  buildRegionTabs,
-  buildTimeframeOptions,
-  filterMatchedHotels,
-  getDepartureLocationsById,
-  resolvePreferredDepartureId,
-  resolvePreferredRegionId
-} from "@/offre/lib/filter-state";
-import {
-  getWidgetHotelIds,
   type NormalizedOffreWidgetOptions,
   type NormalizedWidgetHotelDescriptor
 } from "@/offre/lib/payload";
@@ -36,18 +23,35 @@ import type {
   OffreRegionOption,
   RegionTabItem
 } from "@/offre/types";
+import {
+  buildDepartureLocationMap,
+  buildDeparturesQueryKey,
+  buildDerivedDepartureOptions,
+  buildDerivedRegionOptions,
+  buildDerivedRegionTabs,
+  buildDerivedTimeframeOptions,
+  buildFilterHotelsDirectory,
+  buildHotelInfoMap,
+  buildHotelsInfoQueryKey,
+  buildMatchedHotelsDirectory,
+  resolveDepartureSelectionFallback,
+  resolveHotelIds,
+  resolveRegionsLoading,
+  resolveRegionSelectionFallback,
+  resolveSelectedDeparture
+} from "@/offre/composables/useOffreFiltersQueryState.helpers";
 export function useOffreFiltersQueryState(
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>,
   hotelsListSource: MaybeRefOrGetter<NormalizedWidgetHotelDescriptor[]>
 ) {
   const options = computed(() => toValue(optionsSource));
   const normalizedHotels = computed(() => toValue(hotelsListSource));
-  const hotelIds = computed(() => getWidgetHotelIds(normalizedHotels.value));
+  const hotelIds = computed(() => resolveHotelIds(normalizedHotels.value));
   const hotelsDirectory = computed<OffreHotelRuntimeEntry[]>(() => {
-    return buildHotelsDirectory(normalizedHotels.value, options.value);
+    return buildFilterHotelsDirectory(normalizedHotels.value, options.value);
   });
-  const hotelInfoQueryKey = computed(() => offreQueryKeys.hotelsInfo(hotelIds.value));
-  const departureQueryKey = computed(() => offreQueryKeys.departures());
+  const hotelInfoQueryKey = computed(() => buildHotelsInfoQueryKey(hotelIds.value));
+  const departureQueryKey = computed(() => buildDeparturesQueryKey());
 
   const hotelsInfoQuery = useQuery<B2CHotelsInfoResult>({
     queryKey: hotelInfoQueryKey,
@@ -73,25 +77,25 @@ export function useOffreFiltersQueryState(
   });
 
   const hotelInfoById = computed(() => {
-    return buildHotelInfoById(hotelsInfoQuery.data.value?.hotels ?? []);
+    return buildHotelInfoMap(hotelsInfoQuery.data.value?.hotels ?? []);
   });
 
   const timeframeOptions = computed(() => {
-    return buildTimeframeOptions(hotelsDirectory.value);
+    return buildDerivedTimeframeOptions(hotelsDirectory.value);
   });
 
   const regionOptions = computed<OffreRegionOption[]>(() => {
-    return buildRegionOptions({
+    return buildDerivedRegionOptions({
       directories: hotelsInfoQuery.data.value,
       options: options.value
     });
   });
 
   const departures = computed<OffreDepartureOption[]>(() => {
-    return buildDepartureOptions(departuresQuery.data.value?.locations ?? []);
+    return buildDerivedDepartureOptions(departuresQuery.data.value?.locations ?? []);
   });
   const departureLocationsById = computed(() => {
-    return getDepartureLocationsById(departuresQuery.data.value?.locations ?? []);
+    return buildDepartureLocationMap(departuresQuery.data.value?.locations ?? []);
   });
   const {
     selectedValue: selectedRegionId,
@@ -99,11 +103,7 @@ export function useOffreFiltersQueryState(
   } = useResolvedSelection({
     itemsSource: regionOptions,
     getValue: (region) => region.id,
-    getFallbackValue: (regions) => resolvePreferredRegionId(
-      regions,
-      options.value.wildcardOption,
-      options.value.preferRegion
-    )
+    getFallbackValue: (regions) => resolveRegionSelectionFallback(regions, options.value)
   });
   const {
     selectedValue: selectedTimeframe,
@@ -119,18 +119,15 @@ export function useOffreFiltersQueryState(
   } = useResolvedSelection({
     itemsSource: departures,
     getValue: (departure) => departure.id,
-    getFallbackValue: (departureOptions) => resolvePreferredDepartureId(
-      departureOptions,
-      options.value.departureCity
-    )
+    getFallbackValue: (departureOptions) => resolveDepartureSelectionFallback(departureOptions, options.value)
   });
 
   const selectedDeparture = computed(() => {
-    return departureLocationsById.value.get(selectedDepartureId.value) ?? null;
+    return resolveSelectedDeparture(departureLocationsById.value, selectedDepartureId.value);
   });
 
   const matchedHotelsDirectory = computed(() => {
-    return filterMatchedHotels({
+    return buildMatchedHotelsDirectory({
       hotelsDirectory: hotelsDirectory.value,
       hotelInfoById: hotelInfoById.value,
       selectedTimeframe: selectedTimeframe.value,
@@ -140,7 +137,7 @@ export function useOffreFiltersQueryState(
   });
 
   const regionTabs = computed<RegionTabItem[]>(() => {
-    return buildRegionTabs(regionOptions.value);
+    return buildDerivedRegionTabs(regionOptions.value);
   });
 
   return {
@@ -162,6 +159,6 @@ export function useOffreFiltersQueryState(
     activeRegionId: selectedRegionId,
     setActiveRegion,
     matchedHotelsDirectory,
-    regionsLoading: computed(() => hotelsInfoQuery.isPending.value)
+    regionsLoading: computed(() => resolveRegionsLoading(hotelsInfoQuery.isPending.value))
   };
 }

@@ -11,11 +11,18 @@ import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 import { aggregateProductsBatch } from "@/offre/lib/products-batch";
 import {
   buildOffreProductQueries,
-  type OffreProductQueryDescriptor
 } from "@/offre/lib/search-criterias";
 import { offreQueryConfig, offreQueryKeys, offreQueryPersisters } from "@/offre/query";
 import type { OffreHotelRuntimeEntry } from "@/offre/types";
 import { runConcurrentSettledTasks } from "@/lib/concurrency";
+import {
+  buildProductsQueryDescriptorsDebugPayload,
+  buildProductsQueryTimingDebugPayload,
+  resolveNoMatchedProducts,
+  resolveProductsError,
+  resolveProductsQueryMode,
+  resolveProductsRequestState
+} from "@/offre/composables/useOffreProductsQuery.helpers";
 
 const PRODUCTS_QUERY_CONCURRENCY = 6;
 
@@ -39,31 +46,6 @@ function logProductsQueryDebug(message: string, details: Record<string, unknown>
   console.info(`OffreWidget: ${message} ${JSON.stringify(details)}`);
 }
 
-function summarizeDescriptor(descriptor: OffreProductQueryDescriptor) {
-  return {
-    onlyhotel: descriptor.onlyhotel,
-    hotelCount: descriptor.hotels.length,
-    hotelIds: descriptor.hotels.map((hotel) => hotel.hotelId),
-    arrivalLocationCount: descriptor.searchCriterias.arrivalLocations.length,
-    beginDates: descriptor.searchCriterias.beginDates,
-    nights: descriptor.searchCriterias.nights.map((night) => night.value)
-  };
-}
-
-function getEffectiveHotels(params: {
-  hotels: OffreHotelRuntimeEntry[];
-  pageSize: number;
-  currentPage: number;
-  serverPageMode: boolean;
-}) {
-  if (!params.serverPageMode) {
-    return params.hotels;
-  }
-
-  const visibleHotelsCount = params.currentPage * params.pageSize;
-  return params.hotels.slice(0, visibleHotelsCount);
-}
-
 export function useOffreProductsQuery(params: {
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>;
   hotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
@@ -71,29 +53,51 @@ export function useOffreProductsQuery(params: {
   selectedTimeframeSource: MaybeRefOrGetter<string>;
   selectedDepartureSource: MaybeRefOrGetter<B2CLocation | null>;
   hotelOrderByIdSource: MaybeRefOrGetter<Map<string, number>>;
+  enabledSource?: MaybeRefOrGetter<boolean>;
   currentPageSource?: MaybeRefOrGetter<number>;
   pageSizeSource?: MaybeRefOrGetter<number>;
   serverPageModeSource?: MaybeRefOrGetter<boolean>;
 }) {
   const queryMode = computed(() => {
-    const hotels = toValue(params.hotelsSource);
-    const pageSize = Math.max(1, Number(toValue(params.pageSizeSource)) || hotels.length || 1);
-    const currentPage = Math.max(1, Number(toValue(params.currentPageSource)) || 1);
-    const serverPageMode = Boolean(toValue(params.serverPageModeSource));
-    const effectiveHotels = getEffectiveHotels({
-      hotels,
-      pageSize,
-      currentPage,
-      serverPageMode
+    return resolveProductsQueryMode({
+      hotels: toValue(params.hotelsSource),
+      pageSize: Number(toValue(params.pageSizeSource)),
+      currentPage: Number(toValue(params.currentPageSource)),
+      serverPageMode: Boolean(toValue(params.serverPageModeSource))
     });
-
-    return {
-      pageSize,
-      currentPage,
-      serverPageMode,
-      totalHotels: hotels.length,
-      effectiveHotels
-    };
+  });
+  const queriedHotelIds = computed(() => {
+    return queryMode.value.effectiveHotels.map((hotel) => String(hotel.id));
+  });
+  const productsList = computed(() => productsQuery.data.value?.payload.products ?? []);
+  const productReference = computed(() => productsQuery.data.value?.payload.reference ?? {});
+  const productsCount = computed(() => productsList.value.length);
+  const batchRequestState = computed(() => productsQuery.data.value?.meta.requestState);
+  const productsInitialLoading = computed(() => {
+    return productsQuery.isPending.value && productsCount.value === 0;
+  });
+  const requestState = computed(() => {
+    return resolveProductsRequestState({
+      queryEnabled: queryEnabled.value,
+      isPending: productsQuery.isPending.value,
+      isError: productsQuery.isError.value,
+      productsCount: productsCount.value,
+      batchRequestState: batchRequestState.value
+    });
+  });
+  const noMatchedProducts = computed(() => {
+    return resolveNoMatchedProducts({
+      descriptorsCount: productQueryDescriptors.value.length,
+      isPending: productsQuery.isPending.value,
+      isError: productsQuery.isError.value,
+      productsCount: productsCount.value
+    });
+  });
+  const productsError = computed(() => {
+    return resolveProductsError({
+      isError: productsQuery.isError.value,
+      batchRequestState: batchRequestState.value
+    });
   });
   const productQueryDescriptors = computed(() => {
     return buildOffreProductQueries({
@@ -109,10 +113,14 @@ export function useOffreProductsQuery(params: {
       productQueryDescriptors.value.map((descriptor) => descriptor.searchCriterias)
     );
   });
+  const queryEnabled = computed(() => {
+    return Boolean(toValue(params.enabledSource) ?? true)
+      && productQueryDescriptors.value.length > 0;
+  });
 
   const productsQuery = useQuery<OffreProductsBatchResult>({
     queryKey: productQueryKey,
-    enabled: computed(() => productQueryDescriptors.value.length > 0),
+    enabled: queryEnabled,
     staleTime: offreQueryConfig.productsBatch.staleTime,
     gcTime: offreQueryConfig.productsBatch.gcTime,
     persister: offreQueryPersisters.productsBatch.persisterFn,
@@ -137,12 +145,7 @@ export function useOffreProductsQuery(params: {
       }
 
       logProductsQueryDebug("products-query descriptors", {
-        serverPageMode: queryMode.value.serverPageMode,
-        currentPage: queryMode.value.currentPage,
-        pageSize: queryMode.value.pageSize,
-        totalHotels: queryMode.value.totalHotels,
-        effectiveHotelIds: queryMode.value.effectiveHotels.map((hotel) => String(hotel.id)),
-        primaryDescriptors: productQueryDescriptors.value.map(summarizeDescriptor)
+        ...buildProductsQueryDescriptorsDebugPayload(queryMode.value, productQueryDescriptors.value)
       });
 
       const batchResult = aggregateProductsBatch({
@@ -152,19 +155,13 @@ export function useOffreProductsQuery(params: {
       });
 
       logProductsQueryDebug("products-query timing", {
-        totalDurationMs: Math.round(getNow() - totalStartedAt),
-        primaryDurationMs,
-        fallbackDurationMs: 0,
-        serverPageMode: queryMode.value.serverPageMode,
-        currentPage: queryMode.value.currentPage,
-        pageSize: queryMode.value.pageSize,
-        totalHotels: queryMode.value.totalHotels,
-        primaryQueryCount: productQueryDescriptors.value.length,
-        fallbackQueryCount: 0,
-        primaryHotelCount: productQueryDescriptors.value.reduce((sum, descriptor) => sum + descriptor.hotels.length, 0),
-        fallbackHotelCount: 0,
-        requestState: batchResult.meta.requestState,
-        resultProducts: batchResult.payload.products.length
+        ...buildProductsQueryTimingDebugPayload({
+          queryMode: queryMode.value,
+          productQueryDescriptors: productQueryDescriptors.value,
+          batchResult,
+          totalDurationMs: Math.round(getNow() - totalStartedAt),
+          primaryDurationMs
+        })
       });
 
       return batchResult;
@@ -174,37 +171,15 @@ export function useOffreProductsQuery(params: {
   return {
     productsQuery,
     refetchProducts: () => productsQuery.refetch(),
-    productsList: computed(() => productsQuery.data.value?.payload.products ?? []),
-    productReference: computed(() => productsQuery.data.value?.payload.reference ?? {}),
-    productsInitialLoading: computed(() => {
-      return productsQuery.isPending.value
-        && (productsQuery.data.value?.payload.products.length ?? 0) === 0;
-    }),
-    requestState: computed(() => {
-      if (!productQueryDescriptors.value.length) {
-        return "idle";
-      }
-
-      if (productsQuery.isPending.value && (productsQuery.data.value?.payload.products.length ?? 0) === 0) {
-        return "loading";
-      }
-
-      if (productsQuery.isError.value) {
-        return "error";
-      }
-
-      return productsQuery.data.value?.meta.requestState ?? "success";
-    }),
-    noMatchedProducts: computed(() => {
-      return productQueryDescriptors.value.length > 0
-        && !productsQuery.isPending.value
-        && !productsQuery.isError.value
-        && (productsQuery.data.value?.payload.products.length ?? 0) === 0;
-    }),
-    productsPartial: computed(() => productsQuery.data.value?.meta.requestState === "partial"),
-    productsError: computed(() => {
-      return productsQuery.isError.value || productsQuery.data.value?.meta.requestState === "error";
-    }),
+    queriedHotelIds,
+    productsList,
+    productReference,
+    productsInitialLoading,
+    requestState,
+    noMatchedProducts,
+    productsPartial: computed(() => batchRequestState.value === "partial"),
+    productsError,
+    productsFetching: computed(() => productsQuery.isFetching.value),
     productsRefetching: computed(() => productsQuery.isRefetching.value),
     productsLoading: computed(() => (productsQuery.isFetching.value ? 100 : 0))
   };

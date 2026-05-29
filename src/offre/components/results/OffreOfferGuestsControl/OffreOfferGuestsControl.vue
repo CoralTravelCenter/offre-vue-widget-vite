@@ -9,12 +9,16 @@ import {Separator} from "@/components/ui/separator";
 interface Props {
 	adultsCount?: number;
 	childrenAges?: number[];
+	defaultAdultsCount?: number;
+	defaultChildrenAges?: number[];
 	disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	adultsCount: 2,
 	childrenAges: () => [],
+	defaultAdultsCount: 2,
+	defaultChildrenAges: () => [],
 	disabled: false
 });
 
@@ -33,10 +37,10 @@ const draftAdultsCount = ref(2);
 const draftChildrenAges = ref<number[]>([]);
 
 const initialAdultsCount = computed(() => {
-	return Math.max(1, Number(props.adultsCount) || 2);
+	return Math.max(1, Number(props.defaultAdultsCount) || 2);
 });
 const initialChildrenAges = computed(() => {
-	return [...props.childrenAges];
+	return [...props.defaultChildrenAges];
 });
 const canReset = computed(() => {
 	return draftAdultsCount.value !== initialAdultsCount.value
@@ -172,6 +176,9 @@ function applyDraft() {
 }
 
 function resetToInitial() {
+	draftAdultsCount.value = initialAdultsCount.value;
+	draftChildrenAges.value = [...initialChildrenAges.value];
+	activeChildAgeGridIndex.value = null;
 	emit("reset");
 }
 </script>

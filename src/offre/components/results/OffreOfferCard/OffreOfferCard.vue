@@ -7,6 +7,7 @@ import OffreOfferTerms from "@/offre/components/results/OffreOfferTerms/OffreOff
 import {useCoralBonus} from "@/offre/composables/useCoralBonus";
 import {useHotelOfferQuery} from "@/offre/composables/useHotelOfferQuery";
 import {useOffreOfferCard} from "@/offre/composables/useOffreOfferCard";
+import coralFamilyClubShieldUrl from "@/offre/assets/coral-family-club-shield.svg";
 import type {NormalizedOffreWidgetOptions} from "@/offre/lib/payload";
 import type {OffreHotelRuntimeEntry, OffreTourType} from "@/offre/types";
 import type {BrandKey} from "@/brands/types";
@@ -227,12 +228,12 @@ function getTermsSkeletonItemClass(width: string) {
 						ELITE SERVICE
 					</Badge>
 
-					<Badge
-							v-if="hasFamilyClub"
-							:class="getLabelClass('family')"
+					<img
+						v-if="hasFamilyClub"
+						:src="coralFamilyClubShieldUrl"
+						alt="Coral Family Club"
+						class="offre-offer-card__family-shield"
 					>
-						CORAL FAMILY CLUB
-					</Badge>
 				</div>
 			</div>
 

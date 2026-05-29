@@ -52,14 +52,14 @@
 	align-items: center;
 	gap: 8px;
 	width: max-content;
-}
-
-.offre-widget__load-more-panel--floating {
 	padding: 10px 12px;
 	border: 1px solid color-mix(in srgb, var(--brand-border) 60%, transparent);
 	border-radius: calc(var(--brand-radius-button) + 8px);
 	background: color-mix(in srgb, var(--brand-card) 94%, transparent);
 	backdrop-filter: blur(10px);
+}
+
+.offre-widget__load-more-panel--floating {
 	box-shadow: var(--brand-shadow-widget);
 }
 

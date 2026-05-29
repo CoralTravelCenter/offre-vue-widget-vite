@@ -117,7 +117,6 @@
 }
 
 .offre-offer-card__title-link:hover {
-  color: var(--brand-primary);
   text-decoration: underline;
 }
 
@@ -172,6 +171,16 @@
   gap: var(--offre-space-2);
 }
 
+.offre-offer-card__family-shield {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 24px;
+  border: 0;
+  border-radius: var(--brand-radius-segment);
+  flex-shrink: 0;
+}
+
 .offre-offer-card__badge {
   border-color: transparent;
   border-radius: var(--brand-radius-badge);
@@ -195,7 +204,7 @@
   display: inline-grid;
   height: 24px;
   place-content: center;
-  border-color: transparent;
+  border: 0;
   border-radius: var(--brand-radius-segment);
   padding-inline: 12px;
   font-size: var(--brand-text-meta);
@@ -253,7 +262,6 @@
 
 @media (min-width: 1024px) {
   .offre-offer-card__usp-list {
-    margin-top: 0;
     border-top: 0;
     padding-top: 0;
     padding-left: 24px;

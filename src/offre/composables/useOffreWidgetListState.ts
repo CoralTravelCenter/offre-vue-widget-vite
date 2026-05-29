@@ -1,50 +1,20 @@
 import { computed, ref, toValue, watch, type MaybeRefOrGetter, type Ref } from "vue";
 import type { B2CProduct } from "@/offre/api";
 import type { OffreTourType, OffreViewMode } from "@/offre/types";
-
-const VIEW_MODE_STORAGE_PREFIX = "offre-widget:view-mode";
-
-function canUseSessionStorage() {
-  return typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
-}
-
-function isOffreViewMode(value: unknown): value is OffreViewMode {
-  return value === "list" || value === "map";
-}
-
-function resolveViewModeStorageKey(value: string | null | undefined) {
-  const normalizedValue = String(value ?? "").trim();
-  return normalizedValue ? `${VIEW_MODE_STORAGE_PREFIX}:${normalizedValue}` : null;
-}
-
-function readPersistedViewMode(storageKey: string | null) {
-  if (!storageKey || !canUseSessionStorage()) {
-    return null;
-  }
-
-  try {
-    const storedValue = window.sessionStorage.getItem(storageKey);
-    return isOffreViewMode(storedValue) ? storedValue : null;
-  } catch {
-    return null;
-  }
-}
-
-function writePersistedViewMode(storageKey: string | null, value: OffreViewMode) {
-  if (!storageKey || !canUseSessionStorage()) {
-    return;
-  }
-
-  try {
-    window.sessionStorage.setItem(storageKey, value);
-  } catch {
-    // Ignore storage write errors.
-  }
-}
+import {
+  paginateProducts,
+  pruneTourTypeByHotelId,
+  readPersistedViewMode,
+  resolveTotalItems,
+  resolveViewModeStorageKey,
+  setNextHotelTourType,
+  writePersistedViewMode
+} from "@/offre/composables/useOffreWidgetListState.helpers";
 
 export function useOffreWidgetListState(params: {
   productsSource: MaybeRefOrGetter<B2CProduct[]>;
   activeRegionIdSource: MaybeRefOrGetter<string>;
+  resetOnActiveRegionChange?: MaybeRefOrGetter<boolean>;
   selectedDepartureIdSource: MaybeRefOrGetter<string>;
   selectedTimeframeSource: MaybeRefOrGetter<string>;
   guestsFilterKeySource?: MaybeRefOrGetter<string>;
@@ -62,13 +32,7 @@ export function useOffreWidgetListState(params: {
 
   const products = computed(() => toValue(params.productsSource));
   const totalItems = computed(() => {
-    const explicitTotal = Number(toValue(params.totalItemsSource));
-
-    if (Number.isFinite(explicitTotal) && explicitTotal >= 0) {
-      return explicitTotal;
-    }
-
-    return products.value.length;
+    return resolveTotalItems(products.value, toValue(params.totalItemsSource));
   });
   const prePaginated = computed(() => Boolean(toValue(params.prePaginatedSource)));
   const viewModeStorageKey = computed(() => resolveViewModeStorageKey(toValue(params.storageKeySource)));
@@ -79,39 +43,29 @@ export function useOffreWidgetListState(params: {
   const hasPagination = computed(() => totalProducts.value > pageSize);
   const canLoadMore = computed(() => currentPage.value < totalPages.value);
   const paginatedProducts = computed(() => {
-    if (prePaginated.value) {
-      return products.value;
-    }
-
-    const startIndex = (currentPage.value - 1) * pageSize;
-    return products.value.slice(startIndex, startIndex + pageSize);
+    return paginateProducts(products.value, currentPage.value, pageSize, prePaginated.value);
   });
 
   watch(products, (nextProducts) => {
-    const knownHotelIds = new Set(nextProducts.map((product) => String(product.hotel?.id ?? "")));
-
-    for (const hotelId of Object.keys(tourTypeByHotelId.value)) {
-      if (!knownHotelIds.has(hotelId)) {
-        delete tourTypeByHotelId.value[hotelId];
-      }
-    }
+    tourTypeByHotelId.value = pruneTourTypeByHotelId(tourTypeByHotelId.value, nextProducts);
   }, { immediate: true });
 
   function setHotelTourType(hotelId: string, value: OffreTourType) {
-    if (!hotelId) {
-      return;
-    }
-
-    tourTypeByHotelId.value[hotelId] = value;
+    tourTypeByHotelId.value = setNextHotelTourType(tourTypeByHotelId.value, hotelId, value);
   }
 
   watch([
-    () => toValue(params.activeRegionIdSource),
     () => toValue(params.selectedDepartureIdSource),
     () => toValue(params.selectedTimeframeSource),
     () => toValue(params.guestsFilterKeySource)
   ], () => {
     currentPage.value = 1;
+  });
+
+  watch(() => toValue(params.activeRegionIdSource), () => {
+    if (Boolean(toValue(params.resetOnActiveRegionChange) ?? true)) {
+      currentPage.value = 1;
+    }
   });
 
   watch(totalPages, (nextTotalPages) => {
