@@ -141,4 +141,23 @@ describe("widget entry lifecycle", () => {
     });
     expect(warnSpy).toHaveBeenCalledTimes(3);
   });
+
+  it("registers the public window API for embed hosts", async () => {
+    document.body.innerHTML = `
+      <div>
+        <script type="application/json" data-offre-vue-test>{"brand":"coral"}</script>
+      </div>
+    `;
+
+    vi.resetModules();
+    await import("./entry");
+    const [widget] = window.OffreWidget?.bootstrap?.() ?? [];
+
+    expect(window.OffreWidget?.bootstrap).toEqual(expect.any(Function));
+    expect(window.OffreWidget?.mount).toEqual(expect.any(Function));
+    expect(window.OffreWidget?.unmount).toEqual(expect.any(Function));
+    expect(widget).toBeTruthy();
+    expect(widget?.instanceId).toBe("test-widget-instance");
+    expect(mountOffreWidgetMock).toHaveBeenCalledTimes(1);
+  });
 });
