@@ -21,8 +21,7 @@ Embeddable Vue-виджет для подборки офферов Coral/Sunmar.
 ## Быстрый старт
 
 - `pnpm install`
-- `pnpm run dev` — локальный playground
-- `pnpm run dev:monkey` — запуск userscript на живом сайте
+- `pnpm run dev:monkey` — запуск dev-userscript на живом сайте
 - `pnpm run build` — production build виджета
 - `pnpm run typecheck` — проверка TypeScript
 - `pnpm run test` — Vitest
@@ -56,16 +55,14 @@ Bootstrap, санитизация payload и mount/unmount лежат в [src/wi
 
 - [src/widget/entry.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/entry.ts) — главный entrypoint embed-виджета: поиск JSON-скриптов, parsing/sanitize payload, mount/unmount.
 - [src/app/create-offre-widget-app.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/app/create-offre-widget-app.ts) — composition root: runtime payload normalization, создание Vue app, QueryClient, plugins/directives, подключение темы бренда.
-- [src/dev/main.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/main.ts) — локальный playground.
 - [src/monkey/dev.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/monkey/dev.ts) — dev userscript для проверки на живом сайте.
 
 ### Входные данные
 
 - [src/widget/types.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/widget/types.ts) — контракт payload виджета.
 - [src/offre/lib/payload.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/offre/lib/payload.ts) — sanitize/normalize helpers для payload, `options` и `hotels`, плюс сборка runtime payload.
-- [src/dev/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/offre-payloads.ts) — основной мок payload для dev-режима; здесь лежат данные, из которых собирается JSON-скрипт виджета.
-- [src/dev/main.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/main.ts) — вставляет моковый `script[type="application/json"]` в локальном playground.
-- [src/monkey/dev.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/monkey/dev.ts) — вставляет тот же моковый JSON-скрипт в userscript-режиме на живом сайте.
+- [src/dev/offre-payloads.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/dev/offre-payloads.ts) — основной мок payload для userscript dev-режима; здесь лежат данные, из которых собирается JSON-скрипт виджета.
+- [src/monkey/dev.ts](/Users/mike/Documents/GitHub/offre-vue-widget-vite/src/monkey/dev.ts) — вставляет моковый JSON-скрипт в userscript-режиме на живом сайте.
 
 ### UI слой
 
