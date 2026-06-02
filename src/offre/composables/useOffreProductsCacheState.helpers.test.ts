@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { B2CPriceSearchReference, B2CProduct } from "@/offre/api";
 import {
+  createOffreProductsCacheRefs,
   createHotelIdSet,
   filterProductsByHotelIds,
   mergeBootstrappedRegionIds,
   mergeCachedProducts,
   mergeFetchedHotelIds,
+  resetOffreProductsCacheRefs,
   resolveEffectiveNoMatchedProducts,
   resolveEffectiveProductsError,
   resolveEffectiveRequestState,
@@ -34,6 +36,32 @@ function createProduct(id: string, amount: number): B2CProduct {
 }
 
 describe("useOffreProductsCacheState helpers", () => {
+  it("creates and resets grouped cache refs", () => {
+    const cacheRefs = createOffreProductsCacheRefs();
+
+    cacheRefs.bootstrappedRegionIds.value = ["region-a"];
+    cacheRefs.pendingRegionBootstrapId.value = "region-b";
+    cacheRefs.regionOutcomeById.value = {
+      "region-a": {
+        requestState: "success",
+        noMatched: false,
+        error: false
+      }
+    };
+    cacheRefs.productsCacheSource.value = [createProduct("101", 500)];
+    cacheRefs.cachedProductReference.value = { meals: { ai: { name: "AI" } } };
+    cacheRefs.fetchedHotelIdsSource.value = ["101"];
+
+    resetOffreProductsCacheRefs(cacheRefs);
+
+    expect(cacheRefs.bootstrappedRegionIds.value).toEqual([]);
+    expect(cacheRefs.pendingRegionBootstrapId.value).toBe("");
+    expect(cacheRefs.regionOutcomeById.value).toEqual({});
+    expect(cacheRefs.productsCacheSource.value).toEqual([]);
+    expect(cacheRefs.cachedProductReference.value).toEqual({});
+    expect(cacheRefs.fetchedHotelIdsSource.value).toEqual([]);
+  });
+
   it("filters and merges cached products by hotel id", () => {
     const hotelIds = createHotelIdSet([createHotel("101"), createHotel("202")]);
 

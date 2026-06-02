@@ -2,11 +2,32 @@ import type { B2CPriceSearchReference, B2CProduct } from "@/offre/api";
 import { dedupeProductsByHotelId } from "@/offre/lib/products-batch";
 import { WILDCARD_REGION_ID } from "@/offre/lib/filter-state";
 import type { OffreHotelRuntimeEntry, OffreRequestState } from "@/offre/types";
+import { shallowRef } from "vue";
 
 export interface RegionOutcome {
   requestState: "success" | "partial" | "error";
   noMatched: boolean;
   error: boolean;
+}
+
+export function createOffreProductsCacheRefs() {
+  return {
+    bootstrappedRegionIds: shallowRef<string[]>([]),
+    pendingRegionBootstrapId: shallowRef(""),
+    regionOutcomeById: shallowRef<Record<string, RegionOutcome>>({}),
+    productsCacheSource: shallowRef<B2CProduct[]>([]),
+    cachedProductReference: shallowRef<B2CPriceSearchReference>({}),
+    fetchedHotelIdsSource: shallowRef<string[]>([])
+  };
+}
+
+export function resetOffreProductsCacheRefs(cacheRefs: ReturnType<typeof createOffreProductsCacheRefs>) {
+  cacheRefs.bootstrappedRegionIds.value = [];
+  cacheRefs.pendingRegionBootstrapId.value = "";
+  cacheRefs.regionOutcomeById.value = {};
+  cacheRefs.productsCacheSource.value = [];
+  cacheRefs.cachedProductReference.value = {};
+  cacheRefs.fetchedHotelIdsSource.value = [];
 }
 
 export function createHotelIdSet(hotels: OffreHotelRuntimeEntry[]) {

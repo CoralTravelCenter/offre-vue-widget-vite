@@ -1,12 +1,14 @@
-import { computed, shallowRef, toValue, watch, type MaybeRefOrGetter } from "vue";
+import { computed, toValue, watch, type MaybeRefOrGetter } from "vue";
 import type { B2CPriceSearchReference, B2CProduct } from "@/offre/api";
 import type { OffreHotelRuntimeEntry, OffreRequestState } from "@/offre/types";
 import {
+  createOffreProductsCacheRefs,
   createHotelIdSet,
   filterProductsByHotelIds,
   mergeBootstrappedRegionIds,
   mergeCachedProducts,
   mergeFetchedHotelIds,
+  resetOffreProductsCacheRefs,
   resolveEffectiveNoMatchedProducts,
   resolveEffectiveProductsError,
   resolveEffectiveRequestState,
@@ -18,7 +20,7 @@ import {
   type RegionOutcome
 } from "@/offre/composables/useOffreProductsCacheState.helpers";
 
-export function useOffreProductsCacheState(params: {
+interface ProductsCacheStateParams {
   activeRegionIdSource: MaybeRefOrGetter<string>;
   matchedHotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
   visibleMatchedHotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
@@ -31,13 +33,18 @@ export function useOffreProductsCacheState(params: {
   productsFetchingSource: MaybeRefOrGetter<boolean>;
   isListPageModeSource: MaybeRefOrGetter<boolean>;
   resetSignalSource?: MaybeRefOrGetter<unknown>;
-}) {
-  const bootstrappedRegionIds = shallowRef<string[]>([]);
-  const pendingRegionBootstrapId = shallowRef("");
-  const regionOutcomeById = shallowRef<Record<string, RegionOutcome>>({});
-  const productsCacheSource = shallowRef<B2CProduct[]>([]);
-  const cachedProductReference = shallowRef<B2CPriceSearchReference>({});
-  const fetchedHotelIdsSource = shallowRef<string[]>([]);
+}
+
+function createOffreProductsCacheDerivedState(
+  params: ProductsCacheStateParams,
+  cacheRefs: ReturnType<typeof createOffreProductsCacheRefs>
+) {
+  const {
+    bootstrappedRegionIds,
+    regionOutcomeById,
+    productsCacheSource,
+    fetchedHotelIdsSource
+  } = cacheRefs;
 
   const activeRegionKey = computed(() => String(toValue(params.activeRegionIdSource) ?? "").trim());
   const visibleMatchedHotelIds = computed(() => {
@@ -100,13 +107,42 @@ export function useOffreProductsCacheState(params: {
     );
   });
 
+  return {
+    activeRegionKey,
+    regionProductsSource,
+    mapProductsSource,
+    effectiveRequestState,
+    effectiveProductsError,
+    effectiveNoMatchedProducts,
+    shouldFetchRegionProducts,
+    hasBootstrappedActiveRegion
+  };
+}
+
+export function useOffreProductsCacheState(params: ProductsCacheStateParams) {
+  const cacheRefs = createOffreProductsCacheRefs();
+  const {
+    bootstrappedRegionIds,
+    pendingRegionBootstrapId,
+    regionOutcomeById,
+    productsCacheSource,
+    cachedProductReference,
+    fetchedHotelIdsSource
+  } = cacheRefs;
+
+  const {
+    activeRegionKey,
+    regionProductsSource,
+    mapProductsSource,
+    effectiveRequestState,
+    effectiveProductsError,
+    effectiveNoMatchedProducts,
+    shouldFetchRegionProducts,
+    hasBootstrappedActiveRegion
+  } = createOffreProductsCacheDerivedState(params, cacheRefs);
+
   watch(() => toValue(params.resetSignalSource), () => {
-    bootstrappedRegionIds.value = [];
-    pendingRegionBootstrapId.value = "";
-    regionOutcomeById.value = {};
-    productsCacheSource.value = [];
-    cachedProductReference.value = {};
-    fetchedHotelIdsSource.value = [];
+    resetOffreProductsCacheRefs(cacheRefs);
   }, { immediate: true });
 
   watch(() => toValue(params.productsListSource), (nextProducts) => {
