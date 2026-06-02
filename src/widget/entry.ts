@@ -243,9 +243,13 @@ function unmountWindowTarget(target: WindowUnmountTarget = document) {
     return unmountOffreWidgets(target);
 }
 
-if (typeof window !== "undefined") {
+function registerWindowApi() {
     window.OffreWidget ||= {};
     window.OffreWidget.bootstrap = bootstrapOffreWidgets;
     window.OffreWidget.mount = mountOffreWidgetFromScript;
     window.OffreWidget.unmount = unmountWindowTarget;
+}
+
+if (typeof window !== "undefined") {
+    registerWindowApi();
 }
