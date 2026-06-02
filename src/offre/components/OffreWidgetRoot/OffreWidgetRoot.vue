@@ -11,8 +11,7 @@ import OffreMapView from "@/offre/components/results/OffreMapView/OffreMapView.v
 import OffreResultsStateNotice from "@/offre/components/results/OffreResultsStateNotice/OffreResultsStateNotice.vue";
 import {useOffreFiltersQueryState} from "@/offre/composables/useOffreFiltersQueryState";
 import {useOffreLoadMoreState} from "@/offre/composables/useOffreLoadMoreState";
-import {useOffreProductsCacheState} from "@/offre/composables/useOffreProductsCacheState";
-import {useOffreProductsQuery} from "@/offre/composables/useOffreProductsQuery";
+import {useOffreProductsDataState} from "@/offre/composables/useOffreProductsDataState";
 import {useOffreRegionPagingState} from "@/offre/composables/useOffreRegionPagingState";
 import {useOffreWidgetLayoutState} from "@/offre/composables/useOffreWidgetLayoutState";
 import {useOffreWidgetListState} from "@/offre/composables/useOffreWidgetListState";
@@ -129,36 +128,6 @@ const {
 	pageSize: PRODUCTS_PAGE_SIZE
 });
 
-let productsQueryState: ReturnType<typeof useOffreProductsQuery> | null = null;
-
-const cacheState = useOffreProductsCacheState({
-	activeRegionIdSource: activeRegionId,
-	matchedHotelsSource: matchedHotelsDirectory,
-	visibleMatchedHotelsSource: visibleMatchedHotels,
-	productsListSource: () => productsQueryState?.productsList.value ?? [],
-	productReferenceSource: () => productsQueryState?.productReference.value ?? {},
-	requestStateSource: () => productsQueryState?.requestState.value ?? "idle",
-	productsErrorSource: () => productsQueryState?.productsError.value ?? false,
-	noMatchedProductsSource: () => productsQueryState?.noMatchedProducts.value ?? false,
-	queriedHotelIdsSource: () => productsQueryState?.queriedHotelIds.value ?? [],
-	productsFetchingSource: () => productsQueryState?.productsFetching.value ?? false,
-	isListPageModeSource: isListPageMode,
-	resetSignalSource: currentProductsResetSignal
-});
-
-productsQueryState = useOffreProductsQuery({
-	optionsSource: effectiveSearchOptions,
-	hotelsSource: matchedHotelsDirectory,
-	hotelInfoByIdSource: hotelInfoById,
-	selectedTimeframeSource: selectedTimeframe,
-	selectedDepartureSource: selectedDeparture,
-	hotelOrderByIdSource: hotelOrderById,
-	enabledSource: cacheState.shouldFetchRegionProducts,
-	currentPageSource: currentPage,
-	pageSizeSource: computed(() => PRODUCTS_PAGE_SIZE),
-	serverPageModeSource: isListPageMode
-});
-
 const {
 	noMatchedProducts,
 	productsPartial,
@@ -166,9 +135,6 @@ const {
 	productsFetching,
 	productsInitialLoading,
 	productsRefetching,
-} = productsQueryState;
-
-const {
 	regionProductsSource,
 	mapProductsSource,
 	productReferenceSource,
@@ -176,7 +142,20 @@ const {
 	effectiveProductsError,
 	effectiveNoMatchedProducts,
 	shouldFetchRegionProducts
-} = cacheState;
+} = useOffreProductsDataState({
+	activeRegionIdSource: activeRegionId,
+	optionsSource: effectiveSearchOptions,
+	matchedHotelsSource: matchedHotelsDirectory,
+	visibleMatchedHotelsSource: visibleMatchedHotels,
+	hotelInfoByIdSource: hotelInfoById,
+	selectedTimeframeSource: selectedTimeframe,
+	selectedDepartureSource: selectedDeparture,
+	hotelOrderByIdSource: hotelOrderById,
+	currentPageSource: currentPage,
+	pageSizeSource: computed(() => PRODUCTS_PAGE_SIZE),
+	serverPageModeSource: isListPageMode,
+	resetSignalSource: currentProductsResetSignal
+});
 
 const {
 	totalProducts,
