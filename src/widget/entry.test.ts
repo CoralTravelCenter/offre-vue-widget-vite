@@ -86,6 +86,28 @@ describe("widget entry lifecycle", () => {
     expect(mountOffreWidgetMock).toHaveBeenCalledTimes(1);
   });
 
+  it("bootstraps only scripts inside the provided root", async () => {
+    document.body.innerHTML = `
+      <div id="inside">
+        <script type="application/json" data-offre-vue-test>{"brand":"coral"}</script>
+      </div>
+      <div id="outside">
+        <script type="application/json" data-offre-vue-test>{"brand":"sunmar"}</script>
+      </div>
+    `;
+
+    vi.resetModules();
+    const { bootstrapOffreWidgets } = await import("./entry");
+    const insideRoot = document.getElementById("inside") as HTMLElement;
+    const outsideScript = document.querySelector("#outside script[data-offre-vue-test]") as HTMLScriptElement;
+    const [widget] = bootstrapOffreWidgets(insideRoot);
+
+    expect(widget).toBeTruthy();
+    expect(insideRoot.contains(widget.rootElement)).toBe(true);
+    expect(outsideScript.hasAttribute("data-offre-widget-mounted")).toBe(false);
+    expect(mountOffreWidgetMock).toHaveBeenCalledTimes(1);
+  });
+
   it("unmounts a widget, clears the query client and removes the dedicated root", async () => {
     document.body.innerHTML = `
       <div id="host">
