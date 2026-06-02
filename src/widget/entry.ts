@@ -155,6 +155,10 @@ function describeScriptElement(scriptElement: HTMLScriptElement, index: number) 
     };
 }
 
+function getWidgetScripts(root: ParentNode) {
+    return Array.from(root.querySelectorAll<HTMLScriptElement>(WIDGET_SELECTOR));
+}
+
 export function mountOffreWidgetFromScript(
     scriptElement: HTMLScriptElement,
 ): BootstrappedOffreWidget | null {
@@ -203,7 +207,7 @@ export function mountOffreWidgetFromScript(
 }
 
 export function bootstrapOffreWidgets(root: ParentNode = document): BootstrappedOffreWidget[] {
-    const widgetScripts = Array.from(root.querySelectorAll<HTMLScriptElement>(WIDGET_SELECTOR));
+    const widgetScripts = getWidgetScripts(root);
 
     logWidgetDebug("bootstrap widgets", {
         scriptCount: widgetScripts.length,
@@ -232,7 +236,7 @@ export function unmountOffreWidget(target: UnmountTarget): boolean {
 }
 
 export function unmountOffreWidgets(root: ParentNode = document): number {
-    const widgetScripts = Array.from(root.querySelectorAll<HTMLScriptElement>(WIDGET_SELECTOR));
+    const widgetScripts = getWidgetScripts(root);
 
     return widgetScripts.reduce((count, scriptElement) => {
         return count + Number(unmountOffreWidget(scriptElement));
