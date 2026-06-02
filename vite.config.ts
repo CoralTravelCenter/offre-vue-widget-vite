@@ -44,6 +44,12 @@ export default defineConfig(({mode}) => {
                 "@": fileURLToPath(new URL("./src", import.meta.url)),
             },
         },
+        server: isMonkeyMode
+            ? {
+                host: "127.0.0.1",
+                open: "/__vite-plugin-monkey.install.user.js",
+            }
+            : undefined,
         build: {
             target: "esnext",
             minify: "terser",
