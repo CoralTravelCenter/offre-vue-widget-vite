@@ -1,25 +1,18 @@
 <script setup lang="ts">
 import {useMediaQuery} from "@vueuse/core";
-import {computed, onMounted, reactive, ref, shallowRef} from "vue";
+import {computed, onMounted, reactive, ref, shallowRef, type ComputedRef} from "vue";
 import type {B2CPriceSearchReference, B2CProduct} from "@/offre/api";
 import OffreMapClusterBadge from "@/offre/components/results/OffreMapClusterBadge/OffreMapClusterBadge.vue";
 import OffreMapMarker from "@/offre/components/results/OffreMapMarker/OffreMapMarker.vue";
 import OffreMapOverlayCard from "@/offre/components/results/OffreMapOverlayCard/OffreMapOverlayCard.vue";
 import OffreMapSidebar from "@/offre/components/results/OffreMapSidebar/OffreMapSidebar.vue";
-import type {OffreMapOverlayModel} from "@/offre/lib/offre-map";
 import {useOffreMapHotelOffers} from "@/offre/composables/useOffreMapHotelOffers";
 import {useOffreMapLocation} from "@/offre/composables/useOffreMapLocation";
 import {useOffreMapSelection} from "@/offre/composables/useOffreMapSelection";
-import {useOffreOfferTerms} from "@/offre/composables/useOffreOfferTerms";
+import {useOffreMapViewState} from "@/offre/composables/useOffreMapViewState";
 import type {NormalizedOffreWidgetOptions} from "@/offre/lib/payload";
 import {
-	buildBaseMapPoints,
-	buildHotelIdSet,
-	buildMapSearchPoints,
-	buildPointsByHotelId,
 	getMapClusterPriceRange,
-	getMapReferenceValue,
-	normalizeMapSearchValue,
 	type OffreMapSearchPoint
 } from "@/offre/lib/offre-map";
 import {
@@ -60,10 +53,6 @@ const mapSettings = reactive({
 	controls: []
 });
 
-const baseMapPoints = computed(() => {
-	return buildBaseMapPoints(props.visibleProducts);
-});
-
 const {
 	mapOfferMode,
 	hotelOffersByHotelId,
@@ -73,42 +62,30 @@ const {
 	searchOptions: computed(() => props.searchOptions)
 });
 
-const visibleMapPoints = computed<OffreMapSearchPoint[]>(() => {
-	return buildMapSearchPoints({
-		points: baseMapPoints.value,
-		hotelOffersByHotelId: hotelOffersByHotelId.value,
-		mapOfferMode: mapOfferMode.value,
-		pricingMode: props.pricingMode,
-		hostname
-	});
+let activeMapPointRef: ComputedRef<OffreMapSearchPoint | null> | null = null;
+
+const mapViewState = useOffreMapViewState({
+	visibleProductsSource: () => props.visibleProducts,
+	hotelOffersByHotelIdSource: hotelOffersByHotelId,
+	mapOfferModeSource: mapOfferMode,
+	pricingModeSource: () => props.pricingMode,
+	hostnameSource: () => hostname,
+	hotelSearchQuerySource: hotelSearchQuery,
+	activeMapPointSource: () => activeMapPointRef?.value ?? null,
+	productReferenceSource: () => props.productReference,
+	selectedDepartureNameSource: () => props.selectedDepartureName
 });
 
-const sortedVisibleMapPoints = computed(() => {
-	return [...visibleMapPoints.value].sort((left, right) => {
-		return left.hotelName.localeCompare(right.hotelName, "ru-RU");
-	});
-});
+const {
+	visibleMapPointsByHotelId,
+	searchFilteredMapPoints,
+	searchFilteredMapPointsByHotelId,
+	searchFilteredHotelIds,
+	activeMapOverlayModel,
+	overlayBounds,
+	hasBaseMapPoints
+} = mapViewState;
 
-const searchFilteredMapPoints = computed(() => {
-	const searchValue = normalizeMapSearchValue(hotelSearchQuery.value);
-
-	if (!searchValue) {
-		return sortedVisibleMapPoints.value;
-	}
-
-	return sortedVisibleMapPoints.value.filter((point) => {
-		return normalizeMapSearchValue(point.hotelName).includes(searchValue);
-	});
-});
-const visibleMapPointsByHotelId = computed(() => {
-	return buildPointsByHotelId(visibleMapPoints.value);
-});
-const searchFilteredMapPointsByHotelId = computed(() => {
-	return buildPointsByHotelId(searchFilteredMapPoints.value);
-});
-const searchFilteredHotelIds = computed(() => {
-	return buildHotelIdSet(searchFilteredMapPoints.value);
-});
 const {
 	activeHotelId,
 	activeMapPoint,
@@ -124,52 +101,7 @@ const {
 		lastAutoLocationKey.value = value;
 	}
 });
-const activeMapPointHotelStarCount = computed(() => {
-	const hotelCategory = getMapReferenceValue<{ starCount?: number }>(
-		props.productReference,
-		"hotelCategories",
-		activeMapPoint.value?.categoryKey
-	);
-
-	return Number(hotelCategory?.starCount) || 0;
-});
-const activeMapPointStarItems = computed<boolean[]>(() => {
-	return Array.from({length: activeMapPointHotelStarCount.value}, () => true);
-});
-const {
-	terms: activeMapPointTerms
-} = useOffreOfferTerms({
-	offer: computed(() => activeMapPoint.value?.effectiveOffer ?? null),
-	productReference: computed(() => props.productReference),
-	selectedDepartureName: computed(() => props.selectedDepartureName)
-});
-const activeMapOverlayModel = computed<OffreMapOverlayModel | null>(() => {
-	if (!activeMapPoint.value) {
-		return null;
-	}
-
-	return {
-		point: activeMapPoint.value,
-		terms: activeMapPointTerms.value,
-		starItems: activeMapPointStarItems.value
-	};
-});
-const overlayBounds = computed<[[number, number], [number, number]] | null>(() => {
-	if (!activeMapPoint.value) {
-		return null;
-	}
-
-	const longitude = activeMapPoint.value.longitude;
-	const latitude = activeMapPoint.value.latitude;
-	const longitudeDelta = 0.0001;
-	const latitudeDelta = 0.0001;
-
-	return [
-		[longitude - longitudeDelta, latitude + latitudeDelta],
-		[longitude + longitudeDelta, latitude - latitudeDelta]
-	];
-});
-const hasBaseMapPoints = computed(() => visibleMapPoints.value.length > 0);
+activeMapPointRef = activeMapPoint;
 
 useOffreMapLocation({
 	ymapsInitialized,

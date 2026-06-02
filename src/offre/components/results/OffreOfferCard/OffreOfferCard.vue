@@ -4,9 +4,7 @@ import {computed} from "vue";
 import type {B2CPriceSearchReference, B2CProduct} from "@/offre/api";
 import OffreOfferPricingPanel from "@/offre/components/results/OffreOfferPricingPanel/OffreOfferPricingPanel.vue";
 import OffreOfferTerms from "@/offre/components/results/OffreOfferTerms/OffreOfferTerms.vue";
-import {useCoralBonus} from "@/offre/composables/useCoralBonus";
-import {useHotelOfferQuery} from "@/offre/composables/useHotelOfferQuery";
-import {useOffreOfferCard} from "@/offre/composables/useOffreOfferCard";
+import {useOffreOfferCardState} from "@/offre/composables/useOffreOfferCardState";
 import coralFamilyClubShieldUrl from "@/offre/assets/coral-family-club-shield.svg";
 import type {NormalizedOffreWidgetOptions} from "@/offre/lib/payload";
 import type {OffreHotelRuntimeEntry, OffreTourType} from "@/offre/types";
@@ -29,7 +27,6 @@ const emit = defineEmits<{
 	"update:tour-type": [value: OffreTourType];
 }>();
 
-const baseOffer = computed(() => props.product.offers?.[0] ?? null);
 const isHotelOnly = computed(() => Boolean(props.hotelRuntimeEntry?.onlyhotel));
 const selectedTourType = computed<OffreTourType>({
 	get() {
@@ -41,34 +38,14 @@ const selectedTourType = computed<OffreTourType>({
 });
 
 const {
-	hotelOffer,
-	hotelOfferQuery
-} = useHotelOfferQuery({
-	hotelSource: () => props.product.hotel,
-	packageOfferSource: baseOffer,
-	searchOptionsSource: () => props.searchOptions,
-	enabledSource: computed(() => selectedTourType.value === "hotel" && !isHotelOnly.value)
-});
-
-const effectiveOffer = computed(() => {
-	if (selectedTourType.value === "hotel") {
-		return hotelOffer.value ?? baseOffer.value;
-	}
-
-	return baseOffer.value;
-});
-const hotelOfferLoading = computed(() => {
-	return selectedTourType.value === "hotel" && hotelOfferQuery.isPending.value;
-});
-
-const {
-	currentPriceValue,
+	cashbackInfo,
 	currentPriceLabel,
 	discountPercent,
 	hasFamilyClub,
 	hasOfferHref,
 	hotelCategoryName,
 	hotelName,
+	hotelOfferLoading,
 	hotelStarCount,
 	hotelUsps,
 	imageUrl,
@@ -79,29 +56,17 @@ const {
 	offerHref,
 	oldPriceLabel,
 	priceSuffix,
+	starItems,
 	terms
-} = useOffreOfferCard({
-	product: () => props.product,
-	offer: effectiveOffer,
-	productReference: () => props.productReference,
-	selectedDepartureName: () => props.selectedDepartureName ?? "",
-	pricingMode: () => props.pricingMode,
-	tourType: selectedTourType,
-	hotelRuntimeEntry: () => props.hotelRuntimeEntry ?? null
-});
-
-const {cashbackInfo} = useCoralBonus({
-	brandKey: () => props.brandKey,
-	hotel: () => props.product.hotel,
-	offer: effectiveOffer,
-	hotelStarCount,
-	currentPriceValue,
-	tourType: selectedTourType,
-	isHotelOnly
-});
-
-const starItems = computed(() => {
-	return Array.from({length: hotelStarCount.value}, () => true);
+} = useOffreOfferCardState({
+	productSource: () => props.product,
+	productReferenceSource: () => props.productReference,
+	selectedDepartureNameSource: () => props.selectedDepartureName ?? "",
+	pricingModeSource: () => props.pricingMode,
+	searchOptionsSource: () => props.searchOptions,
+	hotelRuntimeEntrySource: () => props.hotelRuntimeEntry ?? null,
+	selectedTourTypeRef: selectedTourType,
+	brandKeySource: () => props.brandKey
 });
 
 const hasLabels = computed(() => isEliteHotel.value || hasFamilyClub.value);

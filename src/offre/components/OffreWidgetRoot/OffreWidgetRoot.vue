@@ -17,6 +17,7 @@ import {useOffreRegionPagingState} from "@/offre/composables/useOffreRegionPagin
 import {useOffreWidgetLayoutState} from "@/offre/composables/useOffreWidgetLayoutState";
 import {useOffreWidgetListState} from "@/offre/composables/useOffreWidgetListState";
 import {useOffreWidgetResultsState} from "@/offre/composables/useOffreWidgetResultsState";
+import {useOffreWidgetRuntimeState} from "@/offre/composables/useOffreWidgetRuntimeState";
 import {useOffreWidgetSessionState} from "@/offre/composables/useOffreWidgetSessionState";
 import {useOffreWidgetUiState} from "@/offre/composables/useOffreWidgetUiState";
 import {Button} from "@/components/ui/button";
@@ -25,6 +26,7 @@ import {
 	type NormalizedOffreWidgetOptions,
 	type NormalizedWidgetHotelDescriptor
 } from "@/offre/lib/payload";
+import {buildWidgetPersistenceKey} from "@/offre/lib/offre-widget-root";
 import type {BrandDefinition, BrandKey} from "@/brands/types";
 import type {OffreViewMode} from "@/offre/types";
 
@@ -75,16 +77,12 @@ const widgetHotelIds = computed(() => {
 	return props.hotelsList.map((hotelEntry) => getWidgetHotelId(hotelEntry));
 });
 
-const {
-	guestsPersistenceKey
-} = useOffreWidgetSessionState({
-	brandKeySource: () => props.brandKey,
-	hotelIdsSource: widgetHotelIds,
-	optionsSource: () => props.options,
-	effectiveSearchOptionsSource: () => props.options,
-	selectedDepartureIdSource: () => "",
-	selectedTimeframeSource: () => "",
-	guestsFilterKeySource: () => ""
+const guestsPersistenceKey = computed(() => {
+	return buildWidgetPersistenceKey({
+		brandKey: props.brandKey,
+		hotelIds: widgetHotelIds.value,
+		options: props.options
+	});
 });
 
 const {
@@ -120,23 +118,15 @@ const {currentPage} = useOffreRegionPagingState({
 	resetSignalSource: currentProductsResetSignal
 });
 
-const hotelRuntimeById = computed(() => {
-	return matchedHotelsDirectory.value.reduce<Map<string, typeof matchedHotelsDirectory.value[number]>>((accumulator, hotel) => {
-		accumulator.set(String(hotel.id), hotel);
-		return accumulator;
-	}, new Map<string, typeof matchedHotelsDirectory.value[number]>());
-});
-
-const isListPageMode = computed(() => {
-	return viewMode.value === "list";
-});
-
-const visibleMatchedHotels = computed(() => {
-	if (!isListPageMode.value) {
-		return matchedHotelsDirectory.value;
-	}
-
-	return matchedHotelsDirectory.value.slice(0, currentPage.value * PRODUCTS_PAGE_SIZE);
+const {
+	hotelRuntimeById,
+	isListPageMode,
+	visibleMatchedHotels
+} = useOffreWidgetRuntimeState({
+	matchedHotelsSource: matchedHotelsDirectory,
+	viewModeRef: viewMode,
+	currentPageRef: currentPage,
+	pageSize: PRODUCTS_PAGE_SIZE
 });
 
 let productsQueryState: ReturnType<typeof useOffreProductsQuery> | null = null;
