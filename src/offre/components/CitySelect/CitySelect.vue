@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import OffreControlSelect from "@/offre/components/OffreControlSelect/OffreControlSelect.vue";
 import type { OffreDepartureOption } from "@/offre/types";
 

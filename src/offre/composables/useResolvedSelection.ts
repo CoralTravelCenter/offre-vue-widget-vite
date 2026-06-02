@@ -1,4 +1,4 @@
-import { ref, watch, type MaybeRefOrGetter, type Ref } from "vue";
+import { ref, watch, type MaybeRefOrGetter } from "vue";
 import { toValue } from "vue";
 import { resolveSelectedValue } from "@/offre/lib/filter-selection";
 

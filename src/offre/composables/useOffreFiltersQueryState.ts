@@ -6,17 +6,15 @@ import {
 } from "vue";
 import { listDepartureLocations, listHotelsInfo } from "@/offre/api";
 import type {
-  B2CHotelInfo,
   B2CHotelsInfoResult,
-  B2CListDepartureLocationsResult,
-  B2CLocation
+  B2CListDepartureLocationsResult
 } from "@/offre/api";
 import { useResolvedSelection } from "@/offre/composables/useResolvedSelection";
 import {
   type NormalizedOffreWidgetOptions,
   type NormalizedWidgetHotelDescriptor
 } from "@/offre/lib/payload";
-import { offreQueryConfig, offreQueryKeys, offreQueryPersisters } from "@/offre/query";
+import { offreQueryConfig, offreQueryPersisters } from "@/offre/query";
 import type {
   OffreDepartureOption,
   OffreHotelRuntimeEntry,

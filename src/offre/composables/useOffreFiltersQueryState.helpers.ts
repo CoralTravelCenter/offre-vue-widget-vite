@@ -15,8 +15,7 @@ import { getWidgetHotelIds, type NormalizedOffreWidgetOptions, type NormalizedWi
 import type {
   B2CHotelInfo,
   B2CHotelsInfoResult,
-  B2CLocation,
-  B2CListDepartureLocationsResult
+  B2CLocation
 } from "@/offre/api";
 
 export function resolveHotelIds(normalizedHotels: NormalizedWidgetHotelDescriptor[]) {

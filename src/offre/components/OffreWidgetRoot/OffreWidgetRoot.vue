@@ -165,11 +165,7 @@ const {
 	productsError,
 	productsFetching,
 	productsInitialLoading,
-	productsList,
 	productsRefetching,
-	productReference,
-	queriedHotelIds,
-	requestState
 } = productsQueryState;
 
 const {
@@ -209,8 +205,6 @@ const {
 const {
 	loadMoreIssueMessage,
 	loadMoreSkeletonItems,
-	remainingProductsCount,
-	nextLoadCount,
 	loadMoreButtonLabel,
 	handleLoadMore
 } = useOffreLoadMoreState({

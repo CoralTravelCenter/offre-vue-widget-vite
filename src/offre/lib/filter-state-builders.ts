@@ -1,4 +1,4 @@
-import type { B2CHotelInfo, B2CLocation, B2CLocationDirectory } from "@/offre/api";
+import type { B2CHotelInfo, B2CLocation } from "@/offre/api";
 import { cleanOffreRegionLabel, normalizeOffreRegionLabelForCompare } from "@/offre/lib/region-labels";
 import { buildHotelTimeframes } from "@/offre/lib/timeframes";
 import type { NormalizedOffreWidgetOptions, NormalizedWidgetHotelDescriptor } from "@/offre/lib/payload";

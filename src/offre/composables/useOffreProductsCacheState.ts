@@ -16,8 +16,7 @@ import {
   resolvePendingRegionBootstrapId,
   resolveRegionOutcome,
   resolveShouldFetchRegionProducts,
-  shouldPersistProductReference,
-  type RegionOutcome
+  shouldPersistProductReference
 } from "@/offre/composables/useOffreProductsCacheState.helpers";
 
 interface ProductsCacheStateParams {
