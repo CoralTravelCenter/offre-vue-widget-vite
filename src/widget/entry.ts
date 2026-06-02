@@ -3,6 +3,7 @@ import type {MountedOffreWidget as CoreMountedOffreWidget} from "@/app/create-of
 import {mountOffreWidget} from "@/app/create-offre-widget-app";
 import { shouldDebugOffreRequests } from "@/offre/api";
 import {sanitizeWidgetPayload} from "@/offre/lib/payload";
+import { isPlainObject } from "@/offre/lib/payload-utils";
 import type {WidgetPayload} from "@/widget/types";
 
 const WIDGET_SELECTOR = 'script[type="application/json"][data-offre-vue-test]';
@@ -20,10 +21,6 @@ export interface BootstrappedOffreWidget extends CoreMountedOffreWidget {
     rootElement: HTMLElement;
     scriptElement: HTMLScriptElement;
     unmount: () => boolean;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function warnWidget(message: string, details?: unknown) {
@@ -53,7 +50,7 @@ function logWidgetDebug(message: string, details: Record<string, unknown>) {
 }
 
 function normalizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
-    if (!isRecord(rawPayload)) {
+    if (!isPlainObject(rawPayload)) {
         warnWidget("widget payload must be a JSON object");
         return null;
     }
@@ -64,7 +61,7 @@ function normalizeWidgetPayload(rawPayload: unknown): WidgetPayload | null {
         }
     }
 
-    if (rawPayload.options !== undefined && !isRecord(rawPayload.options)) {
+    if (rawPayload.options !== undefined && !isPlainObject(rawPayload.options)) {
         warnWidget("payload.options must be a JSON object, falling back to empty options");
     }
 
@@ -118,7 +115,7 @@ function getOrCreateWidgetRoot(scriptElement: HTMLScriptElement) {
 }
 
 function isMountedWidgetTarget(value: unknown): value is BootstrappedOffreWidget {
-    return isRecord(value)
+    return isPlainObject(value)
         && value.scriptElement instanceof HTMLScriptElement
         && typeof value.unmount === "function";
 }
