@@ -104,6 +104,28 @@ describe("widget entry lifecycle", () => {
     expect(document.body.contains(widget.rootElement)).toBe(false);
   });
 
+  it("unmounts by script element and clears mount markers", async () => {
+    document.body.innerHTML = `
+      <div id="host">
+        <script type="application/json" data-offre-vue-test>{"brand":"coral"}</script>
+      </div>
+    `;
+
+    vi.resetModules();
+    const { bootstrapOffreWidgets, unmountOffreWidget } = await import("./entry");
+    const [widget] = bootstrapOffreWidgets();
+    const scriptElement = widget.scriptElement;
+
+    expect(scriptElement.getAttribute("data-offre-widget-mounted")).toBe("true");
+    expect(scriptElement.getAttribute("data-offre-widget-instance-id")).toBe("test-widget-instance");
+
+    expect(unmountOffreWidget(scriptElement)).toBe(true);
+    expect(document.body.contains(widget.rootElement)).toBe(false);
+    expect(scriptElement.hasAttribute("data-offre-widget-mounted")).toBe(false);
+    expect(scriptElement.hasAttribute("data-offre-widget-instance-id")).toBe(false);
+    expect(unmountOffreWidget(scriptElement)).toBe(false);
+  });
+
   it("skips invalid JSON payloads and warns instead of throwing", async () => {
     document.body.innerHTML = `
       <div>
