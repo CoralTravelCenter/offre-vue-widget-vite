@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import type { B2CPriceSearchReference, B2CProduct } from "@/offre/api";
 import OffreOfferCard from "@/offre/components/results/OffreOfferCard/OffreOfferCard.vue";
+import { useOffreOffersListState } from "@/offre/composables/useOffreOffersListState";
 import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 import type { OffreHotelRuntimeEntry, OffreTourType } from "@/offre/types";
 import type { BrandKey } from "@/brands/types";
@@ -21,12 +21,10 @@ const emit = defineEmits<{
   "update-tour-type": [hotelId: string, value: OffreTourType];
 }>();
 
-const normalizedProducts = computed(() => {
-  return props.products.map((product, index) => ({
-    key: String(product.hotel?.id ?? product.hotel?.name ?? `product-${index}`),
-    product,
-    hotelRuntimeEntry: props.hotelRuntimeById.get(String(product.hotel?.id ?? "")) ?? null
-  }));
+const { normalizedProducts } = useOffreOffersListState({
+  productsSource: () => props.products,
+  hotelRuntimeByIdSource: () => props.hotelRuntimeById,
+  tourTypeByHotelIdSource: () => props.tourTypeByHotelId
 });
 </script>
 
@@ -45,8 +43,8 @@ const normalizedProducts = computed(() => {
         :search-options="searchOptions"
         :hotel-runtime-entry="entry.hotelRuntimeEntry"
         :brand-key="brandKey"
-        :tour-type="tourTypeByHotelId[String(entry.product.hotel?.id ?? '')]"
-        @update:tour-type="emit('update-tour-type', String(entry.product.hotel?.id ?? ''), $event)"
+        :tour-type="entry.tourType"
+        @update:tour-type="emit('update-tour-type', entry.hotelId, $event)"
       />
     </li>
   </ul>
