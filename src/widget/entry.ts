@@ -134,6 +134,17 @@ function clearMountedScriptMarker(scriptElement: HTMLScriptElement) {
     scriptElement.removeAttribute(WIDGET_SCRIPT_INSTANCE_ATTR);
 }
 
+function cleanupMountedWidget(
+    scriptElement: HTMLScriptElement,
+    mountedWidget: BootstrappedOffreWidget,
+) {
+    mountedWidget.app.unmount();
+    mountedWidget.queryClient.clear();
+    mountedWidget.rootElement.remove();
+    mountedWidgetsByScript.delete(scriptElement);
+    clearMountedScriptMarker(scriptElement);
+}
+
 function describeScriptElement(scriptElement: HTMLScriptElement, index: number) {
     return {
         index,
@@ -212,11 +223,7 @@ export function unmountOffreWidget(target: UnmountTarget): boolean {
         return false;
     }
 
-    mountedWidget.app.unmount();
-    mountedWidget.queryClient.clear();
-    mountedWidget.rootElement.remove();
-    mountedWidgetsByScript.delete(scriptElement);
-    clearMountedScriptMarker(scriptElement);
+    cleanupMountedWidget(scriptElement, mountedWidget);
     logWidgetDebug("unmount widget", {
         instanceId: mountedWidget.instanceId
     });
