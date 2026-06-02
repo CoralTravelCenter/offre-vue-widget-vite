@@ -13,7 +13,8 @@
   },
   "pnpm": {
     "overrides": {
-      "postcss-url>minimatch": "^3.1.5"
+      "postcss-url>minimatch": "^3.1.5",
+      "ws": "^8.20.1"
     }
   },
   "dependencies": {
@@ -40,7 +41,7 @@
     "typescript": "^5.9.3",
     "vite": "^8.0.12",
     "vite-plugin-monkey": "^8.0.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "vue-tsc": "^3.2.7"
   }
 }
