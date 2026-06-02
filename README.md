@@ -22,6 +22,7 @@ Embeddable Vue-виджет для подборки офферов Coral/Sunmar.
 
 - `pnpm install`
 - `pnpm run dev:monkey` — запуск dev-userscript на живом сайте
+  Команда открывает `/__vite-plugin-monkey.install.user.js` для установки dev-userscript.
 - `pnpm run build` — production build виджета
 - `pnpm run typecheck` — проверка TypeScript
 - `pnpm run test` — Vitest
