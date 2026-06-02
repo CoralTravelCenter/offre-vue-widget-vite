@@ -18,6 +18,7 @@ import { runConcurrentSettledTasks } from "@/lib/concurrency";
 import {
   buildProductsQueryDescriptorsDebugPayload,
   buildProductsQueryTimingDebugPayload,
+  type OffreProductsQueryMode,
   resolveNoMatchedProducts,
   resolveProductsError,
   resolveProductsQueryMode,
@@ -44,6 +45,52 @@ function logProductsQueryDebug(message: string, details: Record<string, unknown>
   }
 
   console.info(`OffreWidget: ${message} ${JSON.stringify(details)}`);
+}
+
+async function runOffreProductsBatchQuery(params: {
+  signal: AbortSignal;
+  queryMode: OffreProductsQueryMode;
+  productQueryDescriptors: ReturnType<typeof buildOffreProductQueries>;
+  options: NormalizedOffreWidgetOptions;
+  hotelOrderById: Map<string, number>;
+}) {
+  const totalStartedAt = getNow();
+  const primaryTasks = params.productQueryDescriptors.map((descriptor) => {
+    return () => descriptor.onlyhotel
+      ? hotelPriceSearchList(descriptor.searchCriterias, { signal: params.signal })
+      : packagePriceSearchList(descriptor.searchCriterias, { signal: params.signal });
+  });
+  const primaryStartedAt = getNow();
+  const primaryResponses = await runConcurrentSettledTasks(primaryTasks, PRODUCTS_QUERY_CONCURRENCY);
+  const primaryDurationMs = Math.round(getNow() - primaryStartedAt);
+
+  for (const response of primaryResponses) {
+    if (response.status === "rejected" && isAbortError(response.reason)) {
+      throw response.reason;
+    }
+  }
+
+  logProductsQueryDebug("products-query descriptors", {
+    ...buildProductsQueryDescriptorsDebugPayload(params.queryMode, params.productQueryDescriptors)
+  });
+
+  const batchResult = aggregateProductsBatch({
+    responses: primaryResponses,
+    options: params.options,
+    hotelOrderById: params.hotelOrderById
+  });
+
+  logProductsQueryDebug("products-query timing", {
+    ...buildProductsQueryTimingDebugPayload({
+      queryMode: params.queryMode,
+      productQueryDescriptors: params.productQueryDescriptors,
+      batchResult,
+      totalDurationMs: Math.round(getNow() - totalStartedAt),
+      primaryDurationMs
+    })
+  });
+
+  return batchResult;
 }
 
 export function useOffreProductsQuery(params: {
@@ -126,45 +173,13 @@ export function useOffreProductsQuery(params: {
     persister: offreQueryPersisters.productsBatch.persisterFn,
     placeholderData: keepPreviousData,
     queryFn: async ({ signal }) => {
-      const totalStartedAt = getNow();
-      const primaryTasks = productQueryDescriptors.value.map((descriptor) => {
-        return () => descriptor.onlyhotel
-          ? hotelPriceSearchList(descriptor.searchCriterias, { signal })
-          : packagePriceSearchList(descriptor.searchCriterias, { signal });
-      });
-      const primaryStartedAt = getNow();
-      const primaryResponses = await runConcurrentSettledTasks(primaryTasks, PRODUCTS_QUERY_CONCURRENCY);
-      const primaryDurationMs = Math.round(getNow() - primaryStartedAt);
-
-      for (const response of primaryResponses) {
-        if (response.status === "rejected") {
-          if (isAbortError(response.reason)) {
-            throw response.reason;
-          }
-        }
-      }
-
-      logProductsQueryDebug("products-query descriptors", {
-        ...buildProductsQueryDescriptorsDebugPayload(queryMode.value, productQueryDescriptors.value)
-      });
-
-      const batchResult = aggregateProductsBatch({
-        responses: primaryResponses,
+      return runOffreProductsBatchQuery({
+        signal,
+        queryMode: queryMode.value,
+        productQueryDescriptors: productQueryDescriptors.value,
         options: toValue(params.optionsSource),
         hotelOrderById: toValue(params.hotelOrderByIdSource)
       });
-
-      logProductsQueryDebug("products-query timing", {
-        ...buildProductsQueryTimingDebugPayload({
-          queryMode: queryMode.value,
-          productQueryDescriptors: productQueryDescriptors.value,
-          batchResult,
-          totalDurationMs: Math.round(getNow() - totalStartedAt),
-          primaryDurationMs
-        })
-      });
-
-      return batchResult;
     }
   });
 
