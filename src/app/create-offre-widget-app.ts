@@ -67,13 +67,14 @@ export function createOffreWidgetApp({ container, payload }: CreateOffreWidgetAp
   applyBrandTheme(container, brandDefinition, widgetOptions);
   container.setAttribute("data-offre-widget-instance", instanceId);
 
-  const app = createApp(OffreWidgetRoot, {
+  const rootProps = {
     instanceId,
     brandKey: brandDefinition.key,
     brandDefinition,
     options: widgetOptions,
     hotelsList: normalizedPayload.hotels
-  });
+  };
+  const app = createApp(OffreWidgetRoot, rootProps);
 
   app.use(VueQueryPlugin, { queryClient });
   app.directive("fixed", fixedDirective);
