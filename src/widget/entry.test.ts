@@ -2,6 +2,8 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const WIDGET_REGISTRY_KEY = "__offreMountedWidgetsByInstanceId";
+
 const { mountOffreWidgetMock } = vi.hoisted(() => ({
   mountOffreWidgetMock: vi.fn()
 }));
@@ -35,6 +37,7 @@ describe("widget entry lifecycle", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
     delete window.OffreWidget;
+    delete (globalThis as typeof globalThis & { [WIDGET_REGISTRY_KEY]?: unknown })[WIDGET_REGISTRY_KEY];
     mountOffreWidgetMock.mockReset();
     mountOffreWidgetMock.mockImplementation(({ container }) => createMountResult(container));
   });
@@ -42,10 +45,11 @@ describe("widget entry lifecycle", () => {
   afterEach(() => {
     document.body.innerHTML = "";
     delete window.OffreWidget;
+    delete (globalThis as typeof globalThis & { [WIDGET_REGISTRY_KEY]?: unknown })[WIDGET_REGISTRY_KEY];
     vi.restoreAllMocks();
   });
 
-  it("mounts into a dedicated root and preserves host DOM", async () => {
+  it("replaces the script with a dedicated root and preserves host DOM", async () => {
     document.body.innerHTML = `
         <div id="host">
         <div data-testid="keep">keep me</div>
@@ -59,11 +63,15 @@ describe("widget entry lifecycle", () => {
     const host = document.getElementById("host");
     const preservedNode = document.querySelector("[data-testid='keep']");
     const scriptElement = host?.querySelector("script[data-offre-vue-test]") as HTMLScriptElement | null;
+    const widgetRoot = host?.querySelector("[data-offre-widget-root='true']") as HTMLElement | null;
 
     expect(widget).toBeTruthy();
     expect(host?.contains(preservedNode)).toBe(true);
-    expect(scriptElement?.nextElementSibling).toBe(widget?.rootElement);
-    expect(widget?.container).toBe(widget?.rootElement);
+    expect(widgetRoot).toBe(widget?.rootElement);
+    expect(widgetRoot?.contains(scriptElement)).toBe(true);
+    expect(widgetRoot?.contains(widget?.container as Node)).toBe(true);
+    expect(scriptElement?.getAttribute("data-offre-widget-instance-id")).toBe("test-widget-instance");
+    expect(widgetRoot?.getAttribute("data-offre-widget-instance-id")).toBe("test-widget-instance");
     expect(widget?.instanceId).toBe("test-widget-instance");
     expect(mountOffreWidgetMock).toHaveBeenCalledTimes(1);
   });
@@ -118,15 +126,17 @@ describe("widget entry lifecycle", () => {
     vi.resetModules();
     const { bootstrapOffreWidgets, unmountOffreWidget } = await import("./entry");
     const [widget] = bootstrapOffreWidgets();
+    const scriptElement = widget.scriptElement;
     const unmounted = unmountOffreWidget(widget);
 
     expect(unmounted).toBe(true);
     expect(widget.app.unmount).toHaveBeenCalledTimes(1);
     expect(widget.queryClient.clear).toHaveBeenCalledTimes(1);
     expect(document.body.contains(widget.rootElement)).toBe(false);
+    expect(document.body.contains(scriptElement)).toBe(true);
   });
 
-  it("unmounts by script element and clears mount markers", async () => {
+  it("unmounts by script element, restores the script node and clears mount markers", async () => {
     document.body.innerHTML = `
       <div id="host">
         <script type="application/json" data-offre-vue-test>{"brand":"coral"}</script>
@@ -143,8 +153,10 @@ describe("widget entry lifecycle", () => {
 
     expect(unmountOffreWidget(scriptElement)).toBe(true);
     expect(document.body.contains(widget.rootElement)).toBe(false);
+    expect(document.body.contains(scriptElement)).toBe(true);
     expect(scriptElement.hasAttribute("data-offre-widget-mounted")).toBe(false);
     expect(scriptElement.hasAttribute("data-offre-widget-instance-id")).toBe(false);
+    expect(scriptElement.style.display).toBe("");
     expect(unmountOffreWidget(scriptElement)).toBe(false);
   });
 

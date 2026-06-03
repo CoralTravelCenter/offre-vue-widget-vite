@@ -87,6 +87,7 @@ export interface OffreMapBasePoint {
 
 export interface OffreMapDisplayPoint extends OffreMapBasePoint {
   effectiveOffer: B2COffer | null;
+  isLoadingPrice: boolean;
   currentPriceValue: number;
   currentPriceLabel: string;
   priceSuffix: string;
@@ -135,13 +136,15 @@ export function buildBaseMapPoints(products: B2CProduct[]) {
 export function buildMapSearchPoints(params: {
   points: OffreMapBasePoint[];
   hotelOffersByHotelId: Map<string, B2COffer | null>;
+  loadingHotelIds: Set<string>;
   mapOfferMode: "package" | "hotel";
   pricingMode?: unknown;
   hostname: string;
 }) {
   return params.points.map<OffreMapSearchPoint>((point) => {
+    const isLoadingPrice = params.mapOfferMode === "hotel" && params.loadingHotelIds.has(point.hotelId);
     const effectiveOffer = params.mapOfferMode === "hotel"
-      ? params.hotelOffersByHotelId.get(point.hotelId) ?? point.packageOffer
+      ? (isLoadingPrice ? null : params.hotelOffersByHotelId.get(point.hotelId) ?? null)
       : point.packageOffer;
     const passengersCount = getOfferPassengersCount(effectiveOffer);
     const stayNights = Number(effectiveOffer?.stayNights) || 0;
@@ -155,6 +158,7 @@ export function buildMapSearchPoints(params: {
     return {
       ...point,
       effectiveOffer,
+      isLoadingPrice,
       currentPriceValue,
       currentPriceLabel: formatCurrencySafe(currentPriceValue),
       priceSuffix: resolveOfferPartySuffix(params.pricingMode, effectiveOffer?.rooms?.[0]?.passengers),

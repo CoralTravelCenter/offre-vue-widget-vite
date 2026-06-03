@@ -13,10 +13,29 @@ const modelValue = defineModel<string>({ required: true });
 
 const props = defineProps<Props>();
 
+function buildDepartureTriggerLabel(label: string) {
+	const normalizedLabel = String(label).trim();
+
+	if (!normalizedLabel) {
+		return "";
+	}
+
+	if (normalizedLabel.startsWith("Санкт-Петербург")) {
+		return normalizedLabel.replace("Санкт-Петербург", "Санкт-П.");
+	}
+
+	if (normalizedLabel.startsWith("Нижний Новгород")) {
+		return normalizedLabel.replace("Нижний Новгород", "Нижний Н.");
+	}
+
+	return normalizedLabel;
+}
+
 const normalizedOptions = computed(() => {
 	return props.options.map((option) => ({
-		value: option.id,
+		value: String(option.id),
 		label: option.label,
+		triggerLabel: buildDepartureTriggerLabel(option.label)
 	}));
 });
 </script>

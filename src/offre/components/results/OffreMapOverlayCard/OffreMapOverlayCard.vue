@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {StarIcon} from "lucide-vue-next";
+import {LoaderCircle, StarIcon} from "lucide-vue-next";
 import OffreOfferTerms from "@/offre/components/results/OffreOfferTerms/OffreOfferTerms.vue";
 import type {OffreMapOverlayModel} from "@/offre/lib/offre-map";
 import {Button} from "@/components/ui/button";
+import {Skeleton} from "@/components/ui/skeleton";
 
 interface Props {
 	model: OffreMapOverlayModel;
@@ -103,11 +104,24 @@ function getStarClass(isFilled: boolean) {
 					v-if="model.terms.length"
 					:terms="model.terms"
 				/>
+				<div
+					v-else-if="model.point.isLoadingPrice"
+					class="offre-map-overlay-card__terms-skeleton"
+					aria-hidden="true"
+				>
+					<Skeleton class="offre-map-overlay-card__terms-skeleton-item offre-map-overlay-card__terms-skeleton-item--wide"/>
+					<Skeleton class="offre-map-overlay-card__terms-skeleton-item offre-map-overlay-card__terms-skeleton-item--medium"/>
+					<Skeleton class="offre-map-overlay-card__terms-skeleton-item offre-map-overlay-card__terms-skeleton-item--narrow"/>
+				</div>
 
 				<div :class="getFooterClass(props.mobile)">
 					<div class="offre-map-overlay-card__pricing">
+						<template v-if="model.point.isLoadingPrice">
+							<Skeleton class="offre-map-overlay-card__loading-price"/>
+							<Skeleton class="offre-map-overlay-card__loading-price-suffix"/>
+						</template>
 						<div
-							v-if="model.point.currentPriceLabel"
+							v-else-if="model.point.currentPriceLabel"
 							class="offre-map-overlay-card__price"
 						>
 							{{ model.point.currentPriceLabel }}
@@ -121,7 +135,16 @@ function getStarClass(isFilled: boolean) {
 					</div>
 
 					<Button
-						v-if="model.point.offerHref && model.point.offerHref !== '#'"
+						v-if="model.point.isLoadingPrice"
+						variant="outline"
+						:class="getActionClass(props.mobile)"
+						disabled
+					>
+						<LoaderCircle class="offre-map-overlay-card__action-spinner animate-spin"/>
+						Загрузка...
+					</Button>
+					<Button
+						v-else-if="model.point.offerHref && model.point.offerHref !== '#'"
 						as="a"
 						:href="model.point.offerHref"
 						target="_blank"

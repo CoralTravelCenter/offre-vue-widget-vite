@@ -1,41 +1,19 @@
-import { unref, type Directive, type Ref } from "vue";
+import { type Directive } from "vue";
+import {
+  applyFixedStateClasses,
+  areFixedStatesEqual,
+  computeFixedStateSnapshot,
+  normalizeFixedConfig,
+  normalizeLength,
+  normalizeOffsetNumber,
+  resolveFixedBoundaryElement,
+  shouldAnchorFixedToBoundaryBottom,
+  type FixedBindingValue,
+  type FixedStateSnapshot,
+  type NormalizedFixedConfig
+} from "@/app/fixed-directive.helpers";
 
-type MaybeRef<T> = T | Ref<T>;
-export type FixedSide = "top" | "bottom";
-export type FixedAlignment = "stretch" | "center";
-export type FixedOffsetValue = string | number | null | undefined;
 type FixedScrollTarget = Window | HTMLElement;
-
-export interface FixedStateSnapshot {
-  top: boolean;
-  bottom: boolean;
-  fixed: boolean;
-}
-
-export interface FixedConfig {
-  enabled?: MaybeRef<boolean>;
-  disabled?: MaybeRef<boolean>;
-  side?: MaybeRef<FixedSide>;
-  top?: MaybeRef<FixedOffsetValue>;
-  bottom?: MaybeRef<FixedOffsetValue>;
-  zIndex?: MaybeRef<number | string | null | undefined>;
-  alignment?: MaybeRef<FixedAlignment>;
-  boundary?: MaybeRef<string | HTMLElement | null | undefined>;
-  onStick?: MaybeRef<((state: FixedStateSnapshot) => void) | null | undefined>;
-}
-
-type FixedBindingValue = boolean | number | string | FixedConfig | null | undefined;
-
-interface NormalizedFixedConfig {
-  enabled: boolean;
-  side: FixedSide;
-  top: FixedOffsetValue;
-  bottom: FixedOffsetValue;
-  zIndex: number | string | null | undefined;
-  alignment: FixedAlignment;
-  boundary: string | HTMLElement | null | undefined;
-  onStick: ((state: FixedStateSnapshot) => void) | null | undefined;
-}
 
 interface FixedElementState {
   initial: {
@@ -64,110 +42,6 @@ type FixedElement = HTMLElement & {
 };
 
 const FIXED_STATE_KEY = "__offreFixedState" as const;
-const FIXED_EPSILON = 0.5;
-
-function getRawValue<T>(value: MaybeRef<T> | T) {
-  return unref(value);
-}
-
-function normalizeLength(value: FixedOffsetValue) {
-  const raw = getRawValue(value);
-
-  if (raw === null || raw === undefined || raw === "") {
-    return "";
-  }
-
-  if (typeof raw === "number") {
-    return `${raw}px`;
-  }
-
-  if (typeof raw === "string") {
-    const trimmed = raw.trim();
-    return /^-?\d+(\.\d+)?$/.test(trimmed) ? `${trimmed}px` : trimmed;
-  }
-
-  return "";
-}
-
-function normalizeOffsetNumber(value: FixedOffsetValue, fallback: number) {
-  const raw = getRawValue(value);
-
-  if (raw === null || raw === undefined || raw === "") {
-    return fallback;
-  }
-
-  if (typeof raw === "number") {
-    return Number.isFinite(raw) ? raw : fallback;
-  }
-
-  if (typeof raw === "string") {
-    const parsed = Number.parseFloat(raw);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-
-  return fallback;
-}
-
-function normalizeConfig(rawConfig: FixedBindingValue): NormalizedFixedConfig {
-  const raw = getRawValue(rawConfig);
-
-  if (raw === false) {
-    return {
-      enabled: false,
-      side: "top",
-      top: 0,
-      bottom: null,
-      zIndex: null,
-      alignment: "stretch",
-      boundary: null,
-      onStick: null
-    };
-  }
-
-  if (raw === true || raw === null || raw === undefined) {
-    return {
-      enabled: true,
-      side: "top",
-      top: 0,
-      bottom: null,
-      zIndex: null,
-      alignment: "stretch",
-      boundary: null,
-      onStick: null
-    };
-  }
-
-  if (typeof raw === "number" || typeof raw === "string") {
-    return {
-      enabled: true,
-      side: "top",
-      top: raw,
-      bottom: null,
-      zIndex: null,
-      alignment: "stretch",
-      boundary: null,
-      onStick: null
-    };
-  }
-
-  const config = typeof raw === "object" ? raw : {};
-  const enabled = config.disabled ? false : getRawValue(config.enabled) !== false;
-  const top = getRawValue(config.top);
-  const bottom = getRawValue(config.bottom);
-  const zIndex = getRawValue(config.zIndex);
-  const boundary = getRawValue(config.boundary);
-  const onStick = getRawValue(config.onStick);
-  const alignment = getRawValue(config.alignment) === "center" ? "center" : "stretch";
-  let side: FixedSide | undefined = getRawValue(config.side);
-
-  if (!["top", "bottom"].includes(side ?? "")) {
-    side = bottom !== null && bottom !== undefined && (top === null || top === undefined)
-      ? "bottom"
-      : "top";
-  }
-
-  return { enabled, side: side ?? "top", top, bottom, zIndex, alignment, boundary, onStick };
-}
 
 function collectScrollTargets(el: HTMLElement) {
   const targets: FixedScrollTarget[] = [];
@@ -203,7 +77,7 @@ function getOrCreateState(el: FixedElement) {
         marginTop: el.style.marginTop,
         marginBottom: el.style.marginBottom
       },
-      config: normalizeConfig(undefined),
+      config: normalizeFixedConfig(undefined),
       placeholder: null,
       resizeObserver: null,
       lastState: { top: false, bottom: false, fixed: false },
@@ -265,34 +139,8 @@ function syncPlaceholder(el: HTMLElement, placeholder: HTMLDivElement) {
   placeholder.style.marginBottom = styles.marginBottom;
 }
 
-function applyStateClasses(el: HTMLElement, fixedState: FixedStateSnapshot) {
-  el.classList.toggle("top-fixed", fixedState.top);
-  el.classList.toggle("bottom-fixed", fixedState.bottom);
-  el.classList.toggle("fixeded", fixedState.fixed);
-  el.classList.toggle("sticked", fixedState.fixed);
-  el.setAttribute("data-fixed", fixedState.fixed ? "true" : "false");
-}
-
-function areStatesEqual(previousState: FixedStateSnapshot, nextState: FixedStateSnapshot) {
-  return previousState.top === nextState.top
-    && previousState.bottom === nextState.bottom
-    && previousState.fixed === nextState.fixed;
-}
-
 function getReferenceRect(el: HTMLElement, state: FixedElementState) {
   return (state.placeholder?.style.display === "block" ? state.placeholder : el).getBoundingClientRect();
-}
-
-function resolveBoundaryElement(el: HTMLElement, config: NormalizedFixedConfig) {
-  if (config.boundary instanceof HTMLElement) {
-    return config.boundary;
-  }
-
-  if (typeof config.boundary === "string" && config.boundary.trim()) {
-    return el.closest<HTMLElement>(config.boundary.trim());
-  }
-
-  return el.closest<HTMLElement>(".offre-widget");
 }
 
 function shouldAnchorToBoundaryBottom(
@@ -300,39 +148,27 @@ function shouldAnchorToBoundaryBottom(
   state: FixedElementState,
   topOffset: number
 ) {
-  const boundary = resolveBoundaryElement(el, state.config);
+  const boundary = resolveFixedBoundaryElement(el);
 
-  if (!boundary || state.config.side !== "top") {
+  if (!boundary) {
     return false;
   }
 
-  const boundaryRect = boundary.getBoundingClientRect();
-  const rect = getReferenceRect(el, state);
-  return boundaryRect.bottom - topOffset <= rect.height + FIXED_EPSILON;
+  return shouldAnchorFixedToBoundaryBottom({
+    boundaryRect: boundary.getBoundingClientRect(),
+    referenceRect: getReferenceRect(el, state),
+    topOffset
+  });
 }
 
 function computeState(el: HTMLElement, state: FixedElementState): FixedStateSnapshot {
-  const config = state.config;
-
-  if (!config.enabled) {
-    return { top: false, bottom: false, fixed: false };
-  }
-
-  const rect = getReferenceRect(el, state);
-  const topOffset = normalizeOffsetNumber(config.top, 0);
-  const bottomOffset = normalizeOffsetNumber(config.bottom, 0);
-  const isTopFixed = config.side === "top" && rect.top <= topOffset + FIXED_EPSILON;
-  const isBottomFixed = config.side === "bottom" && window.innerHeight - rect.bottom <= bottomOffset + FIXED_EPSILON;
-
-  return {
-    top: isTopFixed,
-    bottom: isBottomFixed,
-    fixed: isTopFixed || isBottomFixed
-  };
+  return computeFixedStateSnapshot({
+    rect: getReferenceRect(el, state),
+    topOffset: normalizeOffsetNumber(state.config.top, 0)
+  });
 }
 
 function applyFixedStyles(el: FixedElement, state: FixedElementState) {
-  const config = state.config;
   const placeholder = ensurePlaceholder(el, state);
 
   syncPlaceholder(el, placeholder);
@@ -341,21 +177,14 @@ function applyFixedStyles(el: FixedElement, state: FixedElementState) {
   const width = `${rect.width}px`;
 
   el.style.position = "fixed";
-  el.style.zIndex = config.zIndex === null || config.zIndex === undefined || config.zIndex === ""
+  el.style.zIndex = state.config.zIndex === null || state.config.zIndex === undefined || state.config.zIndex === ""
     ? ""
-    : String(config.zIndex);
-  el.style.top = config.side === "top" ? normalizeLength(config.top) : "";
-  el.style.bottom = config.side === "bottom" ? normalizeLength(config.bottom) : "";
+    : String(state.config.zIndex);
+  el.style.top = normalizeLength(state.config.top);
+  el.style.bottom = "";
   el.style.right = "";
   el.style.marginTop = "0";
   el.style.marginBottom = "0";
-
-  if (config.alignment === "center") {
-    el.style.left = `${rect.left + rect.width / 2}px`;
-    el.style.width = width;
-    el.style.transform = "translateX(-50%)";
-    return;
-  }
 
   el.style.left = `${rect.left}px`;
   el.style.width = width;
@@ -364,7 +193,7 @@ function applyFixedStyles(el: FixedElement, state: FixedElementState) {
 
 function applyBoundaryBottomStyles(el: FixedElement, state: FixedElementState) {
   const placeholder = ensurePlaceholder(el, state);
-  const boundary = resolveBoundaryElement(el, state.config);
+  const boundary = resolveFixedBoundaryElement(el);
 
   if (!boundary) {
     applyFixedStyles(el, state);
@@ -411,9 +240,9 @@ function updateFixedState(el: FixedElement, state: FixedElementState) {
     restoreInitialStyles(el, state);
   }
 
-  applyStateClasses(el, nextState);
+  applyFixedStateClasses(el, nextState);
 
-  if (areStatesEqual(state.lastState, nextState)) {
+  if (areFixedStatesEqual(state.lastState, nextState)) {
     return;
   }
 
@@ -473,17 +302,9 @@ function bindListeners(el: FixedElement, state: FixedElementState) {
 
 function applyFixed(el: FixedElement, rawConfig: FixedBindingValue) {
   const state = getOrCreateState(el);
-  const config = normalizeConfig(rawConfig);
+  const config = normalizeFixedConfig(rawConfig);
 
   state.config = config;
-
-  if (!config.enabled) {
-    unbindListeners(state);
-    hidePlaceholder(state);
-    restoreInitialStyles(el, state);
-    state.lastState = { top: false, bottom: false, fixed: false };
-    return;
-  }
 
   ensurePlaceholder(el, state);
   bindListeners(el, state);
@@ -512,5 +333,13 @@ const fixedDirective: Directive<HTMLElement, FixedBindingValue> = {
     delete fixedElement[FIXED_STATE_KEY];
   }
 };
+
+export type {
+  FixedBindingValue,
+  FixedConfig,
+  FixedOffsetValue,
+  FixedStateSnapshot,
+  NormalizedFixedConfig
+} from "@/app/fixed-directive.helpers";
 
 export default fixedDirective;

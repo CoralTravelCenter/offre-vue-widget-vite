@@ -28,11 +28,14 @@ function createState(overrides: {
   hotelSearchQuery?: string;
   activeMapPoint?: OffreMapSearchPoint | null;
   productReference?: B2CPriceSearchReference;
+  loadingHotelIds?: Set<string>;
+  mapOfferMode?: "package" | "hotel";
 } = {}) {
   return useOffreMapViewState({
     visibleProductsSource: ref(overrides.visibleProducts ?? []),
     hotelOffersByHotelIdSource: ref(new Map()),
-    mapOfferModeSource: ref("package"),
+    loadingHotelIdsSource: ref(overrides.loadingHotelIds ?? new Set()),
+    mapOfferModeSource: ref(overrides.mapOfferMode ?? "package"),
     pricingModeSource: ref("default"),
     hostnameSource: ref("example.com"),
     hotelSearchQuerySource: ref(overrides.hotelSearchQuery ?? ""),
@@ -90,5 +93,16 @@ describe("useOffreMapViewState", () => {
     expect(state.overlayBounds.value?.[0]?.[1]).toBeCloseTo(27.2001);
     expect(state.overlayBounds.value?.[1]?.[0]).toBeCloseTo(33.8001);
     expect(state.overlayBounds.value?.[1]?.[1]).toBeCloseTo(27.1999);
+  });
+
+  it("marks hotel-mode points as loading until hotel-specific offers resolve", () => {
+    const state = createState({
+      visibleProducts: [createProduct(10, "Альфа Отель")],
+      mapOfferMode: "hotel",
+      loadingHotelIds: new Set(["10"])
+    });
+
+    expect(state.visibleMapPoints.value[0]?.isLoadingPrice).toBe(true);
+    expect(state.visibleMapPoints.value[0]?.currentPriceLabel).toBe("");
   });
 });

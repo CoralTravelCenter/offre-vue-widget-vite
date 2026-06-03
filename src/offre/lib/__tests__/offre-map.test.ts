@@ -53,6 +53,7 @@ describe("offre-map helpers", () => {
     const points = buildMapSearchPoints({
       points: basePoints,
       hotelOffersByHotelId: new Map(),
+      loadingHotelIds: new Set(),
       mapOfferMode: "package",
       pricingMode: "default",
       hostname: "example.com"

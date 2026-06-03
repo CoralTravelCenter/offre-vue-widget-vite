@@ -40,6 +40,26 @@
 	background: var(--brand-card);
 }
 
+.offre-control-select__value-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.offre-control-select__trigger :global(.offre-city-select__value) {
+	min-width: 0;
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .offre-control-select__trigger :deep(svg) {
 	color: var(--brand-select-trigger-foreground, var(--brand-foreground));
 	transition: color 0.2s ease;

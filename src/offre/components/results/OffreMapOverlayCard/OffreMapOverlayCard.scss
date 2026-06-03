@@ -96,6 +96,30 @@
 	color: var(--brand-foreground);
 }
 
+.offre-map-overlay-card__terms-skeleton {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.offre-map-overlay-card__terms-skeleton-item {
+	height: 12px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+}
+
+.offre-map-overlay-card__terms-skeleton-item--wide {
+	width: 78%;
+}
+
+.offre-map-overlay-card__terms-skeleton-item--medium {
+	width: 54%;
+}
+
+.offre-map-overlay-card__terms-skeleton-item--narrow {
+	width: 38%;
+}
+
 .offre-map-overlay-card__footer {
 	display: grid;
 	gap: 8px;
@@ -123,6 +147,24 @@
 	color: var(--brand-primary);
 }
 
+.offre-map-overlay-card__loading-price,
+.offre-map-overlay-card__loading-price-suffix {
+	background: color-mix(in srgb, var(--brand-foreground) 10%, transparent);
+}
+
+.offre-map-overlay-card__loading-price {
+	width: 112px;
+	height: 24px;
+	border-radius: 6px;
+}
+
+.offre-map-overlay-card__loading-price-suffix {
+	width: 72px;
+	height: 12px;
+	margin-top: 4px;
+	border-radius: 4px;
+}
+
 .offre-map-overlay-card__price-suffix {
 	font-size: 12px;
 	line-height: 16px;
@@ -130,10 +172,19 @@
 }
 
 .offre-map-overlay-card__action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
 	height: 34px;
 	padding: 0 14px;
 	border-radius: 8px;
 	font-size: 13px;
+}
+
+.offre-map-overlay-card__action-spinner {
+	width: 14px;
+	height: 14px;
 }
 
 .offre-map-overlay-card__action--mobile {

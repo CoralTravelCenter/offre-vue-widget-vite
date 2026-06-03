@@ -6,7 +6,6 @@ import ViewModeSwitch from "@/offre/components/ViewModeSwitch/ViewModeSwitch.vue
 import RegionTabsNav from "@/offre/components/RegionTabsNav/RegionTabsNav.vue";
 import OffreOffersList from "@/offre/components/results/OffreOffersList/OffreOffersList.vue";
 import OffreOffersListSkeleton from "@/offre/components/results/OffreOffersListSkeleton/OffreOffersListSkeleton.vue";
-import OffreMapViewSkeleton from "@/offre/components/results/OffreMapViewSkeleton/OffreMapViewSkeleton.vue";
 import OffreMapView from "@/offre/components/results/OffreMapView/OffreMapView.vue";
 import OffreResultsStateNotice from "@/offre/components/results/OffreResultsStateNotice/OffreResultsStateNotice.vue";
 import {useOffreFiltersQueryState} from "@/offre/composables/useOffreFiltersQueryState";
@@ -19,6 +18,7 @@ import {useOffreWidgetResultsState} from "@/offre/composables/useOffreWidgetResu
 import {useOffreWidgetRuntimeState} from "@/offre/composables/useOffreWidgetRuntimeState";
 import {useOffreWidgetSessionState} from "@/offre/composables/useOffreWidgetSessionState";
 import {useOffreWidgetUiState} from "@/offre/composables/useOffreWidgetUiState";
+import {useOffreWidgetVisibilityState} from "@/offre/composables/useOffreWidgetVisibilityState";
 import {Button} from "@/components/ui/button";
 import {
 	getWidgetHotelId,
@@ -40,6 +40,10 @@ interface OffreWidgetRootProps {
 }
 
 const props = defineProps<OffreWidgetRootProps>();
+const widgetRootRef = ref<HTMLElement | null>(null);
+const { hasEnteredViewport } = useOffreWidgetVisibilityState({
+	targetRef: widgetRootRef
+});
 
 const {
 	activeRegionId,
@@ -57,7 +61,8 @@ const {
 	setActiveRegion
 } = useOffreFiltersQueryState(
 	() => props.options,
-	() => props.hotelsList
+	() => props.hotelsList,
+	hasEnteredViewport
 );
 
 const hotelOrderById = computed(() => {
@@ -144,6 +149,7 @@ const {
 	shouldFetchRegionProducts
 } = useOffreProductsDataState({
 	activeRegionIdSource: activeRegionId,
+	enabledSource: hasEnteredViewport,
 	optionsSource: effectiveSearchOptions,
 	matchedHotelsSource: matchedHotelsDirectory,
 	visibleMatchedHotelsSource: visibleMatchedHotels,
@@ -191,7 +197,7 @@ const {
 	canLoadMoreSource: canLoadMore,
 	totalProductsSource: totalProducts,
 	paginatedProductsLengthSource: computed(() => paginatedProducts.value.length),
-	productsRefetchingSource: productsRefetching,
+	productsFetchingSource: productsFetching,
 	productsErrorSource: productsError,
 	noMatchedProductsSource: noMatchedProducts,
 	resetSignalSource: currentProductsResetSignal,
@@ -233,6 +239,7 @@ const {
 
 <template>
 	<div
+			ref="widgetRootRef"
 			class="offre-widget offre-vue"
 			:data-offre-widget-instance="instanceId"
 	>
@@ -346,15 +353,15 @@ const {
 						<Button
 								v-if="canLoadMore"
 								type="button"
-								variant="default"
-								size="brand"
+								:variant="productsFetching ? 'outline' : 'default'"
+								:size="productsFetching ? 'sm' : 'brand'"
 								class="offre-widget__load-more-button"
-								:disabled="productsRefetching"
+								:disabled="productsFetching"
 								@click="handleLoadMore"
 						>
 						<LoaderCircle
-							v-if="productsRefetching"
-							class="offre-widget__load-more-spinner"
+							v-if="productsFetching"
+							class="offre-widget__load-more-spinner animate-spin"
 						/>
 						{{ loadMoreButtonLabel }}
 					</Button>
@@ -369,14 +376,7 @@ const {
 				class="offre-widget__results offre-widget__results--map"
 		>
 			<div
-				v-if="showMapSkeleton"
-				:class="['offre-widget__state', mapProductsState.modifierClass]"
-			>
-				<OffreMapViewSkeleton/>
-			</div>
-
-			<div
-				v-else-if="effectiveProductsError && mapProductsSource.length === 0"
+				v-if="effectiveProductsError && mapProductsSource.length === 0"
 				:class="['offre-widget__state', mapProductsState.modifierClass]"
 			>
 				<OffreResultsStateNotice
@@ -409,6 +409,7 @@ const {
 					v-else
 					:key="mapViewKey"
 					:visible-products="mapProductsSource"
+					:is-loading-base="showMapSkeleton"
 					:pricing-mode="effectiveSearchOptions.pricing"
 					:search-options="effectiveSearchOptions"
 					:product-reference="productReferenceSource"

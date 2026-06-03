@@ -15,6 +15,7 @@ import {
 export function useOffreMapViewState(params: {
   visibleProductsSource: MaybeRefOrGetter<B2CProduct[]>;
   hotelOffersByHotelIdSource: MaybeRefOrGetter<Map<string, B2COffer | null>>;
+  loadingHotelIdsSource: MaybeRefOrGetter<Set<string>>;
   mapOfferModeSource: MaybeRefOrGetter<"package" | "hotel">;
   pricingModeSource?: MaybeRefOrGetter<unknown>;
   hostnameSource: MaybeRefOrGetter<string>;
@@ -31,6 +32,7 @@ export function useOffreMapViewState(params: {
     return buildMapSearchPoints({
       points: baseMapPoints.value,
       hotelOffersByHotelId: toValue(params.hotelOffersByHotelIdSource),
+      loadingHotelIds: toValue(params.loadingHotelIdsSource),
       mapOfferMode: toValue(params.mapOfferModeSource),
       pricingMode: toValue(params.pricingModeSource),
       hostname: toValue(params.hostnameSource)

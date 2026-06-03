@@ -1,4 +1,4 @@
-import { computed, shallowRef, type MaybeRefOrGetter } from "vue";
+import { computed, shallowRef, toValue, type MaybeRefOrGetter } from "vue";
 import type { B2CHotelInfo, B2CLocation } from "@/offre/api";
 import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 import { useOffreProductsCacheState } from "@/offre/composables/useOffreProductsCacheState";
@@ -9,6 +9,7 @@ export function useOffreProductsDataState(params: {
   activeRegionIdSource: MaybeRefOrGetter<string>;
   matchedHotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
   visibleMatchedHotelsSource: MaybeRefOrGetter<OffreHotelRuntimeEntry[]>;
+  enabledSource?: MaybeRefOrGetter<boolean>;
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>;
   hotelInfoByIdSource: MaybeRefOrGetter<Map<string, B2CHotelInfo>>;
   selectedTimeframeSource: MaybeRefOrGetter<string>;
@@ -43,7 +44,10 @@ export function useOffreProductsDataState(params: {
     selectedTimeframeSource: params.selectedTimeframeSource,
     selectedDepartureSource: params.selectedDepartureSource,
     hotelOrderByIdSource: params.hotelOrderByIdSource,
-    enabledSource: cacheState.shouldFetchRegionProducts,
+    enabledSource: computed(() => {
+      return Boolean(toValue(params.enabledSource) ?? true)
+        && cacheState.shouldFetchRegionProducts.value;
+    }),
     currentPageSource: params.currentPageSource,
     pageSizeSource: params.pageSizeSource,
     serverPageModeSource: params.serverPageModeSource

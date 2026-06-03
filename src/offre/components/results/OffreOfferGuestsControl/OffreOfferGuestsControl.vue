@@ -178,8 +178,11 @@ function applyDraft() {
 function resetToInitial() {
 	draftAdultsCount.value = initialAdultsCount.value;
 	draftChildrenAges.value = [...initialChildrenAges.value];
+	appliedAdultsCount.value = initialAdultsCount.value;
+	appliedChildrenAges.value = [...initialChildrenAges.value];
 	activeChildAgeGridIndex.value = null;
 	emit("reset");
+	isOpen.value = false;
 }
 </script>
 

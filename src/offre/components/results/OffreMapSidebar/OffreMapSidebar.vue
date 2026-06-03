@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useDebounceFn} from "@vueuse/core";
-import {computed, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import OffreTourTypeTabs from "@/offre/components/results/OffreTourTypeTabs/OffreTourTypeTabs.vue";
 import type {OffreMapDisplayPoint} from "@/offre/lib/offre-map";
 import {ScrollArea} from "@/components/ui/scroll-area";
@@ -11,11 +11,13 @@ interface Props {
 	activeHotelId: string | null;
 	searchQuery: string;
 	mapOfferMode: "package" | "hotel";
+	isLoadingBase?: boolean;
 	isUpdatingPrices?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	activeHotelId: null,
+	isLoadingBase: false,
 	isUpdatingPrices: false
 });
 
@@ -37,10 +39,6 @@ const emitSearchQuery = useDebounceFn((value: string) => {
 	emit("update:searchQuery", value);
 }, 250);
 
-const skeletonItemsCount = computed(() => {
-	return Math.max(3, Math.min(props.points.length || 0, 6));
-});
-
 function handleSearchInput(event: Event) {
 	const nextValue = (event.target as HTMLInputElement).value;
 	localSearchQuery.value = nextValue;
@@ -60,7 +58,23 @@ function getSidebarItemClass(hotelId: string) {
 <template>
 	<aside class="offre-map-sidebar">
 		<div class="offre-map-sidebar__top">
-			<div class="offre-map-sidebar__header">
+			<div
+				v-if="props.isLoadingBase"
+				class="offre-map-sidebar__header offre-map-sidebar__header--loading"
+				aria-hidden="true"
+			>
+				<div class="offre-map-sidebar__header-row">
+					<Skeleton class="offre-map-sidebar__header-title-skeleton"/>
+					<Skeleton class="offre-map-sidebar__header-count-skeleton"/>
+				</div>
+
+				<Skeleton class="offre-map-sidebar__tabs-skeleton"/>
+			</div>
+
+			<div
+				v-else
+				class="offre-map-sidebar__header"
+			>
 				<div class="offre-map-sidebar__header-row">
 					<div class="offre-map-sidebar__title">
 						Отели на карте
@@ -79,7 +93,15 @@ function getSidebarItemClass(hotelId: string) {
 				/>
 			</div>
 
-			<label class="offre-map-sidebar__search">
+			<Skeleton
+				v-if="props.isLoadingBase"
+				class="offre-map-sidebar__search-skeleton"
+				aria-hidden="true"
+			/>
+			<label
+				v-else
+				class="offre-map-sidebar__search"
+			>
 				<span class="offre-map-sidebar__search-shell">
 					<input
 						:value="localSearchQuery"
@@ -94,9 +116,9 @@ function getSidebarItemClass(hotelId: string) {
 
 		<ScrollArea class="offre-map-sidebar__list">
 			<div class="offre-map-sidebar__list-content">
-				<template v-if="isUpdatingPrices">
+				<template v-if="props.isLoadingBase">
 					<div
-						v-for="index in skeletonItemsCount"
+						v-for="index in 4"
 						:key="`sidebar-skeleton-${index}`"
 						class="offre-map-sidebar__skeleton-item"
 						aria-hidden="true"
@@ -143,7 +165,13 @@ function getSidebarItemClass(hotelId: string) {
 							{{ point.locationLabel }}
 						</div>
 						<div
-							v-if="point.currentPriceLabel"
+							v-if="point.isLoadingPrice"
+							class="offre-map-sidebar__item-price-shell"
+						>
+							<Skeleton class="offre-map-sidebar__skeleton-price offre-map-sidebar__skeleton-price--inline"/>
+						</div>
+						<div
+							v-else-if="point.currentPriceLabel"
 							class="offre-map-sidebar__item-price"
 						>
 							{{ point.currentPriceLabel }}

@@ -8,8 +8,11 @@ import type {WidgetPayload} from "@/widget/types";
 
 const WIDGET_SELECTOR = 'script[type="application/json"][data-offre-vue-test]';
 const WIDGET_ROOT_ATTR = "data-offre-widget-root";
+const WIDGET_MOUNT_ATTR = "data-offre-widget-mount";
 const WIDGET_SCRIPT_MOUNTED_ATTR = "data-offre-widget-mounted";
 const WIDGET_SCRIPT_INSTANCE_ATTR = "data-offre-widget-instance-id";
+const WIDGET_ROOT_INSTANCE_ATTR = "data-offre-widget-instance-id";
+const WIDGET_REGISTRY_KEY = "__offreMountedWidgetsByInstanceId";
 
 const mountedWidgetsByScript = new WeakMap<HTMLScriptElement, BootstrappedOffreWidget>();
 
@@ -21,6 +24,15 @@ export interface BootstrappedOffreWidget extends CoreMountedOffreWidget {
     rootElement: HTMLElement;
     scriptElement: HTMLScriptElement;
     unmount: () => boolean;
+}
+
+function getMountedWidgetsByInstanceId() {
+    const scope = globalThis as typeof globalThis & {
+        [WIDGET_REGISTRY_KEY]?: Map<string, BootstrappedOffreWidget>;
+    };
+
+    scope[WIDGET_REGISTRY_KEY] ||= new Map<string, BootstrappedOffreWidget>();
+    return scope[WIDGET_REGISTRY_KEY];
 }
 
 function warnWidget(message: string, details?: unknown) {
@@ -83,22 +95,37 @@ function parseWidgetPayload(scriptElement: HTMLScriptElement): WidgetPayload | n
 }
 
 function getExistingMountedWidget(scriptElement: HTMLScriptElement) {
+    const mountedWidgetsByInstanceId = getMountedWidgetsByInstanceId();
+    const persistedInstanceId = scriptElement.getAttribute(WIDGET_SCRIPT_INSTANCE_ATTR)?.trim() ?? "";
+    const widgetByInstanceId = persistedInstanceId
+        ? mountedWidgetsByInstanceId.get(persistedInstanceId) ?? null
+        : null;
     const existingWidget = mountedWidgetsByScript.get(scriptElement);
+    const candidateWidget = widgetByInstanceId ?? existingWidget ?? null;
 
-    if (!existingWidget) {
+    if (!candidateWidget) {
         return null;
     }
 
-    if (existingWidget.rootElement.isConnected) {
-        return existingWidget;
+    if (
+        candidateWidget.scriptElement === scriptElement
+        && candidateWidget.rootElement.isConnected
+        && candidateWidget.instanceId === persistedInstanceId
+    ) {
+        mountedWidgetsByScript.set(scriptElement, candidateWidget);
+        mountedWidgetsByInstanceId.set(candidateWidget.instanceId, candidateWidget);
+        return candidateWidget;
     }
 
     mountedWidgetsByScript.delete(scriptElement);
+    if (persistedInstanceId) {
+        mountedWidgetsByInstanceId.delete(persistedInstanceId);
+    }
     return null;
 }
 
 function getOrCreateWidgetRoot(scriptElement: HTMLScriptElement) {
-    const existingRoot = scriptElement.nextElementSibling;
+    const existingRoot = scriptElement.parentElement;
 
     if (
         existingRoot instanceof HTMLElement
@@ -108,10 +135,29 @@ function getOrCreateWidgetRoot(scriptElement: HTMLScriptElement) {
     }
 
     const rootElement = document.createElement("div");
+    const mountElement = document.createElement("div");
+
     rootElement.setAttribute(WIDGET_ROOT_ATTR, "true");
-    scriptElement.insertAdjacentElement("afterend", rootElement);
+    mountElement.setAttribute(WIDGET_MOUNT_ATTR, "true");
+
+    scriptElement.replaceWith(rootElement);
+    scriptElement.style.display = "none";
+    rootElement.append(scriptElement, mountElement);
 
     return rootElement;
+}
+
+function getWidgetMountElement(rootElement: HTMLElement) {
+    const existingMountElement = rootElement.querySelector<HTMLElement>(`[${WIDGET_MOUNT_ATTR}="true"]`);
+
+    if (existingMountElement) {
+        return existingMountElement;
+    }
+
+    const mountElement = document.createElement("div");
+    mountElement.setAttribute(WIDGET_MOUNT_ATTR, "true");
+    rootElement.append(mountElement);
+    return mountElement;
 }
 
 function isMountedWidgetTarget(value: unknown): value is BootstrappedOffreWidget {
@@ -129,6 +175,10 @@ function markScriptAsMounted(scriptElement: HTMLScriptElement, instanceId: strin
     scriptElement.setAttribute(WIDGET_SCRIPT_INSTANCE_ATTR, instanceId);
 }
 
+function markRootAsMounted(rootElement: HTMLElement, instanceId: string) {
+    rootElement.setAttribute(WIDGET_ROOT_INSTANCE_ATTR, instanceId);
+}
+
 function clearMountedScriptMarker(scriptElement: HTMLScriptElement) {
     scriptElement.removeAttribute(WIDGET_SCRIPT_MOUNTED_ATTR);
     scriptElement.removeAttribute(WIDGET_SCRIPT_INSTANCE_ATTR);
@@ -138,10 +188,13 @@ function cleanupMountedWidget(
     scriptElement: HTMLScriptElement,
     mountedWidget: BootstrappedOffreWidget,
 ) {
+    const mountedWidgetsByInstanceId = getMountedWidgetsByInstanceId();
     mountedWidget.app.unmount();
     mountedWidget.queryClient.clear();
-    mountedWidget.rootElement.remove();
+    scriptElement.style.display = "";
+    mountedWidget.rootElement.replaceWith(scriptElement);
     mountedWidgetsByScript.delete(scriptElement);
+    mountedWidgetsByInstanceId.delete(mountedWidget.instanceId);
     clearMountedScriptMarker(scriptElement);
 }
 
@@ -179,9 +232,11 @@ export function mountOffreWidgetFromScript(
     }
 
     const rootElement = getOrCreateWidgetRoot(scriptElement);
+    const mountElement = getWidgetMountElement(rootElement);
 
     try {
-        const mountedWidget = mountOffreWidget({container: rootElement, payload});
+        const mountedWidget = mountOffreWidget({container: mountElement, payload});
+        const mountedWidgetsByInstanceId = getMountedWidgetsByInstanceId();
         const bootstrappedWidget: BootstrappedOffreWidget = {
             ...mountedWidget,
             payload,
@@ -191,7 +246,9 @@ export function mountOffreWidgetFromScript(
         };
 
         mountedWidgetsByScript.set(scriptElement, bootstrappedWidget);
+        mountedWidgetsByInstanceId.set(bootstrappedWidget.instanceId, bootstrappedWidget);
         markScriptAsMounted(scriptElement, bootstrappedWidget.instanceId);
+        markRootAsMounted(rootElement, bootstrappedWidget.instanceId);
         logWidgetDebug("mount widget", {
             instanceId: bootstrappedWidget.instanceId,
             hotelCount: Array.isArray(payload.hotels) ? payload.hotels.length : 0,

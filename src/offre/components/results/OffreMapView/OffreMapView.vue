@@ -29,9 +29,25 @@ import {
 } from "vue-yandex-maps";
 
 const YMAPS_API_KEY = import.meta.env.VITE_YMAPS_API_KEY?.trim() ?? "";
+let ymapsOptionsConfigured = false;
+let ymapsInitializationPromise: Promise<void> | null = null;
+
+function ensureYmapsInitialized(apiKey: string) {
+	if (!ymapsOptionsConfigured) {
+		createYmapsOptions({apikey: apiKey});
+		ymapsOptionsConfigured = true;
+	}
+
+	if (!ymapsInitializationPromise) {
+		ymapsInitializationPromise = initYmaps();
+	}
+
+	return ymapsInitializationPromise;
+}
 
 const props = defineProps<{
 	visibleProducts: B2CProduct[];
+	isLoadingBase?: boolean;
 	pricingMode?: unknown;
 	searchOptions: NormalizedOffreWidgetOptions;
 	productReference: B2CPriceSearchReference;
@@ -56,6 +72,7 @@ const mapSettings = reactive({
 const {
 	mapOfferMode,
 	hotelOffersByHotelId,
+	loadingHotelIds,
 	mapOfferLoading
 } = useOffreMapHotelOffers({
 	products: computed(() => props.visibleProducts),
@@ -67,6 +84,7 @@ let activeMapPointRef: ComputedRef<OffreMapSearchPoint | null> | null = null;
 const mapViewState = useOffreMapViewState({
 	visibleProductsSource: () => props.visibleProducts,
 	hotelOffersByHotelIdSource: hotelOffersByHotelId,
+	loadingHotelIdsSource: loadingHotelIds,
 	mapOfferModeSource: mapOfferMode,
 	pricingModeSource: () => props.pricingMode,
 	hostnameSource: () => hostname,
@@ -118,8 +136,7 @@ onMounted(async () => {
 		return;
 	}
 
-	createYmapsOptions({apikey: YMAPS_API_KEY});
-	await initYmaps();
+	await ensureYmapsInitialized(YMAPS_API_KEY);
 	ymapsInitialized.value = true;
 });
 </script>
@@ -141,7 +158,7 @@ onMounted(async () => {
 		</div>
 
 		<div
-			v-else-if="!hasBaseMapPoints"
+			v-else-if="!hasBaseMapPoints && !props.isLoadingBase"
 			class="offre-map-view__state"
 		>
 			Для выбранных офферов нет координат отелей
@@ -156,6 +173,7 @@ onMounted(async () => {
 				:active-hotel-id="activeHotelId"
 				:search-query="hotelSearchQuery"
 				:map-offer-mode="mapOfferMode"
+				:is-loading-base="Boolean(props.isLoadingBase)"
 				:is-updating-prices="mapOfferLoading"
 				@update:search-query="hotelSearchQuery = $event"
 				@update:map-offer-mode="mapOfferMode = $event"
@@ -210,7 +228,7 @@ onMounted(async () => {
 							:is-family-club="point.isFamilyClub"
 							:is-elite-hotel="point.isEliteHotel"
 							:is-open="activeHotelId === point.hotelId"
-							:is-loading="mapOfferLoading"
+							:is-loading="point.isLoadingPrice"
 						/>
 					</YandexMapMarker>
 				</YandexMapClusterer>

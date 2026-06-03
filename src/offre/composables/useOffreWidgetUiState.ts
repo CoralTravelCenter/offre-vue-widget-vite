@@ -51,7 +51,7 @@ export function useOffreWidgetUiState(params: {
   }
 
   function handleGuestsReset() {
-    selectedGuests.value = defaultGuests.value;
+    selectedGuests.value = normalizeGuestsState(defaultGuests.value);
   }
 
   return {

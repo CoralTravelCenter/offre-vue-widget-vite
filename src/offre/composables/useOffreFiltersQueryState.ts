@@ -40,7 +40,8 @@ import {
 } from "@/offre/composables/useOffreFiltersQueryState.helpers";
 export function useOffreFiltersQueryState(
   optionsSource: MaybeRefOrGetter<NormalizedOffreWidgetOptions>,
-  hotelsListSource: MaybeRefOrGetter<NormalizedWidgetHotelDescriptor[]>
+  hotelsListSource: MaybeRefOrGetter<NormalizedWidgetHotelDescriptor[]>,
+  enabledSource: MaybeRefOrGetter<boolean> = true
 ) {
   const options = computed(() => toValue(optionsSource));
   const normalizedHotels = computed(() => toValue(hotelsListSource));
@@ -50,10 +51,11 @@ export function useOffreFiltersQueryState(
   });
   const hotelInfoQueryKey = computed(() => buildHotelsInfoQueryKey(hotelIds.value));
   const departureQueryKey = computed(() => buildDeparturesQueryKey());
+  const queriesEnabled = computed(() => Boolean(toValue(enabledSource)));
 
   const hotelsInfoQuery = useQuery<B2CHotelsInfoResult>({
     queryKey: hotelInfoQueryKey,
-    enabled: computed(() => hotelIds.value.length > 0),
+    enabled: computed(() => queriesEnabled.value && hotelIds.value.length > 0),
     staleTime: offreQueryConfig.hotelsInfo.staleTime,
     gcTime: offreQueryConfig.hotelsInfo.gcTime,
     persister: offreQueryPersisters.hotelsInfo.persisterFn,
@@ -65,6 +67,7 @@ export function useOffreFiltersQueryState(
 
   const departuresQuery = useQuery<B2CListDepartureLocationsResult>({
     queryKey: departureQueryKey,
+    enabled: queriesEnabled,
     staleTime: offreQueryConfig.departures.staleTime,
     gcTime: offreQueryConfig.departures.gcTime,
     persister: offreQueryPersisters.departures.persisterFn,

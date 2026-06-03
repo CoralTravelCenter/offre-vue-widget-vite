@@ -1,6 +1,6 @@
 import { useMediaQuery } from "@vueuse/core";
-import { computed, ref, watch, type Ref } from "vue";
-import { buildMapViewKey, shouldActivateMapView } from "@/offre/lib/offre-widget-root";
+import { computed, ref, type Ref } from "vue";
+import { buildMapViewKey } from "@/offre/lib/offre-widget-root";
 import type { OffreViewMode } from "@/offre/types";
 
 const DESKTOP_LAYOUT_BREAKPOINT = "(min-width: 1024px)";
@@ -30,7 +30,7 @@ export function useOffreWidgetLayoutState(params: {
   const isLargeScreen = useMediaQuery(DESKTOP_LAYOUT_BREAKPOINT);
   const isTabletScreen = useMediaQuery(TABLET_LAYOUT_BREAKPOINT);
   const navigationFloating = ref(false);
-  const hasActivatedMapView = ref(false);
+  const hasActivatedMapView = ref(true);
 
   function resolveNavigationTopOffset() {
     if (isMvMode.value) {
@@ -50,19 +50,11 @@ export function useOffreWidgetLayoutState(params: {
 
   const navigationFixedOptions = computed(() => ({
     top: resolveNavigationTopOffset(),
-    side: "top",
     zIndex: CONTROLS_FIXED_Z_INDEX,
-    alignment: "stretch",
     onStick: (fixedState: { fixed: boolean }) => {
       navigationFloating.value = fixedState.fixed;
     }
   }));
-
-  watch(params.viewModeRef, (nextValue) => {
-    if (shouldActivateMapView(nextValue)) {
-      hasActivatedMapView.value = true;
-    }
-  }, { immediate: true });
 
   const mapViewKey = computed(() => {
     return buildMapViewKey({

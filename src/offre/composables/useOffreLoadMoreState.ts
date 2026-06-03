@@ -5,7 +5,7 @@ export function useOffreLoadMoreState(params: {
   canLoadMoreSource: MaybeRefOrGetter<boolean>;
   totalProductsSource: MaybeRefOrGetter<number>;
   paginatedProductsLengthSource: MaybeRefOrGetter<number>;
-  productsRefetchingSource: MaybeRefOrGetter<boolean>;
+  productsFetchingSource: MaybeRefOrGetter<boolean>;
   productsErrorSource: MaybeRefOrGetter<boolean>;
   noMatchedProductsSource: MaybeRefOrGetter<boolean>;
   resetSignalSource?: MaybeRefOrGetter<unknown>;
@@ -25,9 +25,9 @@ export function useOffreLoadMoreState(params: {
   watch([
     () => toValue(params.productsErrorSource),
     () => toValue(params.noMatchedProductsSource),
-    () => toValue(params.productsRefetchingSource)
-  ], ([hasError, hasNoMatched, isRefetching]) => {
-    if (isRefetching || params.currentPageRef.value <= 1 || isRollingBackLoadMore.value || !pendingLoadMoreRequest.value) {
+    () => toValue(params.productsFetchingSource)
+  ], ([hasError, hasNoMatched, isFetching]) => {
+    if (isFetching || params.currentPageRef.value <= 1 || isRollingBackLoadMore.value || !pendingLoadMoreRequest.value) {
       return;
     }
 
@@ -44,18 +44,18 @@ export function useOffreLoadMoreState(params: {
     params.currentPageRef.value -= 1;
   });
 
-  watch(() => toValue(params.productsRefetchingSource), (isRefetching) => {
-    if (!isRefetching) {
+  watch(() => toValue(params.productsFetchingSource), (isFetching) => {
+    if (!isFetching) {
       isRollingBackLoadMore.value = false;
     }
   });
 
   watch([
-    () => toValue(params.productsRefetchingSource),
+    () => toValue(params.productsFetchingSource),
     pendingLoadMoreRequest
-  ], ([isRefetching, hasPendingLoadMoreRequest]) => {
+  ], ([isFetching, hasPendingLoadMoreRequest]) => {
     if (
-      !isRefetching
+      !isFetching
       && hasPendingLoadMoreRequest
       && !isRollingBackLoadMore.value
       && !toValue(params.productsErrorSource)
@@ -66,7 +66,7 @@ export function useOffreLoadMoreState(params: {
   });
 
   const loadMoreSkeletonItems = computed(() => {
-    if (!toValue(params.productsRefetchingSource) || !toValue(params.canLoadMoreSource)) {
+    if (!toValue(params.productsFetchingSource) || !toValue(params.canLoadMoreSource)) {
       return 0;
     }
 
@@ -83,7 +83,7 @@ export function useOffreLoadMoreState(params: {
   });
 
   const loadMoreButtonLabel = computed(() => {
-    if (toValue(params.productsRefetchingSource)) {
+    if (toValue(params.productsFetchingSource)) {
       return "Загрузка...";
     }
 

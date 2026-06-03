@@ -111,4 +111,163 @@ describe("useOffreProductsCacheState", () => {
     expect(state.effectiveNoMatchedProducts.value).toBe(true);
     expect(state.effectiveProductsError.value).toBe(false);
   });
+
+  it("reuses cached products when switching back to a previously bootstrapped region", async () => {
+    const activeRegionId = ref("region-a");
+    const matchedHotels = ref([createHotel("101")]);
+    const visibleMatchedHotels = ref([createHotel("101")]);
+    const productsList = ref<B2CProduct[]>([]);
+    const requestState = ref<OffreRequestState>("idle");
+    const queriedHotelIds = ref<string[]>([]);
+    const productsFetching = ref(false);
+
+    const state = useOffreProductsCacheState({
+      activeRegionIdSource: activeRegionId,
+      matchedHotelsSource: matchedHotels,
+      visibleMatchedHotelsSource: visibleMatchedHotels,
+      productsListSource: productsList,
+      productReferenceSource: computed(() => ({})),
+      requestStateSource: requestState,
+      productsErrorSource: computed(() => false),
+      noMatchedProductsSource: computed(() => false),
+      queriedHotelIdsSource: queriedHotelIds,
+      productsFetchingSource: productsFetching,
+      isListPageModeSource: computed(() => true)
+    });
+
+    productsFetching.value = true;
+    productsList.value = [createProduct("101", 500)];
+    queriedHotelIds.value = ["101"];
+    requestState.value = "success";
+    await nextTick();
+
+    productsFetching.value = false;
+    await nextTick();
+
+    expect(state.shouldFetchRegionProducts.value).toBe(false);
+    expect(state.hasBootstrappedActiveRegion.value).toBe(true);
+    expect(state.regionProductsSource.value).toHaveLength(1);
+
+    activeRegionId.value = "region-b";
+    matchedHotels.value = [createHotel("202")];
+    visibleMatchedHotels.value = [createHotel("202")];
+    productsFetching.value = true;
+    productsList.value = [createProduct("202", 700)];
+    queriedHotelIds.value = ["202"];
+    await nextTick();
+
+    productsFetching.value = false;
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.regionProductsSource.value[0]?.hotel?.id).toBe("202");
+
+    activeRegionId.value = "region-a";
+    matchedHotels.value = [createHotel("101")];
+    visibleMatchedHotels.value = [createHotel("101")];
+    requestState.value = "idle";
+    queriedHotelIds.value = [];
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.regionProductsSource.value[0]?.hotel?.id).toBe("101");
+    expect(state.shouldFetchRegionProducts.value).toBe(false);
+    expect(state.hasBootstrappedActiveRegion.value).toBe(true);
+  });
+
+  it("preserves cached products while surfacing a later regional error", async () => {
+    const activeRegionId = ref("region-a");
+    const matchedHotels = ref([createHotel("101")]);
+    const visibleMatchedHotels = ref([createHotel("101")]);
+    const productsList = ref<B2CProduct[]>([]);
+    const requestState = ref<OffreRequestState>("idle");
+    const productsError = ref(false);
+    const queriedHotelIds = ref<string[]>([]);
+    const productsFetching = ref(false);
+
+    const state = useOffreProductsCacheState({
+      activeRegionIdSource: activeRegionId,
+      matchedHotelsSource: matchedHotels,
+      visibleMatchedHotelsSource: visibleMatchedHotels,
+      productsListSource: productsList,
+      productReferenceSource: computed(() => ({})),
+      requestStateSource: requestState,
+      productsErrorSource: productsError,
+      noMatchedProductsSource: computed(() => false),
+      queriedHotelIdsSource: queriedHotelIds,
+      productsFetchingSource: productsFetching,
+      isListPageModeSource: computed(() => true)
+    });
+
+    productsFetching.value = true;
+    productsList.value = [createProduct("101", 500)];
+    queriedHotelIds.value = ["101"];
+    requestState.value = "success";
+    await nextTick();
+
+    productsFetching.value = false;
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.effectiveProductsError.value).toBe(false);
+
+    requestState.value = "error";
+    productsError.value = true;
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.effectiveProductsError.value).toBe(true);
+    expect(state.effectiveRequestState.value).toBe("error");
+  });
+
+  it("clears all cached state when the reset signal changes", async () => {
+    const resetSignal = ref(0);
+    const productsList = ref<B2CProduct[]>([]);
+    const productReference = ref<B2CPriceSearchReference>({});
+    const requestState = ref<OffreRequestState>("idle");
+    const queriedHotelIds = ref<string[]>([]);
+    const productsFetching = ref(false);
+
+    const state = useOffreProductsCacheState({
+      activeRegionIdSource: computed(() => "region-a"),
+      matchedHotelsSource: computed(() => [createHotel("101")]),
+      visibleMatchedHotelsSource: computed(() => [createHotel("101")]),
+      productsListSource: productsList,
+      productReferenceSource: productReference,
+      requestStateSource: requestState,
+      productsErrorSource: computed(() => false),
+      noMatchedProductsSource: computed(() => false),
+      queriedHotelIdsSource: queriedHotelIds,
+      productsFetchingSource: productsFetching,
+      isListPageModeSource: computed(() => true),
+      resetSignalSource: resetSignal
+    });
+
+    productsFetching.value = true;
+    productsList.value = [createProduct("101", 500)];
+    productReference.value = { meals: { ai: { name: "AI" } } };
+    queriedHotelIds.value = ["101"];
+    requestState.value = "success";
+    await nextTick();
+
+    productsFetching.value = false;
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.productReferenceSource.value.meals).toEqual({ ai: { name: "AI" } });
+    expect(state.shouldFetchRegionProducts.value).toBe(false);
+
+    resetSignal.value += 1;
+    requestState.value = "idle";
+    queriedHotelIds.value = [];
+    productsList.value = [];
+    productReference.value = {};
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toEqual([]);
+    expect(state.mapProductsSource.value).toEqual([]);
+    expect(state.productReferenceSource.value).toEqual({});
+    expect(state.shouldFetchRegionProducts.value).toBe(true);
+    expect(state.hasBootstrappedActiveRegion.value).toBe(false);
+  });
 });

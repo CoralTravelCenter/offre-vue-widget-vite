@@ -20,6 +20,7 @@ export function useOffreMapHotelOffers(params: {
 
   const mapOfferMode = ref<"package" | "hotel">("package");
   const hotelOffersByHotelId = shallowRef(new Map<string, B2COffer | null>());
+  const loadingHotelIds = shallowRef(new Set<string>());
   const mapOfferLoading = ref(false);
 
   watch(
@@ -31,11 +32,14 @@ export function useOffreMapHotelOffers(params: {
       });
 
       if (offerMode !== "hotel") {
+        hotelOffersByHotelId.value = new Map();
+        loadingHotelIds.value = new Set();
         mapOfferLoading.value = false;
         return;
       }
 
       const nextMap = new Map<string, B2COffer | null>();
+      const nextLoadingHotelIds = new Set<string>();
       const tasks = nextProducts.flatMap((product, index) => {
         const hotelId = String(product.hotel?.id ?? product.hotel?.name ?? index);
 
@@ -49,6 +53,8 @@ export function useOffreMapHotelOffers(params: {
           nextMap.set(hotelId, null);
           return [];
         }
+
+        nextLoadingHotelIds.add(hotelId);
 
         return [async () => {
           try {
@@ -77,28 +83,41 @@ export function useOffreMapHotelOffers(params: {
         }];
       });
 
+      hotelOffersByHotelId.value = nextMap;
+      loadingHotelIds.value = nextLoadingHotelIds;
+
       if (!tasks.length) {
-        hotelOffersByHotelId.value = nextMap;
         mapOfferLoading.value = false;
         return;
       }
 
       mapOfferLoading.value = true;
-      const nextEntries = await runConcurrentTasks(tasks, MAP_HOTEL_OFFERS_CONCURRENCY);
+      await runConcurrentTasks(tasks.map((task) => {
+        return async () => {
+          const nextEntry = await task();
+
+          if (cancelled) {
+            return nextEntry;
+          }
+
+          const nextResolvedLoadingHotelIds = new Set(loadingHotelIds.value);
+          nextResolvedLoadingHotelIds.delete(nextEntry.hotelId);
+          loadingHotelIds.value = nextResolvedLoadingHotelIds;
+
+          if (!nextEntry.hasError) {
+            const nextResolvedOfferMap = new Map(hotelOffersByHotelId.value);
+            nextResolvedOfferMap.set(nextEntry.hotelId, nextEntry.hotelOffer);
+            hotelOffersByHotelId.value = nextResolvedOfferMap;
+          }
+
+          return nextEntry;
+        };
+      }), MAP_HOTEL_OFFERS_CONCURRENCY);
 
       if (cancelled) {
         return;
       }
-
-      nextEntries.forEach(({ hotelId, hotelOffer, hasError }) => {
-        if (hasError) {
-          return;
-        }
-
-        nextMap.set(hotelId, hotelOffer);
-      });
-
-      hotelOffersByHotelId.value = nextMap;
+      loadingHotelIds.value = new Set();
       mapOfferLoading.value = false;
     },
     { immediate: true }
@@ -107,6 +126,7 @@ export function useOffreMapHotelOffers(params: {
   return {
     mapOfferMode,
     hotelOffersByHotelId,
+    loadingHotelIds,
     mapOfferLoading
   };
 }

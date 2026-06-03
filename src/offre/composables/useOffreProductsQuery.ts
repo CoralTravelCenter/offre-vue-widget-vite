@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import { hotelPriceSearchList, packagePriceSearchList } from "@/offre/api";
 import type {
@@ -171,7 +171,6 @@ export function useOffreProductsQuery(params: {
     staleTime: offreQueryConfig.productsBatch.staleTime,
     gcTime: offreQueryConfig.productsBatch.gcTime,
     persister: offreQueryPersisters.productsBatch.persisterFn,
-    placeholderData: keepPreviousData,
     queryFn: async ({ signal }) => {
       return runOffreProductsBatchQuery({
         signal,

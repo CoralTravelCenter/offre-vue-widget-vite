@@ -16,6 +16,7 @@ function createPoint(hotelId: string): OffreMapSearchPoint {
     isFamilyClub: false,
     isEliteHotel: false,
     effectiveOffer: null,
+    isLoadingPrice: false,
     currentPriceValue: 0,
     currentPriceLabel: "",
     priceSuffix: "",

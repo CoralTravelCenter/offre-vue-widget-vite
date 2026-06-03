@@ -8,7 +8,7 @@ describe("useOffreLoadMoreState", () => {
     const canLoadMore = ref(true);
     const totalProducts = ref(12);
     const paginatedProductsLength = ref(5);
-    const productsRefetching = ref(false);
+    const productsFetching = ref(false);
     const productsError = ref(false);
     const noMatchedProducts = ref(false);
 
@@ -17,7 +17,7 @@ describe("useOffreLoadMoreState", () => {
       canLoadMoreSource: canLoadMore,
       totalProductsSource: totalProducts,
       paginatedProductsLengthSource: paginatedProductsLength,
-      productsRefetchingSource: productsRefetching,
+      productsFetchingSource: productsFetching,
       productsErrorSource: productsError,
       noMatchedProductsSource: noMatchedProducts,
       pageSize: 5
@@ -26,7 +26,7 @@ describe("useOffreLoadMoreState", () => {
     state.handleLoadMore();
     expect(currentPage.value).toBe(2);
 
-    productsRefetching.value = true;
+    productsFetching.value = true;
     await nextTick();
 
     expect(state.loadMoreButtonLabel.value).toBe("Загрузка...");
@@ -37,7 +37,7 @@ describe("useOffreLoadMoreState", () => {
 
   it("rolls back the page and shows a warning when the next batch fails", async () => {
     const currentPage = ref(1);
-    const productsRefetching = ref(false);
+    const productsFetching = ref(false);
     const productsError = ref(false);
 
     const state = useOffreLoadMoreState({
@@ -45,18 +45,18 @@ describe("useOffreLoadMoreState", () => {
       canLoadMoreSource: computed(() => true),
       totalProductsSource: computed(() => 10),
       paginatedProductsLengthSource: computed(() => 5),
-      productsRefetchingSource: productsRefetching,
+      productsFetchingSource: productsFetching,
       productsErrorSource: productsError,
       noMatchedProductsSource: computed(() => false),
       pageSize: 5
     });
 
-    productsRefetching.value = true;
+    productsFetching.value = true;
     state.handleLoadMore();
     await nextTick();
 
     productsError.value = true;
-    productsRefetching.value = false;
+    productsFetching.value = false;
     await nextTick();
 
     expect(currentPage.value).toBe(1);

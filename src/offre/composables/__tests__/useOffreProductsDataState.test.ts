@@ -83,10 +83,12 @@ vi.mock("@/offre/composables/useOffreProductsQuery", () => ({
 
 describe("useOffreProductsDataState", () => {
   it("connects cache enabled state to products query and exposes query data to cache sources", () => {
+    const widgetVisible = ref(true);
     const state = useOffreProductsDataState({
       activeRegionIdSource: ref("region-a"),
       matchedHotelsSource: ref([{ id: "101", onlyhotel: false, usps: [], timeframes: [] }]),
       visibleMatchedHotelsSource: ref([{ id: "101", onlyhotel: false, usps: [], timeframes: [] }]),
+      enabledSource: widgetVisible,
       optionsSource: ref({
         groupBy: "regions",
         chartersOnly: false,
@@ -107,7 +109,7 @@ describe("useOffreProductsDataState", () => {
       resetSignalSource: ref(0)
     });
 
-    const queryParams = mocks.queryParams as { enabledSource: unknown };
+    const queryParams = mocks.queryParams as { enabledSource: { value: boolean } };
     const cacheParams = mocks.cacheParams as {
       productsListSource: () => unknown;
       productReferenceSource: () => unknown;
@@ -115,12 +117,15 @@ describe("useOffreProductsDataState", () => {
       queriedHotelIdsSource: () => unknown;
     };
 
-    expect(queryParams.enabledSource).toBe(mocks.shouldFetchRegionProducts);
+    expect(queryParams.enabledSource.value).toBe(true);
     expect(cacheParams.productsListSource()).toEqual([{ hotel: { id: "101" } }]);
     expect(cacheParams.productReferenceSource()).toEqual({ meals: { ai: { name: "AI" } } });
     expect(cacheParams.requestStateSource()).toBe("success");
     expect(cacheParams.queriedHotelIdsSource()).toEqual(["101"]);
     expect(state.productsList.value).toEqual([{ hotel: { id: "101" } }]);
     expect(state.shouldFetchRegionProducts.value).toBe(true);
+
+    widgetVisible.value = false;
+    expect(queryParams.enabledSource.value).toBe(false);
   });
 });

@@ -74,14 +74,13 @@ const mocks = vi.hoisted(() => {
   const loadMoreButtonLabel = manualRef("Показать ещё");
   const navigationFixedOptions = manualRef({
     top: 16,
-    side: "top",
     zIndex: 30,
-    alignment: "stretch",
     onStick: () => undefined
   });
   const navigationFloating = manualRef(false);
   const hasActivatedMapView = manualRef(false);
   const mapViewKey = manualRef("region-a|msk|June|{}");
+  const hasEnteredViewport = manualRef(true);
   const productsListState = manualRef({
     title: "",
     description: "",
@@ -149,6 +148,7 @@ const mocks = vi.hoisted(() => {
     navigationFloating,
     hasActivatedMapView,
     mapViewKey,
+    hasEnteredViewport,
     productsListState,
     mapProductsState,
     showRegionSkeleton,
@@ -186,6 +186,12 @@ vi.mock("@/offre/composables/useOffreWidgetSessionState", () => ({
     guestsPersistenceKey: mocks.manualRef("guests-key"),
     viewModePersistenceKey: mocks.manualRef("view-mode-key"),
     resetNonce: mocks.manualRef(0)
+  })
+}));
+
+vi.mock("@/offre/composables/useOffreWidgetVisibilityState", () => ({
+  useOffreWidgetVisibilityState: () => ({
+    hasEnteredViewport: mocks.hasEnteredViewport
   })
 }));
 
