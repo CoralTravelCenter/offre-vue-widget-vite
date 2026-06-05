@@ -8,6 +8,8 @@
     --brand-popover-foreground: #000000;
     --brand-primary: #0092d0;
     --brand-primary-foreground: #ffffff;
+    --brand-elite-primary: #B6985B;
+    --brand-elite-primary-foreground: #ffffff;
     --brand-secondary: #ffffff;
     --brand-secondary-foreground: #000000;
     --brand-muted: #ffffff;
@@ -88,6 +90,8 @@
 .offre-theme--coral-elite {
     --brand-primary: #B6985B;
     --brand-primary-foreground: #ffffff;
+    --brand-elite-primary: #B6985B;
+    --brand-elite-primary-foreground: #ffffff;
     --primary: #000000;
     --primary-foreground: #ffffff;
     --brand-cta-primary: #000000;

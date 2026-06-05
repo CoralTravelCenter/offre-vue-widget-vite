@@ -8,6 +8,8 @@
     --brand-popover-foreground: #2a2421;
     --brand-primary: #ff6b00;
     --brand-primary-foreground: #ffffff;
+    --brand-elite-primary: var(--brand-primary);
+    --brand-elite-primary-foreground: var(--brand-primary-foreground);
     --brand-secondary: #fff1e6;
     --brand-secondary-foreground: #2a2421;
     --brand-muted: #fff7f1;

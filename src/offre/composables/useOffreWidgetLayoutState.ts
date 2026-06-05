@@ -24,7 +24,6 @@ export function useOffreWidgetLayoutState(params: {
   activeRegionIdSource: Ref<string>;
   selectedDepartureIdSource: Ref<string>;
   selectedTimeframeSource: Ref<string>;
-  guestsFilterKeySource: Ref<string>;
 }) {
   const isMvMode = computed(resolveIsMvMode);
   const isLargeScreen = useMediaQuery(DESKTOP_LAYOUT_BREAKPOINT);
@@ -60,8 +59,7 @@ export function useOffreWidgetLayoutState(params: {
     return buildMapViewKey({
       activeRegionId: params.activeRegionIdSource.value,
       selectedDepartureId: params.selectedDepartureIdSource.value,
-      selectedTimeframe: params.selectedTimeframeSource.value,
-      guestsFilterKey: params.guestsFilterKeySource.value
+      selectedTimeframe: params.selectedTimeframeSource.value
     });
   });
 

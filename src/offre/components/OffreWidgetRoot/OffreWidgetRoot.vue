@@ -213,8 +213,7 @@ const {
 	viewModeRef: viewMode,
 	activeRegionIdSource: activeRegionId,
 	selectedDepartureIdSource: selectedDepartureId,
-	selectedTimeframeSource: selectedTimeframe,
-	guestsFilterKeySource: guestsFilterKey
+	selectedTimeframeSource: selectedTimeframe
 });
 
 const {

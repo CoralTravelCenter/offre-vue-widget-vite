@@ -35,9 +35,8 @@ describe("offre-widget-root helpers", () => {
     expect(buildMapViewKey({
       activeRegionId: "hurghada",
       selectedDepartureId: "msk",
-      selectedTimeframe: "may",
-      guestsFilterKey: "{\"adultsCount\":2}"
-    })).toBe("hurghada|msk|may|{\"adultsCount\":2}");
+      selectedTimeframe: "may"
+    })).toBe("hurghada|msk|may");
   });
 
   it("activates map view only for map mode", () => {

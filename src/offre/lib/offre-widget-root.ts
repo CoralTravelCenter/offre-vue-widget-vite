@@ -18,13 +18,11 @@ export function buildMapViewKey(params: {
   activeRegionId?: string | null;
   selectedDepartureId?: string | null;
   selectedTimeframe?: string | null;
-  guestsFilterKey?: string | null;
 }) {
   return [
     params.activeRegionId ?? "",
     params.selectedDepartureId ?? "",
-    params.selectedTimeframe ?? "",
-    params.guestsFilterKey ?? ""
+    params.selectedTimeframe ?? ""
   ].join("|");
 }
 

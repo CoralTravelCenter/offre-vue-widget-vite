@@ -2,11 +2,33 @@
 	position: relative;
 	display: grid;
 	padding: 6px;
-	border: 1px solid var(--brand-border);
+	border: 1px solid var(--offre-map-overlay-card-border, var(--brand-border));
 	border-radius: 12px;
-	background: var(--brand-card);
+	background: var(--offre-map-overlay-card-surface, var(--brand-card));
 	box-shadow: var(--brand-shadow-popover);
 	pointer-events: auto;
+}
+
+.offre-map-overlay-card--default {
+	--offre-map-overlay-card-accent: var(--brand-primary);
+	--offre-map-overlay-card-accent-foreground: var(--brand-primary-foreground);
+	--offre-map-overlay-card-accent-shadow: color-mix(in srgb, var(--brand-primary) 22%, transparent);
+	--offre-map-overlay-card-surface: var(--brand-card);
+	--offre-map-overlay-card-border: var(--brand-border);
+	--offre-map-overlay-card-close-surface: var(--brand-card);
+}
+
+.offre-map-overlay-card--elite {
+	--offre-map-overlay-card-accent: var(--brand-elite-primary, var(--brand-primary));
+	--offre-map-overlay-card-accent-foreground: var(--brand-elite-primary-foreground, var(--brand-primary-foreground));
+	--offre-map-overlay-card-accent-shadow:
+		color-mix(in srgb, var(--brand-elite-primary, var(--brand-primary)) 18%, transparent);
+	--offre-map-overlay-card-surface:
+		color-mix(in srgb, var(--brand-card) 88%, var(--brand-selected-surface) 12%);
+	--offre-map-overlay-card-border:
+		color-mix(in srgb, var(--brand-border) 68%, var(--brand-elite-primary, var(--brand-primary)) 32%);
+	--offre-map-overlay-card-close-surface:
+		color-mix(in srgb, var(--brand-card) 82%, var(--brand-selected-surface) 18%);
 }
 
 .offre-map-overlay-card--mobile {
@@ -31,9 +53,10 @@
 	padding: 0;
 	border: 1px solid var(--brand-control-border);
 	border-radius: 6px;
-	background: var(--brand-card);
+	background: var(--offre-map-overlay-card-close-surface, var(--brand-card));
 	font-size: 14px;
 	cursor: pointer;
+	color: var(--brand-foreground);
 }
 
 .offre-map-overlay-card__content {
@@ -144,7 +167,7 @@
 	font-size: 18px;
 	font-weight: 600;
 	line-height: 22px;
-	color: var(--brand-primary);
+	color: var(--offre-map-overlay-card-accent);
 }
 
 .offre-map-overlay-card__loading-price,
@@ -168,7 +191,7 @@
 .offre-map-overlay-card__price-suffix {
 	font-size: 12px;
 	line-height: 16px;
-	color: var(--brand-primary);
+	color: var(--offre-map-overlay-card-accent);
 }
 
 .offre-map-overlay-card__action {
@@ -180,6 +203,26 @@
 	padding: 0 14px;
 	border-radius: 8px;
 	font-size: 13px;
+	border: 1px solid transparent;
+	background: var(--offre-map-overlay-card-accent);
+	color: var(--offre-map-overlay-card-accent-foreground);
+	text-decoration: none;
+}
+
+.offre-map-overlay-card__action:hover:not(:disabled) {
+	filter: brightness(0.96);
+}
+
+.offre-map-overlay-card__action:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--offre-map-overlay-card-accent) 30%, white);
+	outline-offset: 2px;
+}
+
+.offre-map-overlay-card__action:disabled {
+	border-color: var(--brand-control-border);
+	background: color-mix(in srgb, var(--brand-card) 88%, var(--brand-border));
+	box-shadow: none;
+	color: var(--brand-muted-foreground);
 }
 
 .offre-map-overlay-card__action-spinner {

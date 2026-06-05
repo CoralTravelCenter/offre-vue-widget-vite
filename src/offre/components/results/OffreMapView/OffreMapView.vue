@@ -13,6 +13,7 @@ import {useOffreMapViewState} from "@/offre/composables/useOffreMapViewState";
 import type {NormalizedOffreWidgetOptions} from "@/offre/lib/payload";
 import {
 	getMapClusterPriceRange,
+	normalizeMapCoordinate,
 	type OffreMapSearchPoint
 } from "@/offre/lib/offre-map";
 import {
@@ -45,6 +46,25 @@ function ensureYmapsInitialized(apiKey: string) {
 	return ymapsInitializationPromise;
 }
 
+function resolveInitialMapLocation(products: B2CProduct[]) {
+	for (const product of products) {
+		const latitude = normalizeMapCoordinate(product.hotel?.coordinates?.latitude);
+		const longitude = normalizeMapCoordinate(product.hotel?.coordinates?.longitude);
+
+		if (latitude !== null && longitude !== null) {
+			return {
+				center: [longitude, latitude] as [number, number],
+				zoom: 9
+			};
+		}
+	}
+
+	return {
+		center: [37.617644, 55.755819] as [number, number],
+		zoom: 9
+	};
+}
+
 const props = defineProps<{
 	visibleProducts: B2CProduct[];
 	isLoadingBase?: boolean;
@@ -62,10 +82,7 @@ const lastAutoLocationKey = ref("");
 const hostname = typeof window === "undefined" ? "" : window.location.hostname;
 const showBottomMapOverlay = useMediaQuery("(max-width: 1023px)");
 const mapSettings = reactive({
-	location: {
-		center: [37.617644, 55.755819] as [number, number],
-		zoom: 9
-	},
+	location: resolveInitialMapLocation(props.visibleProducts),
 	controls: []
 });
 

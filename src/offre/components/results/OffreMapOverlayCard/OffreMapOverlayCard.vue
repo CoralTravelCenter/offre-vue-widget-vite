@@ -21,6 +21,9 @@ const emit = defineEmits<{
 function getRootClass(mobile: boolean) {
 	return [
 		"offre-map-overlay-card",
+		props.model.point.isEliteHotel
+			? "offre-map-overlay-card--elite"
+			: "offre-map-overlay-card--default",
 		mobile
 			? "offre-map-overlay-card--mobile"
 			: "offre-map-overlay-card--desktop"
@@ -146,6 +149,7 @@ function getStarClass(isFilled: boolean) {
 					<Button
 						v-else-if="model.point.offerHref && model.point.offerHref !== '#'"
 						as="a"
+						variant="default"
 						:href="model.point.offerHref"
 						target="_blank"
 						rel="noopener noreferrer"

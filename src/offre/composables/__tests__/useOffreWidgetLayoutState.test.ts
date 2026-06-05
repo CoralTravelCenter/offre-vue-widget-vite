@@ -14,18 +14,16 @@ describe("useOffreWidgetLayoutState", () => {
     const activeRegionId = ref("hurghada");
     const selectedDepartureId = ref("msk");
     const selectedTimeframe = ref("may");
-    const guestsFilterKey = ref("{\"adultsCount\":2}");
 
     const state = useOffreWidgetLayoutState({
       viewModeRef: viewMode,
       activeRegionIdSource: activeRegionId,
       selectedDepartureIdSource: selectedDepartureId,
-      selectedTimeframeSource: selectedTimeframe,
-      guestsFilterKeySource: guestsFilterKey
+      selectedTimeframeSource: selectedTimeframe
     });
 
     expect(state.hasActivatedMapView.value).toBe(true);
-    expect(state.mapViewKey.value).toBe("hurghada|msk|may|{\"adultsCount\":2}");
+    expect(state.mapViewKey.value).toBe("hurghada|msk|may");
     expect(state.navigationFixedOptions.value.top).toBe(16);
   });
 
@@ -34,8 +32,7 @@ describe("useOffreWidgetLayoutState", () => {
       viewModeRef: ref<"list" | "map">("list"),
       activeRegionIdSource: ref("hurghada"),
       selectedDepartureIdSource: ref("msk"),
-      selectedTimeframeSource: ref("may"),
-      guestsFilterKeySource: ref("{}")
+      selectedTimeframeSource: ref("may")
     });
 
     state.navigationFixedOptions.value.onStick({ fixed: true });
