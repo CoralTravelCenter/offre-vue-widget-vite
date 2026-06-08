@@ -83,7 +83,11 @@ export function mergeFetchedHotelIds(
   requestState: OffreRequestState,
   hasError: boolean
 ) {
-  if (hasError || requestState === "loading" || requestState === "idle" || queriedHotelIds.length === 0) {
+  if (
+    hasError
+    || requestState !== "success"
+    || queriedHotelIds.length === 0
+  ) {
     return fetchedHotelIds;
   }
 

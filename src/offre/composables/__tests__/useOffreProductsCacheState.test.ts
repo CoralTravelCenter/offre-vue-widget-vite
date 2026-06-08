@@ -220,6 +220,36 @@ describe("useOffreProductsCacheState", () => {
     expect(state.effectiveRequestState.value).toBe("error");
   });
 
+  it("does not mark queried hotels as fetched after a partial response", async () => {
+    const activeRegionId = ref("region-a");
+    const matchedHotels = ref([createHotel("101"), createHotel("202")]);
+    const visibleMatchedHotels = ref([createHotel("101"), createHotel("202")]);
+    const productsList = ref<B2CProduct[]>([createProduct("101", 500)]);
+    const requestState = ref<OffreRequestState>("partial");
+    const queriedHotelIds = ref<string[]>(["101", "202"]);
+    const productsFetching = ref(false);
+
+    const state = useOffreProductsCacheState({
+      activeRegionIdSource: activeRegionId,
+      matchedHotelsSource: matchedHotels,
+      visibleMatchedHotelsSource: visibleMatchedHotels,
+      productsListSource: productsList,
+      productReferenceSource: computed(() => ({})),
+      requestStateSource: requestState,
+      productsErrorSource: computed(() => false),
+      noMatchedProductsSource: computed(() => false),
+      queriedHotelIdsSource: queriedHotelIds,
+      productsFetchingSource: productsFetching,
+      isListPageModeSource: computed(() => true)
+    });
+
+    await nextTick();
+
+    expect(state.regionProductsSource.value).toHaveLength(1);
+    expect(state.shouldFetchRegionProducts.value).toBe(true);
+    expect(state.hasBootstrappedActiveRegion.value).toBe(false);
+  });
+
   it("clears all cached state when the reset signal changes", async () => {
     const resetSignal = ref(0);
     const productsList = ref<B2CProduct[]>([]);

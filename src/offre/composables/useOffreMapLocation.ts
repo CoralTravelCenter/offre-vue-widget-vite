@@ -27,13 +27,18 @@ export function useOffreMapLocation(params: {
   const activeHotelId = computed(() => toValue(params.activeHotelId));
   const lastAutoLocationKey = params.lastAutoLocationKeySource ?? ref("");
 
-  watch([points, map], async ([nextPoints, nextMap], _prev, onCleanup) => {
+  watch([points, map, ymapsInitialized, activeHotelId], async ([nextPoints, nextMap], _prev, onCleanup) => {
     let cancelled = false;
     onCleanup(() => {
       cancelled = true;
     });
 
-    if (!ymapsInitialized.value || !nextMap || nextPoints.length === 0) {
+    if (nextPoints.length === 0) {
+      lastAutoLocationKey.value = "";
+      return;
+    }
+
+    if (!ymapsInitialized.value || !nextMap) {
       return;
     }
 
@@ -43,16 +48,26 @@ export function useOffreMapLocation(params: {
 
     if (nextPoints.length === 1) {
       const nextLocationKey = `single:${nextPoints[0].hotelId}`;
+      const nextLocation = {
+        center: [nextPoints[0].longitude, nextPoints[0].latitude] as [number, number],
+        zoom: 10
+      };
 
       if (lastAutoLocationKey.value === nextLocationKey) {
         return;
       }
 
       lastAutoLocationKey.value = nextLocationKey;
-      params.mapSettings.location = {
-        center: [nextPoints[0].longitude, nextPoints[0].latitude],
-        zoom: 10
-      };
+
+      if (map.value) {
+        map.value.setLocation({
+          ...nextLocation,
+          duration: 750
+        });
+        return;
+      }
+
+      params.mapSettings.location = nextLocation;
       return;
     }
 

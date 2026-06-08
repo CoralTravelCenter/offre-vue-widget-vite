@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import { describe, expect, it, vi } from "vitest";
 import { useOffreWidgetLayoutState } from "@/offre/composables/useOffreWidgetLayoutState";
 
@@ -9,7 +9,7 @@ vi.mock("@vueuse/core", () => ({
 }));
 
 describe("useOffreWidgetLayoutState", () => {
-  it("builds map view key and keeps map mode activated immediately", () => {
+  it("builds map view key and activates map mode lazily", async () => {
     const viewMode = ref<"list" | "map">("list");
     const activeRegionId = ref("hurghada");
     const selectedDepartureId = ref("msk");
@@ -22,9 +22,14 @@ describe("useOffreWidgetLayoutState", () => {
       selectedTimeframeSource: selectedTimeframe
     });
 
-    expect(state.hasActivatedMapView.value).toBe(true);
+    expect(state.hasActivatedMapView.value).toBe(false);
     expect(state.mapViewKey.value).toBe("hurghada|msk|may");
     expect(state.navigationFixedOptions.value.top).toBe(16);
+
+    viewMode.value = "map";
+    await nextTick();
+
+    expect(state.hasActivatedMapView.value).toBe(true);
   });
 
   it("updates floating state through the fixed callback", () => {

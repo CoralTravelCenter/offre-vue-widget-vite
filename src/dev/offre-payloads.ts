@@ -11,7 +11,6 @@ const devOffrePayloadBase: WidgetPayload = {
             "fluid": ["P15D", "P115D"],
             "monthly": true
         },
-        "wildcardOption": "Все отели",
         "preferRegion": "Турция",
         "sortBy": "price"
     },

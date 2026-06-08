@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { createApp, h, nextTick, ref } from "vue";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useOffreWidgetUiState } from "@/offre/composables/useOffreWidgetUiState";
 import type { NormalizedOffreWidgetOptions } from "@/offre/lib/payload";
 
@@ -82,6 +82,42 @@ describe("useOffreWidgetUiState", () => {
       adultsCount: 2,
       childrenAges: []
     }));
+
+    app.unmount();
+  });
+
+  it("ignores sessionStorage write errors when persisting guests", async () => {
+    const options = ref(createOptions());
+    let state!: ReturnType<typeof useOffreWidgetUiState>;
+
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("quota exceeded");
+    });
+
+    const app = createApp({
+      setup() {
+        state = useOffreWidgetUiState({
+          optionsSource: options,
+          storageKeySource: ref("widget-guests-test")
+        });
+
+        return () => h("div");
+      }
+    });
+
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    mountedHosts.push(host);
+
+    expect(() => app.mount(host)).not.toThrow();
+
+    state.handleGuestsApply({
+      adultsCount: 3,
+      childrenAges: [5]
+    });
+    await nextTick();
+
+    expect(setItemSpy).toHaveBeenCalled();
 
     app.unmount();
   });

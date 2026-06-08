@@ -10,6 +10,7 @@ describe("useOffreLoadMoreState", () => {
     const paginatedProductsLength = ref(5);
     const productsFetching = ref(false);
     const productsError = ref(false);
+    const productsPartial = ref(false);
     const noMatchedProducts = ref(false);
 
     const state = useOffreLoadMoreState({
@@ -19,6 +20,7 @@ describe("useOffreLoadMoreState", () => {
       paginatedProductsLengthSource: paginatedProductsLength,
       productsFetchingSource: productsFetching,
       productsErrorSource: productsError,
+      productsPartialSource: productsPartial,
       noMatchedProductsSource: noMatchedProducts,
       pageSize: 5
     });
@@ -39,6 +41,7 @@ describe("useOffreLoadMoreState", () => {
     const currentPage = ref(1);
     const productsFetching = ref(false);
     const productsError = ref(false);
+    const productsPartial = ref(false);
 
     const state = useOffreLoadMoreState({
       currentPageRef: currentPage,
@@ -47,6 +50,7 @@ describe("useOffreLoadMoreState", () => {
       paginatedProductsLengthSource: computed(() => 5),
       productsFetchingSource: productsFetching,
       productsErrorSource: productsError,
+      productsPartialSource: productsPartial,
       noMatchedProductsSource: computed(() => false),
       pageSize: 5
     });
@@ -56,6 +60,36 @@ describe("useOffreLoadMoreState", () => {
     await nextTick();
 
     productsError.value = true;
+    productsFetching.value = false;
+    await nextTick();
+
+    expect(currentPage.value).toBe(1);
+    expect(state.loadMoreIssueMessage.value).toContain("Не удалось загрузить");
+  });
+
+  it("rolls back the page when a partial load-more response adds no new visible products", async () => {
+    const currentPage = ref(1);
+    const paginatedProductsLength = ref(5);
+    const productsFetching = ref(false);
+    const productsPartial = ref(false);
+
+    const state = useOffreLoadMoreState({
+      currentPageRef: currentPage,
+      canLoadMoreSource: computed(() => true),
+      totalProductsSource: computed(() => 10),
+      paginatedProductsLengthSource: paginatedProductsLength,
+      productsFetchingSource: productsFetching,
+      productsErrorSource: computed(() => false),
+      productsPartialSource: productsPartial,
+      noMatchedProductsSource: computed(() => false),
+      pageSize: 5
+    });
+
+    productsFetching.value = true;
+    state.handleLoadMore();
+    await nextTick();
+
+    productsPartial.value = true;
     productsFetching.value = false;
     await nextTick();
 

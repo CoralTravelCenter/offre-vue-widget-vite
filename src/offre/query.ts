@@ -52,7 +52,7 @@ export const offreQueryKeys = {
   }
 };
 
-function canUseSessionStorage() {
+export function canUseSessionStorage() {
   try {
     return typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
   } catch {
@@ -60,7 +60,7 @@ function canUseSessionStorage() {
   }
 }
 
-function createSessionStorageAdapter(): AsyncStorage<string> | undefined {
+export function createSessionStorageAdapter(): AsyncStorage<string> | undefined {
   if (!canUseSessionStorage()) {
     return undefined;
   }
@@ -69,16 +69,38 @@ function createSessionStorageAdapter(): AsyncStorage<string> | undefined {
 
   return {
     getItem(key) {
-      return storage.getItem(key);
+      try {
+        return storage.getItem(key);
+      } catch {
+        return null;
+      }
     },
     setItem(key, value) {
-      storage.setItem(key, value);
+      try {
+        storage.setItem(key, value);
+      } catch {
+        // Ignore storage write errors.
+      }
     },
     removeItem(key) {
-      storage.removeItem(key);
+      try {
+        storage.removeItem(key);
+      } catch {
+        // Ignore storage remove errors.
+      }
     },
     entries() {
-      return Object.keys(storage).map((key) => [key, storage.getItem(key) ?? ""] as [string, string]);
+      try {
+        return Object.keys(storage).map((key) => {
+          try {
+            return [key, storage.getItem(key) ?? ""] as [string, string];
+          } catch {
+            return [key, ""] as [string, string];
+          }
+        });
+      } catch {
+        return [];
+      }
     }
   };
 }

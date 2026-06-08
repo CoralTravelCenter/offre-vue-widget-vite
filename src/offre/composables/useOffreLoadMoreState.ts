@@ -7,6 +7,7 @@ export function useOffreLoadMoreState(params: {
   paginatedProductsLengthSource: MaybeRefOrGetter<number>;
   productsFetchingSource: MaybeRefOrGetter<boolean>;
   productsErrorSource: MaybeRefOrGetter<boolean>;
+  productsPartialSource?: MaybeRefOrGetter<boolean>;
   noMatchedProductsSource: MaybeRefOrGetter<boolean>;
   resetSignalSource?: MaybeRefOrGetter<unknown>;
   pageSize?: number;
@@ -15,30 +16,37 @@ export function useOffreLoadMoreState(params: {
   const loadMoreIssueMessage = ref("");
   const isRollingBackLoadMore = ref(false);
   const pendingLoadMoreRequest = ref(false);
+  const loadMoreStartProductsLength = ref(0);
 
   watch(() => toValue(params.resetSignalSource), () => {
     loadMoreIssueMessage.value = "";
     isRollingBackLoadMore.value = false;
     pendingLoadMoreRequest.value = false;
+    loadMoreStartProductsLength.value = 0;
   }, { immediate: true });
 
   watch([
     () => toValue(params.productsErrorSource),
+    () => toValue(params.productsPartialSource),
     () => toValue(params.noMatchedProductsSource),
-    () => toValue(params.productsFetchingSource)
-  ], ([hasError, hasNoMatched, isFetching]) => {
+    () => toValue(params.productsFetchingSource),
+    () => toValue(params.paginatedProductsLengthSource)
+  ], ([hasError, hasPartial, hasNoMatched, isFetching, paginatedProductsLength]) => {
     if (isFetching || params.currentPageRef.value <= 1 || isRollingBackLoadMore.value || !pendingLoadMoreRequest.value) {
       return;
     }
 
-    if (!hasError && !hasNoMatched) {
+    const hasNoNewVisibleProducts = paginatedProductsLength <= loadMoreStartProductsLength.value;
+
+    if (!hasError && !hasPartial && !hasNoMatched && !hasNoNewVisibleProducts) {
       loadMoreIssueMessage.value = "";
       pendingLoadMoreRequest.value = false;
+      loadMoreStartProductsLength.value = 0;
       return;
     }
 
     isRollingBackLoadMore.value = true;
-    loadMoreIssueMessage.value = hasError
+    loadMoreIssueMessage.value = hasError || hasPartial
       ? "Не удалось загрузить дополнительные варианты. Уже найденные отели остаются на экране."
       : "Для следующей порции подходящих вариантов не нашлось. Уже найденные отели остаются на экране.";
     params.currentPageRef.value -= 1;
@@ -59,9 +67,11 @@ export function useOffreLoadMoreState(params: {
       && hasPendingLoadMoreRequest
       && !isRollingBackLoadMore.value
       && !toValue(params.productsErrorSource)
+      && !toValue(params.productsPartialSource)
       && !toValue(params.noMatchedProductsSource)
     ) {
       pendingLoadMoreRequest.value = false;
+      loadMoreStartProductsLength.value = 0;
     }
   });
 
@@ -97,6 +107,7 @@ export function useOffreLoadMoreState(params: {
 
     loadMoreIssueMessage.value = "";
     pendingLoadMoreRequest.value = true;
+    loadMoreStartProductsLength.value = toValue(params.paginatedProductsLengthSource);
     params.currentPageRef.value += 1;
   }
 

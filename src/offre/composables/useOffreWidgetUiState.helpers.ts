@@ -95,7 +95,11 @@ export function writePersistedGuestsState(key: string | null | undefined, value:
     return;
   }
 
-  window.sessionStorage.setItem(storageKey, JSON.stringify(normalizeGuestsState(value)));
+  try {
+    window.sessionStorage.setItem(storageKey, JSON.stringify(normalizeGuestsState(value)));
+  } catch {
+    // Ignore storage write errors.
+  }
 }
 
 export function resolveInitialGuestsState(roomCriterias: WidgetRoomCriteria[] | undefined): OffreWidgetGuestsState {

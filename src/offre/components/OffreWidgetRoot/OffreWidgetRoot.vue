@@ -48,8 +48,10 @@ const { hasEnteredViewport } = useOffreWidgetVisibilityState({
 const {
 	activeRegionId,
 	departures,
+	departuresError,
 	departuresQuery,
 	hotelInfoById,
+	hotelsInfoError,
 	matchedHotelsDirectory,
 	options,
 	regionTabs,
@@ -192,17 +194,18 @@ const {
 	loadMoreSkeletonItems,
 	loadMoreButtonLabel,
 	handleLoadMore
-} = useOffreLoadMoreState({
-	currentPageRef: currentPage,
-	canLoadMoreSource: canLoadMore,
-	totalProductsSource: totalProducts,
-	paginatedProductsLengthSource: computed(() => paginatedProducts.value.length),
-	productsFetchingSource: productsFetching,
-	productsErrorSource: productsError,
-	noMatchedProductsSource: noMatchedProducts,
-	resetSignalSource: currentProductsResetSignal,
-	pageSize: PRODUCTS_PAGE_SIZE
-});
+	} = useOffreLoadMoreState({
+		currentPageRef: currentPage,
+		canLoadMoreSource: canLoadMore,
+		totalProductsSource: totalProducts,
+		paginatedProductsLengthSource: computed(() => paginatedProducts.value.length),
+		productsFetchingSource: productsFetching,
+		productsErrorSource: productsError,
+		productsPartialSource: productsPartial,
+		noMatchedProductsSource: noMatchedProducts,
+		resetSignalSource: currentProductsResetSignal,
+		pageSize: PRODUCTS_PAGE_SIZE
+	});
 
 const {
 	navigationFixedOptions,
@@ -294,11 +297,44 @@ const {
 				/>
 			</div>
 
-			<div
-				v-else-if="effectiveNoMatchedProducts && regionProductsSource.length === 0"
-				:class="['offre-widget__state', productsListState.modifierClass]"
-			>
-				<OffreResultsStateNotice
+				<div
+					v-else-if="hotelsInfoError && regionProductsSource.length === 0"
+					:class="['offre-widget__state', 'offre-widget__state--error']"
+				>
+					<OffreResultsStateNotice
+							title="Упс! Что-то пошло не так."
+							description="Не удалось загрузить данные по отелям, попробуйте зайти позже"
+							variant="error"
+					/>
+				</div>
+
+				<div
+					v-else-if="departuresError && regionProductsSource.length === 0"
+					:class="['offre-widget__state', 'offre-widget__state--error']"
+				>
+					<OffreResultsStateNotice
+							title="Упс! Что-то пошло не так."
+							description="Не удалось загрузить города вылета, попробуйте зайти позже"
+							variant="error"
+					/>
+				</div>
+
+				<div
+					v-else-if="productsPartial && regionProductsSource.length === 0"
+					:class="['offre-widget__state', productsListState.modifierClass]"
+				>
+					<OffreResultsStateNotice
+							:title="productsListState.title"
+							:description="productsListState.description"
+							variant="warning"
+					/>
+				</div>
+
+				<div
+					v-else-if="effectiveNoMatchedProducts && regionProductsSource.length === 0"
+					:class="['offre-widget__state', productsListState.modifierClass]"
+				>
+					<OffreResultsStateNotice
 						:title="productsListState.title"
 						:description="productsListState.description"
 						variant="warning"
@@ -385,11 +421,22 @@ const {
 				/>
 			</div>
 
-			<div
-				v-else-if="effectiveNoMatchedProducts && mapProductsSource.length === 0"
-				:class="['offre-widget__state', mapProductsState.modifierClass]"
-			>
-				<OffreResultsStateNotice
+				<div
+					v-else-if="productsPartial && mapProductsSource.length === 0"
+					:class="['offre-widget__state', mapProductsState.modifierClass]"
+				>
+					<OffreResultsStateNotice
+						:title="mapProductsState.title"
+						:description="mapProductsState.description"
+						variant="warning"
+					/>
+				</div>
+
+				<div
+					v-else-if="effectiveNoMatchedProducts && mapProductsSource.length === 0"
+					:class="['offre-widget__state', mapProductsState.modifierClass]"
+				>
+					<OffreResultsStateNotice
 					:title="mapProductsState.title"
 					:description="mapProductsState.description"
 					variant="warning"

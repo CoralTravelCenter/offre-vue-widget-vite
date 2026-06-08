@@ -4,7 +4,11 @@ import type { OffreTourType, OffreViewMode } from "@/offre/types";
 const VIEW_MODE_STORAGE_PREFIX = "offre-widget:view-mode";
 
 export function canUseSessionStorage() {
-  return typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
+  try {
+    return typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
+  } catch {
+    return false;
+  }
 }
 
 export function isOffreViewMode(value: unknown): value is OffreViewMode {

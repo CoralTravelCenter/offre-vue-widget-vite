@@ -137,7 +137,8 @@ export function useOffreProductsQuery(params: {
       descriptorsCount: productQueryDescriptors.value.length,
       isPending: productsQuery.isPending.value,
       isError: productsQuery.isError.value,
-      productsCount: productsCount.value
+      productsCount: productsCount.value,
+      batchRequestState: batchRequestState.value
     });
   });
   const productsError = computed(() => {

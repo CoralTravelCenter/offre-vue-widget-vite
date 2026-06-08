@@ -185,7 +185,18 @@ export function buildHotelIdSet(points: Array<{ hotelId: string }>) {
 export function buildMapPointsLocationKey(
   points: Array<{ hotelId: string; longitude: number; latitude: number }>
 ) {
-  return points
+  return [...points]
+    .sort((left, right) => {
+      if (left.hotelId !== right.hotelId) {
+        return left.hotelId.localeCompare(right.hotelId, "en");
+      }
+
+      if (left.longitude !== right.longitude) {
+        return left.longitude - right.longitude;
+      }
+
+      return left.latitude - right.latitude;
+    })
     .map((point) => `${point.hotelId}:${point.longitude.toFixed(4)},${point.latitude.toFixed(4)}`)
     .join("|");
 }

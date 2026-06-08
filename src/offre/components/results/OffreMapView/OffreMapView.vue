@@ -40,7 +40,10 @@ function ensureYmapsInitialized(apiKey: string) {
 	}
 
 	if (!ymapsInitializationPromise) {
-		ymapsInitializationPromise = initYmaps();
+		ymapsInitializationPromise = initYmaps().catch((error) => {
+			ymapsInitializationPromise = null;
+			throw error;
+		});
 	}
 
 	return ymapsInitializationPromise;
@@ -74,6 +77,7 @@ const props = defineProps<{
 	selectedDepartureName: string;
 }>();
 
+const mapInitError = ref(false);
 const ymapsInitialized = ref(false);
 const map = shallowRef();
 const clusterer = shallowRef();
@@ -153,8 +157,14 @@ onMounted(async () => {
 		return;
 	}
 
-	await ensureYmapsInitialized(YMAPS_API_KEY);
-	ymapsInitialized.value = true;
+	try {
+		mapInitError.value = false;
+		await ensureYmapsInitialized(YMAPS_API_KEY);
+		ymapsInitialized.value = true;
+	} catch (error) {
+		console.error("OffreWidget: failed to initialize Yandex Maps", error);
+		mapInitError.value = true;
+	}
 });
 </script>
 
@@ -165,6 +175,13 @@ onMounted(async () => {
 			class="offre-map-view__state"
 		>
 			Карта временно недоступна
+		</div>
+
+		<div
+			v-else-if="mapInitError"
+			class="offre-map-view__state"
+		>
+			Не удалось загрузить карту
 		</div>
 
 		<div

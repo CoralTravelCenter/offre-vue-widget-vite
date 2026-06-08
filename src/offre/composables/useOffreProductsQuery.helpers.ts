@@ -124,10 +124,12 @@ export function resolveNoMatchedProducts(params: {
   isPending: boolean;
   isError: boolean;
   productsCount: number;
+  batchRequestState?: OffreRequestState;
 }) {
   return params.descriptorsCount > 0
     && !params.isPending
     && !params.isError
+    && params.batchRequestState !== "partial"
     && params.productsCount === 0;
 }
 

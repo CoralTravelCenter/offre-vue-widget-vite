@@ -188,7 +188,7 @@ describe("useOffreProductsQuery", () => {
     expect(state.noMatchedProducts.value).toBe(false);
   });
 
-  it("derives partial and no-match flags from query results", () => {
+  it("derives partial state without misclassifying it as no-match", () => {
     mocks.isPending.value = false;
     mocks.isFetching.value = false;
     mocks.isRefetching.value = true;
@@ -209,7 +209,7 @@ describe("useOffreProductsQuery", () => {
 
     expect(state.requestState.value).toBe("partial");
     expect(state.productsPartial.value).toBe(true);
-    expect(state.noMatchedProducts.value).toBe(true);
+    expect(state.noMatchedProducts.value).toBe(false);
     expect(state.productsError.value).toBe(false);
     expect(state.productsRefetching.value).toBe(true);
   });

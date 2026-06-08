@@ -140,6 +140,14 @@ describe("useOffreProductsQuery helpers", () => {
       productsCount: 0
     })).toBe(true);
 
+    expect(resolveNoMatchedProducts({
+      descriptorsCount: 2,
+      isPending: false,
+      isError: false,
+      productsCount: 0,
+      batchRequestState: "partial"
+    })).toBe(false);
+
     expect(resolveProductsError({
       isError: false,
       batchRequestState: "error"

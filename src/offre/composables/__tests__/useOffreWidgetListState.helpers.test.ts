@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  canUseSessionStorage,
   isOffreViewMode,
   paginateProducts,
   pruneTourTypeByHotelId,
@@ -9,10 +10,41 @@ import {
 } from "@/offre/composables/useOffreWidgetListState.helpers";
 
 describe("useOffreWidgetListState helpers", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("validates and resolves view mode storage keys", () => {
     expect(isOffreViewMode("list")).toBe(true);
     expect(isOffreViewMode("grid")).toBe(false);
     expect(resolveViewModeStorageKey(" widget-1 ")).toBe("offre-widget:view-mode:widget-1");
+  });
+
+  it("returns false when sessionStorage access throws", () => {
+    const originalWindowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const mockWindow = {};
+
+    Object.defineProperty(mockWindow, "sessionStorage", {
+      configurable: true,
+      get() {
+        throw new Error("blocked");
+      }
+    });
+
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      get() {
+        return mockWindow;
+      }
+    });
+
+    expect(canUseSessionStorage()).toBe(false);
+
+    if (originalWindowDescriptor) {
+      Object.defineProperty(globalThis, "window", originalWindowDescriptor);
+    } else {
+      Reflect.deleteProperty(globalThis, "window");
+    }
   });
 
   it("resolves total items and paginates product lists", () => {

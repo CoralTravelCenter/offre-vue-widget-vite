@@ -21,8 +21,10 @@ const mocks = vi.hoisted(() => {
 
   const activeRegionId = manualRef("region-a");
   const departures = manualRef([{ id: "msk", type: 5, label: "Москва" }]);
+  const departuresError = manualRef(false);
   const departuresPending = manualRef(false);
   const hotelInfoById = manualRef(new Map());
+  const hotelsInfoError = manualRef(false);
   const matchedHotelsDirectory = manualRef([{ id: "101" }]);
   const options = manualRef({
     groupBy: "regions",
@@ -102,8 +104,10 @@ const mocks = vi.hoisted(() => {
     manualRef,
     activeRegionId,
     departures,
+    departuresError,
     departuresPending,
     hotelInfoById,
+    hotelsInfoError,
     matchedHotelsDirectory,
     options,
     regionTabs,
@@ -167,8 +171,10 @@ vi.mock("@/offre/composables/useOffreFiltersQueryState", () => ({
   useOffreFiltersQueryState: () => ({
     activeRegionId: mocks.activeRegionId,
     departures: mocks.departures,
+    departuresError: mocks.departuresError,
     departuresQuery: { isPending: mocks.departuresPending },
     hotelInfoById: mocks.hotelInfoById,
+    hotelsInfoError: mocks.hotelsInfoError,
     matchedHotelsDirectory: mocks.matchedHotelsDirectory,
     options: mocks.options,
     regionTabs: mocks.regionTabs,
@@ -407,9 +413,11 @@ async function mountRoot() {
 
 function resetState() {
   mocks.activeRegionId.value = "region-a";
+  mocks.departuresError.value = false;
   mocks.departuresPending.value = false;
   mocks.regionTabs.value = [{ id: "region-a", label: "Region A" }];
   mocks.regionsLoading.value = false;
+  mocks.hotelsInfoError.value = false;
   mocks.selectedDeparture.value = { id: "msk", type: 5, name: "Москва" };
   mocks.selectedDepartureId.value = "msk";
   mocks.selectedTimeframe.value = "June";
@@ -517,6 +525,51 @@ describe("OffreWidgetRoot", () => {
 
     expect(notice?.textContent).toContain("Упс! Что-то пошло не так.");
     expect(notice?.textContent).toContain("error");
+
+    view.unmount();
+  });
+
+  it("renders the error notice branch when hotel info bootstrap failed", async () => {
+    mocks.hotelsInfoError.value = true;
+
+    const view = await mountRoot();
+    const notice = view.container.querySelector("[data-testid='results-state-notice']");
+
+    expect(notice?.textContent).toContain("Упс! Что-то пошло не так.");
+    expect(notice?.textContent).toContain("Не удалось загрузить данные по отелям");
+    expect(notice?.textContent).toContain("error");
+
+    view.unmount();
+  });
+
+  it("renders the error notice branch when departures bootstrap failed", async () => {
+    mocks.departuresError.value = true;
+
+    const view = await mountRoot();
+    const notice = view.container.querySelector("[data-testid='results-state-notice']");
+
+    expect(notice?.textContent).toContain("Упс! Что-то пошло не так.");
+    expect(notice?.textContent).toContain("Не удалось загрузить города вылета");
+    expect(notice?.textContent).toContain("error");
+
+    view.unmount();
+  });
+
+  it("renders the warning notice branch when results are partial and nothing is shown yet", async () => {
+    mocks.productsPartial.value = true;
+    mocks.productsListState.value = {
+      title: "Часть туров не загрузилась. Показываем результаты, которые удалось получить.",
+      description: "",
+      modifierClass: "offre-widget__state--warning",
+      partialMessage: "",
+      showRetry: false
+    };
+
+    const view = await mountRoot();
+    const notice = view.container.querySelector("[data-testid='results-state-notice']");
+
+    expect(notice?.textContent).toContain("Часть туров не загрузилась");
+    expect(notice?.textContent).toContain("warning");
 
     view.unmount();
   });

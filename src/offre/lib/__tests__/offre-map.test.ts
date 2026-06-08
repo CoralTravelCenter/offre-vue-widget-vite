@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildBaseMapPoints,
   buildHotelIdSet,
+  buildMapPointsLocationKey,
   buildMapSearchPoints,
   buildPointsByHotelId
 } from "@/offre/lib/offre-map";
@@ -67,5 +68,19 @@ describe("offre-map helpers", () => {
     expect(points[0]?.currentPriceLabel).toContain("₽");
     expect(buildPointsByHotelId(points).get("10")).toBe(points[0]);
     expect(buildHotelIdSet(points).has("10")).toBe(true);
+  });
+
+  it("builds a stable location key regardless of point order", () => {
+    const left = buildMapPointsLocationKey([
+      { hotelId: "202", longitude: 33.8, latitude: 27.2 },
+      { hotelId: "101", longitude: 28.8, latitude: 36.9 }
+    ]);
+
+    const right = buildMapPointsLocationKey([
+      { hotelId: "101", longitude: 28.8, latitude: 36.9 },
+      { hotelId: "202", longitude: 33.8, latitude: 27.2 }
+    ]);
+
+    expect(left).toBe(right);
   });
 });
