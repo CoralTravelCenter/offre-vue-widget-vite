@@ -15,6 +15,7 @@ import {
 } from "@/brands/registry";
 import type { BrandDefinition } from "@/brands/types";
 import type { WidgetOptions, WidgetPayload } from "@/widget/types";
+import { markOffrePerformance, OFFRE_PERFORMANCE_MARKS } from "@/lib/offre-performance";
 
 interface CreateOffreWidgetAppParams {
   container: Element;
@@ -86,6 +87,11 @@ export function createOffreWidgetApp({ container, payload }: CreateOffreWidgetAp
 export function mountOffreWidget({ container, payload }: CreateOffreWidgetAppParams): MountedOffreWidget {
   const { app, brandDefinition, queryClient, instanceId } = createOffreWidgetApp({ container, payload });
   const instance = app.mount(container) as ComponentPublicInstance;
+
+  markOffrePerformance(OFFRE_PERFORMANCE_MARKS.mounted, {
+    instanceId,
+    brand: brandDefinition.key
+  });
 
   return {
     app,

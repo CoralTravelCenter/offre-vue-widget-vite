@@ -1,15 +1,26 @@
-import { onBeforeUnmount, onMounted, ref, type Ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, toValue, type MaybeRefOrGetter, type Ref } from "vue";
+import { markOffrePerformance, OFFRE_PERFORMANCE_MARKS } from "@/lib/offre-performance";
 
 const WIDGET_VISIBILITY_ROOT_MARGIN = "240px 0px 240px 0px";
 
 export function useOffreWidgetVisibilityState(params: {
   targetRef: Ref<HTMLElement | null>;
+  instanceIdSource?: MaybeRefOrGetter<string>;
+  rootMargin?: string;
+  markVisiblePerformance?: boolean;
 }) {
   const hasEnteredViewport = ref(false);
   let observer: IntersectionObserver | null = null;
 
   function markVisible() {
     hasEnteredViewport.value = true;
+
+    if (params.markVisiblePerformance !== false) {
+      markOffrePerformance(OFFRE_PERFORMANCE_MARKS.visible, {
+        instanceId: toValue(params.instanceIdSource) ?? ""
+      });
+    }
+
     observer?.disconnect();
     observer = null;
   }
@@ -34,7 +45,7 @@ export function useOffreWidgetVisibilityState(params: {
       }
     }, {
       root: null,
-      rootMargin: WIDGET_VISIBILITY_ROOT_MARGIN,
+      rootMargin: params.rootMargin ?? WIDGET_VISIBILITY_ROOT_MARGIN,
       threshold: 0
     });
 

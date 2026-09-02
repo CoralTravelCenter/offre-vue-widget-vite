@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offre Widget Browser Smoke</title>
+    <style>
+      body {
+        margin: 24px;
+        color: rgb(17, 24, 39);
+        background: rgb(254, 252, 232);
+        font-family: Georgia, serif;
+      }
+
+      #host-button {
+        padding: 7px 11px;
+        color: rgb(255, 255, 255);
+        background: rgb(185, 28, 28);
+        border: 3px solid rgb(17, 24, 39);
+        cursor: crosshair;
+      }
+
+      #widget-shell {
+        margin-top: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Host page sentinel</h1>
+    <button id="host-button" type="button">Host button</button>
+
+    <main id="widget-shell">
+      <script type="application/json" data-offre-vue-test>
+        {
+          "brand": "coral",
+          "options": {
+            "groupBy": "countries",
+            "preferRegion": "Турция",
+            "departureCity": "Москва",
+            "nights": [7],
+            "timeframe": {
+              "fixed": ["2026-09-15", "2026-09-30"],
+              "monthly": false
+            }
+          },
+          "hotels": [{ "id": 101 }]
+        }
+      </script>
+    </main>
+
+    <script>
+      const hostButton = document.querySelector("#host-button");
+      const widgetShell = document.querySelector("#widget-shell");
+
+      if (new URLSearchParams(window.location.search).get("below") === "1") {
+        widgetShell.style.marginTop = "1300px";
+      }
+
+      window.__offreHostStylesBeforeWidget = {
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+        bodyColor: getComputedStyle(document.body).color,
+        buttonBorder: getComputedStyle(hostButton).border,
+        buttonCursor: getComputedStyle(hostButton).cursor,
+        fontSansVariable: getComputedStyle(document.documentElement).getPropertyValue("--font-sans"),
+        spacingVariable: getComputedStyle(document.documentElement).getPropertyValue("--spacing")
+      };
+    </script>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

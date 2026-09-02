@@ -86,4 +86,42 @@ describe("useOffreWidgetVisibilityState", () => {
 
     app.unmount();
   });
+
+  it("uses a custom root margin for early activation", async () => {
+    let observerOptions: IntersectionObserverInit | undefined;
+
+    vi.stubGlobal("IntersectionObserver", class {
+      constructor(_callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        observerOptions = options;
+      }
+
+      observe() {}
+      disconnect() {}
+    });
+
+    const host = document.createElement("div");
+    document.body.append(host);
+
+    const app = createApp({
+      setup() {
+        return useOffreWidgetVisibilityState({
+          targetRef: ref(document.createElement("div")),
+          rootMargin: "1000px 0px 1000px 0px",
+          markVisiblePerformance: false
+        });
+      },
+      template: "<div />"
+    });
+
+    app.mount(host);
+    await nextTick();
+
+    expect(observerOptions).toMatchObject({
+      root: null,
+      rootMargin: "1000px 0px 1000px 0px",
+      threshold: 0
+    });
+
+    app.unmount();
+  });
 });

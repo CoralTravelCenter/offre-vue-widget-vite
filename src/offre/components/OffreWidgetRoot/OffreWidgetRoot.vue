@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {LoaderCircle} from "lucide-vue-next";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import OffreControls from "@/offre/components/OffreControls/OffreControls.vue";
 import ViewModeSwitch from "@/offre/components/ViewModeSwitch/ViewModeSwitch.vue";
 import RegionTabsNav from "@/offre/components/RegionTabsNav/RegionTabsNav.vue";
@@ -28,6 +28,7 @@ import {
 import {buildWidgetPersistenceKey} from "@/offre/lib/offre-widget-root";
 import type {BrandDefinition, BrandKey} from "@/brands/types";
 import type {OffreViewMode} from "@/offre/types";
+import {markOffrePerformance, OFFRE_PERFORMANCE_MARKS} from "@/lib/offre-performance";
 
 const PRODUCTS_PAGE_SIZE = 5;
 
@@ -41,8 +42,14 @@ interface OffreWidgetRootProps {
 
 const props = defineProps<OffreWidgetRootProps>();
 const widgetRootRef = ref<HTMLElement | null>(null);
+const { hasEnteredViewport: hasEnteredBootstrapRange } = useOffreWidgetVisibilityState({
+	targetRef: widgetRootRef,
+	rootMargin: "1000px 0px 1000px 0px",
+	markVisiblePerformance: false
+});
 const { hasEnteredViewport } = useOffreWidgetVisibilityState({
-	targetRef: widgetRootRef
+	targetRef: widgetRootRef,
+	instanceIdSource: () => props.instanceId
 });
 
 const {
@@ -64,7 +71,7 @@ const {
 } = useOffreFiltersQueryState(
 	() => props.options,
 	() => props.hotelsList,
-	hasEnteredViewport
+	hasEnteredBootstrapRange
 );
 
 const hotelOrderById = computed(() => {
@@ -117,6 +124,24 @@ const {
 });
 
 const departuresLoading = computed(() => departuresQuery.isPending.value);
+let hasMarkedBootstrapReady = false;
+
+watch(
+	[hasEnteredBootstrapRange, regionsLoading, departuresLoading],
+	([isInBootstrapRange, isRegionsLoading, isDeparturesLoading]) => {
+		if (hasMarkedBootstrapReady || !isInBootstrapRange || isRegionsLoading || isDeparturesLoading) {
+			return;
+		}
+
+		hasMarkedBootstrapReady = true;
+		markOffrePerformance(OFFRE_PERFORMANCE_MARKS.bootstrapReady, {
+			instanceId: props.instanceId,
+			hotelsInfoError: hotelsInfoError.value,
+			departuresError: departuresError.value
+		});
+	},
+	{immediate: true}
+);
 const viewMode = ref<OffreViewMode>("list");
 const currentProductsResetSignal = computed(() => resetNonce.value);
 const {currentPage} = useOffreRegionPagingState({
@@ -357,6 +382,7 @@ const {
 				</div>
 
 				<OffreOffersList
+						:instance-id="instanceId"
 						:products="paginatedProducts"
 						:product-reference="productReferenceSource"
 						:selected-departure-name="selectedDeparture?.name ?? ''"

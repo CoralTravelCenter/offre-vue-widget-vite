@@ -1,10 +1,28 @@
 @import "../brands/coral.css";
 @import "../brands/sunmar.css";
-@import "tailwindcss";
+@import "tailwindcss/utilities.css" layer(utilities);
+@reference "tailwindcss/theme.css";
+@config "../../tailwind.config.ts";
 
-@custom-variant dark (&:is(.dark *));
+@layer theme, base, components, utilities;
 
-:root {
+@custom-variant dark (&:where(.offre-widget-host[data-offre-theme="dark"], .offre-widget-host[data-offre-theme="dark"] *));
+
+.offre-widget-host {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --color-white: #ffffff;
+    --spacing: 0.25rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
+    --font-weight-normal: 400;
+    --animate-spin: spin 1s linear infinite;
+    --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --default-transition-duration: 0.15s;
+    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --background: #ffffff;
     --foreground: #000000;
     --card: #ffffff;
@@ -28,33 +46,6 @@
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 8px 24px rgba(149, 157, 165, 0.2);
-    --shadow: var(--shadow-sm);
-}
-
-.dark {
-    --background: #111111;
-    --foreground: #f3f4f6;
-    --card: #1b1b1b;
-    --card-foreground: #f3f4f6;
-    --popover: #1b1b1b;
-    --popover-foreground: #f3f4f6;
-    --primary: #38a3dd;
-    --primary-foreground: #ffffff;
-    --secondary: #1b1b1b;
-    --secondary-foreground: #f3f4f6;
-    --muted: #1b1b1b;
-    --muted-foreground: rgba(255, 255, 255, 0.7);
-    --accent: #132531;
-    --accent-foreground: #38a3dd;
-    --destructive: #f97316;
-    --destructive-foreground: #ffffff;
-    --border: rgba(255, 255, 255, 0.16);
-    --input: rgba(255, 255, 255, 0.16);
-    --ring: color-mix(in srgb, #38a3dd 35%, transparent);
-    --radius: 0.5rem;
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
     --shadow: var(--shadow-sm);
 }
 
@@ -168,9 +159,46 @@
 }
 
 @layer base {
-    button:not(:disabled),
-    [role="button"]:not(:disabled) {
+    .offre-widget-host,
+    .offre-widget-host *,
+    .offre-widget-host::before,
+    .offre-widget-host::after,
+    .offre-widget-host *::before,
+    .offre-widget-host *::after {
+        box-sizing: border-box;
+    }
+
+    .offre-widget-host {
+        color: var(--foreground);
+        background: var(--background);
+        font-family: var(--font-sans);
+        line-height: 1.5;
+    }
+
+    .offre-widget-host :where(h1, h2, h3, h4, h5, h6, p) {
+        margin: 0;
+    }
+
+    .offre-widget-host :where(ol, ul, menu) {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .offre-widget-host :where(button, input, select, optgroup, textarea) {
+        margin: 0;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+    }
+
+    .offre-widget-host :where(button, [role="button"]):not(:disabled) {
         cursor: pointer;
+    }
+
+    .offre-widget-host :where(img, svg, video, canvas) {
+        display: block;
+        max-width: 100%;
     }
 }
 
@@ -192,14 +220,4 @@
 
 .offre-scroll-snap-x > * {
     scroll-snap-align: start;
-}
-
-@layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-
-    body {
-        @apply bg-background text-foreground;
-    }
 }

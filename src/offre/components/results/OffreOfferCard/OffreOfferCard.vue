@@ -25,6 +25,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	"update:tour-type": [value: OffreTourType];
+	"image-loaded": [];
 }>();
 
 const isHotelOnly = computed(() => Boolean(props.hotelRuntimeEntry?.onlyhotel));
@@ -121,6 +122,7 @@ function getTermsSkeletonItemClass(width: string) {
 						:src="imageUrl"
 						:alt="hotelName"
 						class="offre-offer-card__image"
+						@load="emit('image-loaded')"
 				>
 				<div
 						v-else

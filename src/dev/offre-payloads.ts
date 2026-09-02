@@ -6,7 +6,7 @@ const devOffrePayloadBase: WidgetPayload = {
         "theme": "default",
         "chartersOnly": true,
         "groupBy": "countries",
-        "nights": [7, 8, 9, 10, 11, 12, 13, 14],
+        "nights": [7],
         "timeframe": {
             "fluid": ["P15D", "P115D"],
             "monthly": true

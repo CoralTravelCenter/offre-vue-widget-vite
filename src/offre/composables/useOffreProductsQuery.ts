@@ -24,6 +24,7 @@ import {
   resolveProductsQueryMode,
   resolveProductsRequestState
 } from "@/offre/composables/useOffreProductsQuery.helpers";
+import { markOffrePerformance, OFFRE_PERFORMANCE_MARKS } from "@/lib/offre-performance";
 
 const PRODUCTS_QUERY_CONCURRENCY = 6;
 
@@ -55,6 +56,11 @@ async function runOffreProductsBatchQuery(params: {
   hotelOrderById: Map<string, number>;
 }) {
   const totalStartedAt = getNow();
+  markOffrePerformance(OFFRE_PERFORMANCE_MARKS.productsRequestStart, {
+    queryCount: params.productQueryDescriptors.length,
+    hotelCount: params.queryMode.effectiveHotels.length,
+    currentPage: params.queryMode.currentPage
+  });
   const primaryTasks = params.productQueryDescriptors.map((descriptor) => {
     return () => descriptor.onlyhotel
       ? hotelPriceSearchList(descriptor.searchCriterias, { signal: params.signal })
@@ -88,6 +94,15 @@ async function runOffreProductsBatchQuery(params: {
       totalDurationMs: Math.round(getNow() - totalStartedAt),
       primaryDurationMs
     })
+  });
+
+  markOffrePerformance(OFFRE_PERFORMANCE_MARKS.productsRequestEnd, {
+    queryCount: params.productQueryDescriptors.length,
+    hotelCount: params.queryMode.effectiveHotels.length,
+    currentPage: params.queryMode.currentPage,
+    durationMs: Math.round(getNow() - totalStartedAt),
+    requestState: batchResult.meta.requestState,
+    resultProducts: batchResult.payload.products.length
   });
 
   return batchResult;

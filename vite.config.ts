@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import {fileURLToPath, URL} from "node:url";
 import {defineConfig, loadEnv} from "vite";
 import monkey from "vite-plugin-monkey";
+import {configDefaults} from "vitest/config";
 
 const widgetEntry = fileURLToPath(
     new URL("./src/widget/entry.ts", import.meta.url),
@@ -50,6 +51,9 @@ export default defineConfig(({mode}) => {
                 open: "/__vite-plugin-monkey.install.user.js",
             }
             : undefined,
+        test: {
+            exclude: [...configDefaults.exclude, "tests/browser/**"],
+        },
         build: {
             target: "esnext",
             minify: "terser",

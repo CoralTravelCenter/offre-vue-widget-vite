@@ -5,6 +5,10 @@ Embeddable Vue-виджет для подборки офферов Coral/Sunmar.
 
 Быстрая архитектурная навигация: [PROJECT_GRAPH.md](./PROJECT_GRAPH.md).
 
+Аудит качества, оптимизации, архитектуры и загрузки карточек: [PROJECT_ANALYSIS.md](./PROJECT_ANALYSIS.md).
+
+Поэтапный план frontend-рефакторинга: [FRONTEND_REFACTORING_PLAN.md](./FRONTEND_REFACTORING_PLAN.md).
+
 ## Что здесь важно
 
 - Общий runtime один для Coral и Sunmar.
