@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {MapPinIcon, StarIcon,} from "lucide-vue-next";
-import {computed} from "vue";
+import {computed, shallowRef, watch} from "vue";
 import type {B2CPriceSearchReference, B2CProduct} from "@/offre/api";
 import OffreOfferPricingPanel from "@/offre/components/results/OffreOfferPricingPanel/OffreOfferPricingPanel.vue";
 import OffreOfferTerms from "@/offre/components/results/OffreOfferTerms/OffreOfferTerms.vue";
@@ -12,7 +12,7 @@ import type {BrandKey} from "@/brands/types";
 import {Badge} from "@/components/ui/badge";
 import {Skeleton} from "@/components/ui/skeleton";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	product: B2CProduct;
 	productReference: B2CPriceSearchReference;
 	selectedDepartureName?: string;
@@ -21,7 +21,10 @@ const props = defineProps<{
 	hotelRuntimeEntry?: OffreHotelRuntimeEntry | null;
 	tourType?: OffreTourType;
 	brandKey: BrandKey;
-}>();
+	priorityImage?: boolean;
+}>(), {
+	priorityImage: false
+});
 
 const emit = defineEmits<{
 	"update:tour-type": [value: OffreTourType];
@@ -72,6 +75,20 @@ const {
 
 const hasLabels = computed(() => isEliteHotel.value || hasFamilyClub.value);
 const hasUsps = computed(() => hotelUsps.value.length > 0);
+const imageFailed = shallowRef(false);
+const shouldRenderImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value);
+
+watch(imageUrl, () => {
+	imageFailed.value = false;
+});
+
+function handleImageLoad() {
+	emit("image-loaded");
+}
+
+function handleImageError() {
+	imageFailed.value = true;
+}
 
 function getTitleClass() {
 	return [
@@ -116,14 +133,18 @@ function getTermsSkeletonItemClass(width: string) {
 					class="offre-offer-card__media-link visual"
 					rel="noopener noreferrer"
 					target="_blank"
-			>
-				<img
-						v-if="imageUrl"
-						:src="imageUrl"
-						:alt="hotelName"
-						class="offre-offer-card__image"
-						@load="emit('image-loaded')"
 				>
+					<img
+							v-if="shouldRenderImage"
+							:src="imageUrl"
+							:alt="hotelName"
+							:loading="priorityImage ? 'eager' : 'lazy'"
+							:decoding="priorityImage ? 'auto' : 'async'"
+							:fetchpriority="priorityImage ? 'high' : undefined"
+							class="offre-offer-card__image"
+							@load="handleImageLoad"
+							@error="handleImageError"
+					>
 				<div
 						v-else
 						class="offre-offer-card__image-placeholder"

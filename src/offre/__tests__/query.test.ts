@@ -1,7 +1,32 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canUseSessionStorage, createSessionStorageAdapter } from "@/offre/query";
+import {
+  canUseSessionStorage,
+  createSessionStorageAdapter,
+  shouldRetryOffreBootstrapQuery
+} from "@/offre/query";
+
+describe("offre query retry policy", () => {
+  it("retries a transport failure only once", () => {
+    const error = new TypeError("network");
+
+    expect(shouldRetryOffreBootstrapQuery(0, error)).toBe(true);
+    expect(shouldRetryOffreBootstrapQuery(1, error)).toBe(false);
+  });
+
+  it.each([408, 502, 503, 504])("retries HTTP %s once", (status) => {
+    expect(shouldRetryOffreBootstrapQuery(0, { kind: "http", status })).toBe(true);
+  });
+
+  it.each([400, 404, 429, 500])("does not retry HTTP %s", (status) => {
+    expect(shouldRetryOffreBootstrapQuery(0, { kind: "http", status })).toBe(false);
+  });
+
+  it.each(["AbortError", "TimeoutError"])("does not retry %s", (name) => {
+    expect(shouldRetryOffreBootstrapQuery(0, { name })).toBe(false);
+  });
+});
 
 describe("offre query persistence storage", () => {
   afterEach(() => {

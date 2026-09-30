@@ -28,7 +28,9 @@ const mocks = vi.hoisted(() => {
     isError: manualRef(false),
     isFetching: manualRef(false),
     isRefetching: manualRef(false),
-    refetch: vi.fn()
+    refetch: vi.fn(),
+    packagePriceSearchList: vi.fn(),
+    hotelPriceSearchList: vi.fn()
   };
 });
 
@@ -47,6 +49,16 @@ vi.mock("@tanstack/vue-query", () => ({
     };
   }
 }));
+
+vi.mock("@/offre/api", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/offre/api")>();
+
+  return {
+    ...original,
+    packagePriceSearchList: mocks.packagePriceSearchList,
+    hotelPriceSearchList: mocks.hotelPriceSearchList
+  };
+});
 
 vi.mock("@/offre/lib/search-criterias", () => ({
   buildOffreProductQueries: (params: { hotels: Array<{ id: string | number }> }) => {
@@ -150,6 +162,8 @@ describe("useOffreProductsQuery", () => {
     mocks.isFetching.value = false;
     mocks.isRefetching.value = false;
     mocks.refetch.mockReset();
+    mocks.packagePriceSearchList.mockReset();
+    mocks.hotelPriceSearchList.mockReset();
   });
 
   it("limits queried hotels in server page mode and wires query enablement", () => {
@@ -223,5 +237,34 @@ describe("useOffreProductsQuery", () => {
 
     expect(state.requestState.value).toBe("error");
     expect(state.productsError.value).toBe(true);
+  });
+
+  it("passes the query signal to price search and propagates cancellation", async () => {
+    createQueryState();
+    const queryOptions = mocks.queryOptions as {
+      retry: boolean;
+      queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
+    };
+    const controller = new AbortController();
+
+    mocks.packagePriceSearchList.mockImplementation((_criterias, options) => {
+      return new Promise((_resolve, reject) => {
+        options.signal.addEventListener("abort", () => {
+          reject(options.signal.reason);
+        }, { once: true });
+      });
+    });
+
+    const request = queryOptions.queryFn({ signal: controller.signal });
+    const rejection = expect(request).rejects.toMatchObject({ name: "AbortError" });
+
+    controller.abort();
+    await rejection;
+
+    expect(queryOptions.retry).toBe(false);
+    expect(mocks.packagePriceSearchList).toHaveBeenCalledWith(
+      expect.any(Object),
+      { signal: controller.signal }
+    );
   });
 });

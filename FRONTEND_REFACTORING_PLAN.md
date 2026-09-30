@@ -8,7 +8,9 @@
 |---|---|---|
 | 1. Browser baseline и performance marks | Выполнен | Добавлены детерминированный Playwright smoke, mock B2C API, lifecycle/multi-instance проверки и семь frontend performance marks. |
 | 2. CSS isolation | Выполнен | Отключён глобальный Preflight, utility selectors и runtime theme variables ограничены widget host; CSS sentinel, portal и multi-brand проверки включены. |
-| 3. Bootstrap/products activation | Следующий | Разделение ранней загрузки справочников и viewport activation поиска цен. |
+| 3. Bootstrap/products activation | Выполнен | Справочники активируются на расстоянии `1000px`, а поиск цен сохраняет viewport-порог `240px`. |
+| 4. Retry, timeout и cancellation | Выполнен | Глобальный retry отключён; bootstrap ограничен одним retry для transient-сбоев, price search — timeout `15 s` без retry, list-query потребляет `AbortSignal`. |
+| 5. Image loading и visual readiness | Выполнен | Первая карточка получает priority image, остальные загружаются лениво; ошибки изображения переключаются на placeholder без повторного запроса. |
 
 ## Цели
 
@@ -111,6 +113,8 @@
 
 Критерий: быстрый scroll к виджету не должен начинать весь cold bootstrap только после появления skeleton в viewport.
 
+Результат: выбрана политика раннего bootstrap на `1000px` при сохранении порога products activation `240px`. TypeScript-проверка и 3 целевых unit-теста пройдены; list-режим дополнительно проверен вручную в браузере. Map-режим в рамках этой проверки не проверялся.
+
 ### 2.2. Настроить retry, timeout и cancellation
 
 1. Убрать общий `retry: 1` как единственную политику для всех endpoint.
@@ -123,6 +127,8 @@
 5. Проверить отмену старого запроса при смене города, месяца, гостей и региона.
 
 Критерий: устаревший запрос физически abort-ится и никогда не меняет UI/cache после смены критериев.
+
+Результат: глобальный retry отключён. Bootstrap повторяется один раз только для transport error и HTTP `408/502/503/504`; price-search не повторяется и прерывается через `15 s`. API debug telemetry различает `abort`, `timeout`, `transport`, `http`, `parse` и `unknown`, а batch telemetry сохраняет состояния `partial/error`. Передача cancellation signal в list-flow закреплена unit-тестом. TypeScript-проверка и полный Vitest (`49` файлов, `160` тестов) пройдены.
 
 ### 2.3. Подготовить progressive batch rendering
 
@@ -143,6 +149,8 @@
 5. Проверить, что CDN URL запрашивает минимально достаточный размер.
 
 Критерии: изображения ниже первого viewport не загружаются eagerly; layout карточки не прыгает при появлении изображения.
+
+Результат: первая карточка использует `loading="eager"` и `fetchpriority="high"`, остальные — `loading="lazy"` и `decoding="async"`. При ошибке `<img>` заменяется существующим placeholder и не запрашивается повторно. Размер media-блока уже резервируется brand-height `200/240/260px`, поэтому геометрия не менялась. CDN size type `4` сохранён: точные размеры типов API не документированы в проекте. TypeScript-проверка и полный Vitest (`51` файл, `163` теста) пройдены.
 
 ## Этап 3. Привести map request lifecycle в безопасное состояние
 

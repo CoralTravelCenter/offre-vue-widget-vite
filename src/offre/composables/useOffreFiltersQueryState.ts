@@ -14,7 +14,11 @@ import {
   type NormalizedOffreWidgetOptions,
   type NormalizedWidgetHotelDescriptor
 } from "@/offre/lib/payload";
-import { offreQueryConfig, offreQueryPersisters } from "@/offre/query";
+import {
+  offreQueryConfig,
+  offreQueryPersisters,
+  shouldRetryOffreBootstrapQuery
+} from "@/offre/query";
 import type {
   OffreDepartureOption,
   OffreHotelRuntimeEntry,
@@ -58,6 +62,7 @@ export function useOffreFiltersQueryState(
     enabled: computed(() => queriesEnabled.value && hotelIds.value.length > 0),
     staleTime: offreQueryConfig.hotelsInfo.staleTime,
     gcTime: offreQueryConfig.hotelsInfo.gcTime,
+    retry: shouldRetryOffreBootstrapQuery,
     persister: offreQueryPersisters.hotelsInfo.persisterFn,
     queryFn: async ({ signal }) => {
       const response = await listHotelsInfo(hotelIds.value, [4, 7], { signal });
@@ -70,6 +75,7 @@ export function useOffreFiltersQueryState(
     enabled: queriesEnabled,
     staleTime: offreQueryConfig.departures.staleTime,
     gcTime: offreQueryConfig.departures.gcTime,
+    retry: shouldRetryOffreBootstrapQuery,
     persister: offreQueryPersisters.departures.persisterFn,
     queryFn: async ({ signal }) => {
       const response = await listDepartureLocations({ signal });

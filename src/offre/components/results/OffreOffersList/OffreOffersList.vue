@@ -65,7 +65,7 @@ function handleImageLoaded() {
 <template>
   <ul class="offre-offers-list offers-list">
     <li
-      v-for="entry in normalizedProducts"
+      v-for="(entry, index) in normalizedProducts"
       :key="entry.key"
       class="offre-offers-list__item"
     >
@@ -78,6 +78,7 @@ function handleImageLoaded() {
         :hotel-runtime-entry="entry.hotelRuntimeEntry"
         :brand-key="brandKey"
         :tour-type="entry.tourType"
+        :priority-image="index === 0"
         @image-loaded="handleImageLoaded"
         @update:tour-type="emit('update-tour-type', entry.hotelId, $event)"
       />

@@ -1,10 +1,24 @@
 import { experimental_createQueryPersister, type AsyncStorage } from "@tanstack/query-persist-client-core";
 import type { B2CPriceSearchCriterias } from "@/offre/api";
+import { classifyB2CApiFailure } from "@/offre/api";
 import { stableStringify } from "@/lib/stable-stringify";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const OFFRE_QUERY_PERSISTENCE_BUSTER = "offre-widget-v1";
+const RETRYABLE_BOOTSTRAP_STATUSES = new Set([408, 502, 503, 504]);
+
+export function shouldRetryOffreBootstrapQuery(failureCount: number, error: unknown) {
+  if (failureCount >= 1) {
+    return false;
+  }
+
+  const failure = classifyB2CApiFailure(error);
+
+  return failure.kind === "transport"
+    || (failure.kind === "http" && failure.status !== undefined
+      && RETRYABLE_BOOTSTRAP_STATUSES.has(failure.status));
+}
 
 export const offreQueryConfig = {
   hotelsInfo: {

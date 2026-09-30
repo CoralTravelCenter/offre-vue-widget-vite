@@ -234,4 +234,12 @@ export interface OffreProductsBatchResult {
 
 export interface B2CApiRequestOptions {
   signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+export type B2CApiFailureKind = "abort" | "timeout" | "transport" | "http" | "parse" | "unknown";
+
+export interface B2CApiFailure {
+  kind: B2CApiFailureKind;
+  status?: number;
 }

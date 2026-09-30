@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/vue-query";
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { hotelPriceSearchList, packagePriceSearchList } from "@/offre/api";
+import {
+  classifyB2CApiFailure,
+  hotelPriceSearchList,
+  packagePriceSearchList
+} from "@/offre/api";
 import type {
   B2CHotelInfo,
   B2CLocation,
@@ -29,7 +33,7 @@ import { markOffrePerformance, OFFRE_PERFORMANCE_MARKS } from "@/lib/offre-perfo
 const PRODUCTS_QUERY_CONCURRENCY = 6;
 
 function isAbortError(error: unknown) {
-  return error instanceof DOMException && error.name === "AbortError";
+  return classifyB2CApiFailure(error).kind === "abort";
 }
 
 function getNow() {
@@ -186,6 +190,7 @@ export function useOffreProductsQuery(params: {
     enabled: queryEnabled,
     staleTime: offreQueryConfig.productsBatch.staleTime,
     gcTime: offreQueryConfig.productsBatch.gcTime,
+    retry: false,
     persister: offreQueryPersisters.productsBatch.persisterFn,
     queryFn: async ({ signal }) => {
       return runOffreProductsBatchQuery({

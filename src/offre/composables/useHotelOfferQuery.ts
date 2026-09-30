@@ -31,6 +31,7 @@ export function useHotelOfferQuery(params: {
     }),
     staleTime: offreQueryConfig.hotelOffer.staleTime,
     gcTime: offreQueryConfig.hotelOffer.gcTime,
+    retry: false,
     persister: offreQueryPersisters.hotelOffer.persisterFn,
     queryFn: async ({ signal }) => {
       if (!searchCriterias.value) {
